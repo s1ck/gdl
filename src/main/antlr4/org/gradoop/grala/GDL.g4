@@ -1,18 +1,87 @@
 // Graph Definition Language
 grammar GDL;
 
-graph:
-    (vertex NewLine)+
-    EOF;
+// starting point for parsing a GDL script
+database
+    : graph+ EOF
+    ;
+
+graph
+    : header properties? '[' (path)+ ']'
+    ;
+
+path
+    : vertex (edge vertex)*
+    ;
 
 vertex
-    : '(' vertexHeader ')'
-    ;
-vertexHeader
-    : Variable? (Colon VertexLabel)?
+    : '(' header properties? ')'
     ;
 
-VertexLabel
+edge
+    : incomingEdge
+    | outgoingEdge
+    ;
+
+incomingEdge
+    : '<-' edgeBody? '-'
+    ;
+
+outgoingEdge
+    : '-' edgeBody? '->'
+    ;
+
+edgeBody
+    : '[' header properties? ']'
+    ;
+
+header
+    : Variable? (COLON Label)?
+    ;
+
+properties
+    : '{' (property (',' property)*)? '}'
+    ;
+
+property
+    : Variable ':' Value
+    ;
+
+Value
+    : StringValue
+    | BooleanValue
+    | NumberValue
+    ;
+
+StringValue
+    : '\"' Character* '\"'
+    ;
+
+BooleanValue
+    : 'true' | 'false'
+    ;
+
+NumberValue
+    : Digit+
+    ;
+
+//properties
+//    : '{' property* '}'
+//    ;
+//
+//property
+//    : PropertyKey ':' PropertyValue
+//    ;
+//
+//PropertyKey
+//    : (LowerCaseLetter | UpperCaseLetter) Character*
+//    ;
+//
+//PropertyValue
+//    : '\"' Character+ '\"'
+//    ;
+
+Label
     : UpperCaseLetter Character*
     ;
 
@@ -38,10 +107,14 @@ Digit
     : [0-9]
     ;
 
-Colon
+COLON
     : ':'
     ;
 
-NewLine
-    : '\r'? '\n'
+SEMICOLON
+    : ';'
+    ;
+
+WS
+    :   [ \t\n\r]+ -> skip
     ;
