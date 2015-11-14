@@ -57,11 +57,14 @@ public class ParserTest {
     System.out.println(String.format("path[%d].edges:", pathId));
     int edgeCount = 0;
     for (GDLParser.EdgeContext edgeContext : path.edge()) {
-      int source = edgeCount;
-      int target = edgeCount + 1;
+
       if(edgeContext.incomingEdge() != null) {
+        int source = edgeCount + 1;
+        int target = edgeCount;
         printEdgeBody(edgeContext.incomingEdge().edgeBody(), edgeCount++, true, source, target);
       } else {
+        int source = edgeCount;
+        int target = edgeCount + 1;
         printEdgeBody(edgeContext.outgoingEdge().edgeBody(), edgeCount++, false, source, target);
       }
     }
