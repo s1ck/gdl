@@ -7,7 +7,7 @@ database
     ;
 
 graph
-    : header properties? '[' (path)+ ']'
+    : header properties? '{' (path)+ '}'
     ;
 
 path
@@ -65,28 +65,12 @@ NumberValue
     : Digit+
     ;
 
-//properties
-//    : '{' property* '}'
-//    ;
-//
-//property
-//    : PropertyKey ':' PropertyValue
-//    ;
-//
-//PropertyKey
-//    : (LowerCaseLetter | UpperCaseLetter) Character*
-//    ;
-//
-//PropertyValue
-//    : '\"' Character+ '\"'
-//    ;
-
 Label
     : UpperCaseLetter Character*
     ;
 
 Variable
-    : (UpperCaseLetter | LowerCaseLetter)+
+    : Character+
     ;
 
 Character
