@@ -3,7 +3,16 @@ grammar GDL;
 
 // starting point for parsing a GDL script
 database
-    : graph+ EOF
+    : elementList EOF
+    ;
+
+elementList
+    : (element SEMICOLON?)*
+    ;
+
+element
+    : path
+    | graph
     ;
 
 graph
@@ -28,7 +37,7 @@ edgeBody
     ;
 
 header
-    : Variable? (Colon Label)?
+    : Identifier? (COLON Label)?
     ;
 
 properties
@@ -36,7 +45,7 @@ properties
     ;
 
 property
-    : Variable ':' literal
+    : Identifier EQUALS literal
     ;
 
 literal
@@ -46,7 +55,7 @@ literal
     ;
 
 StringLiteral
-    : '\"' Character* '\"'
+    : '"' ('\\"'|.)*? '"'
     ;
 
 BooleanLiteral
@@ -56,43 +65,76 @@ BooleanLiteral
 
 IntegerLiteral
     : '0'
-    | NonZeroDigit Digit*
+    | '-'? NONZERODIGIT DIGIT*
     ;
 
 Label
-    : UpperCaseLetter Character*
+    : UpperCaseLetter LowerCaseLetters?                 // graph and vertex label
+    | UpperCaseLetter (UpperCaseLetter | UNDERSCORE)*   // edge label
     ;
 
-Variable
+Identifier
+    : Characters
+    ;
+
+Characters
     : Character+
     ;
 
 Character
     : UpperCaseLetter
     | LowerCaseLetter
-    | Digit
+    | DIGIT
+    ;
+
+UpperCaseLetters
+    : UpperCaseLetter+
     ;
 
 UpperCaseLetter
     : [A-Z]
     ;
 
+LowerCaseLetters
+    : LowerCaseLetter+
+    ;
+
 LowerCaseLetter
     : [a-z]
     ;
 
-Digit
+DIGIT
     : [0-9]
     ;
 
-NonZeroDigit
+NONZERODIGIT
     : [1-9]
     ;
 
-Colon
+COLON
     : ':'
+    ;
+
+SEMICOLON
+    : ';'
+    ;
+
+EQUALS
+    : '='
+    ;
+
+UNDERSCORE
+    : '_'
     ;
 
 WS
     : [ \t\n\r]+ -> skip
+    ;
+
+COMMENT
+    : '/*' .*? '*/' -> skip
+    ;
+
+LINE_COMMENT
+    : '//' ~[\r\n]* -> skip
     ;

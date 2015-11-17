@@ -16,7 +16,7 @@ public class ParserTest {
 
   @Test
   public void testListener() throws IOException {
-    String file = "/database.gdl";
+    String file = "/social_network.gdl";
     InputStream inputStream = getClass().getResourceAsStream(file);
 
     GDLLexer lexer = new GDLLexer(new ANTLRInputStream(inputStream));

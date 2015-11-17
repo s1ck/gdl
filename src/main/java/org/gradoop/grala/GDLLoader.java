@@ -31,6 +31,9 @@ public class GDLLoader extends GDLBaseListener {
   private long currentVertexId = 0L;
   private long currentEdgeId = 0L;
 
+  // flag that tells if the parser is inside a logical graph
+  private boolean inGraph = false;
+
   public GDLLoader() {
     graphCache = Maps.newHashMap();
     vertexCache = Maps.newHashMap();
@@ -67,6 +70,7 @@ public class GDLLoader extends GDLBaseListener {
 
   @Override
   public void enterGraph(GDLParser.GraphContext graphContext) {
+    inGraph = true;
     String variable = getVariable(graphContext.header());
     if (variable != null && !graphCache.containsKey(variable)) {
       Graph g = initNewGraph(graphContext);
@@ -76,6 +80,11 @@ public class GDLLoader extends GDLBaseListener {
       Graph g = initNewGraph(graphContext);
       graphs.add(g);
     }
+  }
+
+  @Override
+  public void exitGraph(GDLParser.GraphContext ctx) {
+    inGraph = false;
   }
 
   @Override
@@ -176,8 +185,8 @@ public class GDLLoader extends GDLBaseListener {
   // --------------------------------------------------------------------------------------------
 
   private String getVariable(GDLParser.HeaderContext header) {
-    if (header != null && header.Variable() != null) {
-      return header.Variable().getText();
+    if (header != null && header.Identifier() != null) {
+      return header.Identifier().getText();
     }
     return null;
   }
@@ -193,7 +202,7 @@ public class GDLLoader extends GDLBaseListener {
     if (propertiesContext != null) {
       Map<String, Object> properties = Maps.newHashMap();
       for (GDLParser.PropertyContext property : propertiesContext.property()) {
-        properties.put(property.Variable().getText(), getPropertyValue(property));
+        properties.put(property.Identifier().getText(), getPropertyValue(property));
       }
       return properties;
     }
