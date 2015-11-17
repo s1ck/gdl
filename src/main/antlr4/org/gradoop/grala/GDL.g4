@@ -36,26 +36,27 @@ properties
     ;
 
 property
-    : Variable ':' value
+    : Variable ':' literal
     ;
 
-value
-    : StringValue
-    | BooleanValue
-    | NumberValue
+literal
+    : StringLiteral
+    | BooleanLiteral
+    | IntegerLiteral
     ;
 
-StringValue
+StringLiteral
     : '\"' Character* '\"'
     ;
 
-BooleanValue
+BooleanLiteral
     : 'true'
     | 'false'
     ;
 
-NumberValue
-    : Digit+
+IntegerLiteral
+    : '0'
+    | NonZeroDigit Digit*
     ;
 
 Label
@@ -82,6 +83,10 @@ LowerCaseLetter
 
 Digit
     : [0-9]
+    ;
+
+NonZeroDigit
+    : [1-9]
     ;
 
 Colon

@@ -201,13 +201,13 @@ public class GDLLoader extends GDLBaseListener {
   }
 
   private Object getPropertyValue(GDLParser.PropertyContext propertyContext) {
-    GDLParser.ValueContext value = propertyContext.value();
-    if (value.StringValue() != null) {
-      return value.StringValue().getText();
-    } else if (value.BooleanValue() != null) {
-      return Boolean.parseBoolean(value.BooleanValue().getText());
-    } else if (value.NumberValue() != null) {
-      return Integer.parseInt(value.NumberValue().getText());
+    GDLParser.LiteralContext value = propertyContext.literal();
+    if (value.StringLiteral() != null) {
+      return value.StringLiteral().getText();
+    } else if (value.BooleanLiteral() != null) {
+      return Boolean.parseBoolean(value.BooleanLiteral().getText());
+    } else if (value.IntegerLiteral() != null) {
+      return Integer.parseInt(value.IntegerLiteral().getText());
     }
     return null;
   }
