@@ -1,11 +1,11 @@
-g:Community{title:"Databases",vertexCount:2} {
+g:Community{title:"Databases",vertexCount:2} [
 	(a:User)-->()<-[r:KNOWS{since:2014}]-(b)
 	(alice:User{name:"Alice",city:"Leipzig",gender:false,age:23})
-}
-:Community {
+]
+:Community [
 	(bob:User{name:"Bob",city:"Dresden",gender:true,age:25})
 	(alice)-[:KNOWS]->(bob)
-}
-{()-->()<--()-->()}
-{(x)-[r]->(y)-[s]->(z)}
+]
+[()-->()<--()-->()]
+[(x)-[r]->(y)-[s]->(z)]
 

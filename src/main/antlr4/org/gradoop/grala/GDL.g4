@@ -7,7 +7,7 @@ database
     ;
 
 graph
-    : header properties? '{' (path)+ '}'
+    : header properties? '[' (path)+ ']'
     ;
 
 path
@@ -19,16 +19,8 @@ vertex
     ;
 
 edge
-    : incomingEdge
-    | outgoingEdge
-    ;
-
-incomingEdge
-    : '<-' edgeBody? '-'
-    ;
-
-outgoingEdge
-    : '-' edgeBody? '->'
+    : '<-' edgeBody? '-'    #incomingEdge
+    | '-' edgeBody? '->'    #outgoingEdge
     ;
 
 edgeBody
@@ -36,7 +28,7 @@ edgeBody
     ;
 
 header
-    : Variable? (COLON Label)?
+    : Variable? (Colon Label)?
     ;
 
 properties
@@ -44,10 +36,10 @@ properties
     ;
 
 property
-    : Variable ':' Value
+    : Variable ':' value
     ;
 
-Value
+value
     : StringValue
     | BooleanValue
     | NumberValue
@@ -58,7 +50,8 @@ StringValue
     ;
 
 BooleanValue
-    : 'true' | 'false'
+    : 'true'
+    | 'false'
     ;
 
 NumberValue
@@ -91,14 +84,10 @@ Digit
     : [0-9]
     ;
 
-COLON
+Colon
     : ':'
     ;
 
-SEMICOLON
-    : ';'
-    ;
-
 WS
-    :   [ \t\n\r]+ -> skip
+    : [ \t\n\r]+ -> skip
     ;
