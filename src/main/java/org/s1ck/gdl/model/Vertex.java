@@ -1,4 +1,4 @@
-package org.gradoop.grala.model;
+package org.s1ck.gdl.model;
 
 public class Vertex extends GraphElement {
   @Override

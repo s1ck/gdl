@@ -1,12 +1,12 @@
-package org.gradoop.grala;
+package org.s1ck.gdl;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import org.gradoop.grala.model.Edge;
-import org.gradoop.grala.model.Graph;
-import org.gradoop.grala.model.GraphElement;
-import org.gradoop.grala.model.Vertex;
+import org.s1ck.gdl.model.Edge;
+import org.s1ck.gdl.model.Graph;
+import org.s1ck.gdl.model.GraphElement;
+import org.s1ck.gdl.model.Vertex;
 
 import java.util.Collection;
 import java.util.Map;

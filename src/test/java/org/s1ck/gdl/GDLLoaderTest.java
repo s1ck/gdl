@@ -1,13 +1,13 @@
-package org.gradoop.grala;
+package org.s1ck.gdl;
 
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
-import org.gradoop.grala.model.Edge;
-import org.gradoop.grala.model.Element;
-import org.gradoop.grala.model.Graph;
-import org.gradoop.grala.model.Vertex;
 import org.junit.Test;
+import org.s1ck.gdl.model.Edge;
+import org.s1ck.gdl.model.Element;
+import org.s1ck.gdl.model.Graph;
+import org.s1ck.gdl.model.Vertex;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -16,7 +16,7 @@ import static org.junit.Assert.*;
 
 public class GDLLoaderTest {
 
-  // reused by all element tests
+  // contains all valid property types
   private static final String PROPERTIES =
     "{key1 = \"value\", key2 = 12, key3 = true, key4 = -10, key5 =0}";
 
