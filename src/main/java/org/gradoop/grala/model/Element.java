@@ -5,7 +5,7 @@ import com.google.common.collect.Maps;
 import java.util.Map;
 
 public class Element {
-  private long id;
+  private Long id;
 
   private String label;
 
@@ -54,12 +54,12 @@ public class Element {
 
     Element element = (Element) o;
 
-    return id == element.id;
+    return !(id != null ? !id.equals(element.id) : element.id != null);
 
   }
 
   @Override
   public int hashCode() {
-    return (int) (id ^ (id >>> 32));
+    return id != null ? id.hashCode() : 0;
   }
 }
