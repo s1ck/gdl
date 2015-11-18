@@ -28,8 +28,8 @@ elementList
     ;
 
 element
-    : path
-    | graph
+    : graph
+    | path
     ;
 
 graph
@@ -86,46 +86,59 @@ IntegerLiteral
     ;
 
 Label
-    : UpperCaseLetter LowerCaseLetters?                 // graph and vertex label
-    | UpperCaseLetter (UpperCaseLetter | UNDERSCORE)*   // edge label
+    : UpperCaseLetter LowerCaseLetters?                 // graph and vertex label (e.g. Person)
+    | UpperCaseLetter (UpperCaseLetter | UNDERSCORE)*   // edge label (e.g. KNOWS, HAS_INTEREST)
     ;
 
 Identifier
     : Characters
     ;
 
+fragment
 Characters
     : Character+
     ;
 
+fragment
 Character
     : UpperCaseLetter
     | LowerCaseLetter
     | DIGIT
     ;
 
+fragment
 UpperCaseLetters
     : UpperCaseLetter+
     ;
 
+fragment
 UpperCaseLetter
     : [A-Z]
     ;
 
+fragment
 LowerCaseLetters
     : LowerCaseLetter+
     ;
 
+fragment
 LowerCaseLetter
     : [a-z]
     ;
 
+fragment
 DIGIT
     : [0-9]
     ;
 
+fragment
 NONZERODIGIT
     : [1-9]
+    ;
+
+fragment
+UNDERSCORE
+    : '_'
     ;
 
 COLON
@@ -138,10 +151,6 @@ SEMICOLON
 
 EQUALS
     : '='
-    ;
-
-UNDERSCORE
-    : '_'
     ;
 
 WS

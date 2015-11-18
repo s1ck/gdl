@@ -112,6 +112,14 @@ public class GDLLoaderTest {
   }
 
   @Test
+  public void readEdgeWithUnderscoreLabelTest() {
+    GDLLoader loader = getLoaderFromGDLString("()-[e:HAS_INTEREST]->()");
+
+    Edge e = loader.getEdgeCache().get("e");
+    assertEquals("edge has wrong label", "HAS_INTEREST", e.getLabel());
+  }
+
+  @Test
   public void readEdgeWithPropertiesTest() {
     GDLLoader loader = getLoaderFromGDLString(String.format("()-[e %s]->()", PROPERTIES));
 
