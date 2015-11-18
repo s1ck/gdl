@@ -33,7 +33,7 @@ element
     ;
 
 graph
-    : header properties? '[' (path)+ ']'
+    : header properties? '[' (path SEMICOLON?)+ ']'
     ;
 
 path

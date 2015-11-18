@@ -1,5 +1,6 @@
 package org.s1ck.gdl;
 
+import com.google.common.collect.Lists;
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
@@ -7,10 +8,12 @@ import org.junit.Test;
 import org.s1ck.gdl.model.Edge;
 import org.s1ck.gdl.model.Element;
 import org.s1ck.gdl.model.Graph;
+import org.s1ck.gdl.model.GraphElement;
 import org.s1ck.gdl.model.Vertex;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 
 import static org.junit.Assert.*;
 
@@ -187,6 +190,57 @@ public class GDLLoaderTest {
       (Long) v2.getId(), e2.getTargetVertexId());
   }
 
+  // --------------------------------------------------------------------------------------------
+  //  Combined tests
+  // --------------------------------------------------------------------------------------------
+
+  @Test
+  public void testGraphWithContentTest() {
+    GDLLoader loader = getLoaderFromGDLString("g[(alice)-[r]->(bob);(alice)-[s]->(eve)]");
+    validateCollectionSizes(loader, 1, 3, 2);
+    validateCacheSizes(loader, 1, 3, 2);
+    Graph g = loader.getGraphCache().get("g");
+    List<GraphElement> graphElements = Lists.newArrayList(
+      loader.getVertexCache().get("alice"),
+      loader.getVertexCache().get("bob"),
+      loader.getVertexCache().get("eve"),
+      loader.getEdgeCache().get("r"),
+      loader.getEdgeCache().get("s")
+    );
+    for (GraphElement graphElement : graphElements) {
+      assertEquals("element has wrong graphs size", 1, graphElement.getGraphs().size());
+      assertTrue("element was not in graph", graphElement.getGraphs().contains(g.getId()));
+    }
+  }
+
+  @Test
+  public void testGraphsWithOverlappingContent() {
+    GDLLoader loader = getLoaderFromGDLString("g1[(alice)-[r]->(bob)];g2[(alice)-[s]->(bob)]");
+    validateCollectionSizes(loader, 2, 2, 2);
+    validateCacheSizes(loader, 2, 2, 2);
+    Graph g1 = loader.getGraphCache().get("g1");
+    Graph g2 = loader.getGraphCache().get("g2");
+
+    List<Vertex> overlapElements = Lists.newArrayList(
+      loader.getVertexCache().get("alice"),
+      loader.getVertexCache().get("bob")
+    );
+
+    for (Vertex vertex : overlapElements) {
+      assertEquals("vertex has wrong graph size", 2, vertex.getGraphs().size());
+      assertTrue("vertex was not in graph g1", vertex.getGraphs().contains(g1.getId()));
+      assertTrue("vertex was not in graph g2", vertex.getGraphs().contains(g2.getId()));
+    }
+
+    assertEquals("edge r has wrong graph size",
+      1, loader.getEdgeCache().get("r").getGraphs().size());
+    assertTrue("edge r was not in graph g1",
+      loader.getEdgeCache().get("r").getGraphs().contains(g1.getId()));
+    assertEquals("edge s has wrong graph size",
+      1, loader.getEdgeCache().get("s").getGraphs().size());
+    assertTrue("edge s was not in graph g2",
+      loader.getEdgeCache().get("s").getGraphs().contains(g2.getId()));
+  }
 
   // --------------------------------------------------------------------------------------------
   //  Special cases
@@ -230,12 +284,46 @@ public class GDLLoaderTest {
       (Long) v2.getId(), e2.getTargetVertexId());
   }
 
+  // just for playing around
+  @Test
+  public void testExternalFile() throws IOException {
+    GDLLoader loader = getLoaderFromFile("/social_network.gdl");
+
+    for (Graph g : loader.getGraphs()) {
+      System.out.println(g);
+    }
+
+    for (Vertex vertex : loader.getVertices()) {
+      System.out.println(vertex);
+    }
+
+    for (Edge edge : loader.getEdges()) {
+      System.out.println(edge);
+    }
+
+    System.out.println(loader.getGraphCache());
+    System.out.println(loader.getVertexCache());
+    System.out.println(loader.getEdgeCache());
+  }
+
   // --------------------------------------------------------------------------------------------
   //  Test helpers
   // --------------------------------------------------------------------------------------------
 
   private GDLLoader getLoaderFromGDLString(String gdlString) {
     GDLLexer lexer = new GDLLexer(new ANTLRInputStream(gdlString));
+    GDLParser parser = new GDLParser(new CommonTokenStream(lexer));
+
+    ParseTreeWalker walker = new ParseTreeWalker();
+    GDLLoader loader = new GDLLoader();
+    walker.walk(loader, parser.database());
+    return loader;
+  }
+
+  private GDLLoader getLoaderFromFile(String fileName) throws IOException {
+    InputStream inputStream = getClass().getResourceAsStream(fileName);
+
+    GDLLexer lexer = new GDLLexer(new ANTLRInputStream(inputStream));
     GDLParser parser = new GDLParser(new CommonTokenStream(lexer));
 
     ParseTreeWalker walker = new ParseTreeWalker();
@@ -272,35 +360,5 @@ public class GDLLoaderTest {
       expectedVertexCacheSize, loader.getVertexCache().size());
     assertEquals("wrong number of cached edges",
       expectedEdgeCacheSize, loader.getEdgeCache().size());
-  }
-
-  @Test
-  public void testGDLLoader() throws IOException {
-    String file = "/social_network.gdl";
-    InputStream inputStream = getClass().getResourceAsStream(file);
-
-    GDLLexer lexer = new GDLLexer(new ANTLRInputStream(inputStream));
-    GDLParser parser = new GDLParser(new CommonTokenStream(lexer));
-
-    ParseTreeWalker walker = new ParseTreeWalker();
-    GDLLoader loader = new GDLLoader();
-
-    walker.walk(loader, parser.database());
-
-    for (Graph g : loader.getGraphs()) {
-      System.out.println(g);
-    }
-
-    for (Vertex vertex : loader.getVertices()) {
-      System.out.println(vertex);
-    }
-
-    for (Edge edge : loader.getEdges()) {
-      System.out.println(edge);
-    }
-
-    System.out.println(loader.getGraphCache());
-    System.out.println(loader.getVertexCache());
-    System.out.println(loader.getEdgeCache());
   }
 }
