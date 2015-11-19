@@ -63,7 +63,7 @@ public class GDLLoader extends GDLBaseListener {
   /**
    * Initializes a new GDL Loader.
    */
-  public GDLLoader() {
+  GDLLoader() {
     this(null, null, null);
   }
 
@@ -74,7 +74,7 @@ public class GDLLoader extends GDLBaseListener {
    * @param defaultVertexLabel  vertex label to be used if no label is given in the GDL script
    * @param defaultEdgeLabel    edge label to be used if no label is given in the GDL script
    */
-  public GDLLoader(String defaultGraphLabel, String defaultVertexLabel, String defaultEdgeLabel) {
+  GDLLoader(String defaultGraphLabel, String defaultVertexLabel, String defaultEdgeLabel) {
     this.defaultGraphLabel = (defaultGraphLabel != null) ?
       defaultGraphLabel : DEFAULT_GRAPH_LABEL;
     this.defaultVertexLabel = (defaultVertexLabel != null) ?
@@ -96,7 +96,7 @@ public class GDLLoader extends GDLBaseListener {
    *
    * @return graph collection
    */
-  public Collection<Graph> getGraphs() {
+  Collection<Graph> getGraphs() {
     return graphs;
   }
 
@@ -105,7 +105,7 @@ public class GDLLoader extends GDLBaseListener {
    *
    * @return vertex collection
    */
-  public Collection<Vertex> getVertices() {
+  Collection<Vertex> getVertices() {
     return vertices;
   }
 
@@ -114,7 +114,7 @@ public class GDLLoader extends GDLBaseListener {
    *
    * @return edge collection
    */
-  public Collection<Edge> getEdges() {
+  Collection<Edge> getEdges() {
     return edges;
   }
 
@@ -124,7 +124,7 @@ public class GDLLoader extends GDLBaseListener {
    *
    * @return immutable graph cache
    */
-  public ImmutableMap<String, Graph> getGraphCache() {
+  ImmutableMap<String, Graph> getGraphCache() {
     return new ImmutableMap.Builder<String, Graph>().putAll(graphCache).build();
   }
 
@@ -134,7 +134,7 @@ public class GDLLoader extends GDLBaseListener {
    *
    * @return immutable vertex cache
    */
-  public ImmutableMap<String, Vertex> getVertexCache() {
+  ImmutableMap<String, Vertex> getVertexCache() {
     return new ImmutableMap.Builder<String, Vertex>().putAll(vertexCache).build();
   }
 
@@ -144,7 +144,7 @@ public class GDLLoader extends GDLBaseListener {
    *
    * @return immutable edge cache
    */
-  public Map<String, Edge> getEdgeCache() {
+  Map<String, Edge> getEdgeCache() {
     return new ImmutableMap.Builder<String, Edge>().putAll(edgeCache).build();
   }
 

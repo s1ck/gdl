@@ -345,8 +345,8 @@ public class GDLLoaderTest {
       ",key4 =   -10"     +
       ",key5 =   0"       +
       ",key6 =   3.14"    +
-      ",key7 =   .14"      +
-      ",key8 =   -3.14"    +
+      ",key7 =   .14"     +
+      ",key8 =   -3.14"   +
       "}";
 
   private void validateProperties(Element element) {

@@ -15,7 +15,7 @@ The data model contains three elements: graphs, vertices and edges. Any element 
 label and can have multiple attributes in the form of key-value pairs. Vertices and edges may 
 be contained in an arbitrary number of graphs including zero graphs. Edges are binary and directed.
 
-## Examples
+## Language Examples
 
 Define a vertex:
 
@@ -134,6 +134,30 @@ g2:Community {title = "Databases", memberCount = 42}[
 g2:Community {title = "Hadoop", memberCount = 31}[
     (bob)-[e]->(eve)
 ]
+```
+
+## Usage examples
+
+Create a database from a GDL string:
+
+```java
+GDLHandler handler = GDLHandler.initFromString("g[(alice)-[e1:KNOWS {since = 2014}]->(bob)]");
+
+for (Vertex v : handler.getVertices()) {
+    // do something
+}
+
+// access elements by variable
+Graph g = handler.getGraphCache().get("g");
+Vertex alice = handler.getVertexCache().get("alice");
+Edge e = handler.getEdgeCache().get("e1");
+```
+
+Create a database from an `InputStream` or an input file:
+
+```java
+GDLHandler handler1 = GDLHandler.initFromStream(stream);
+GDLHandler handler2 = GDLHandler.initFromFile(fileName);
 ```
 
 ## License
