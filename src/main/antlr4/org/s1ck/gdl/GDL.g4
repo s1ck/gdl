@@ -54,7 +54,7 @@ edgeBody
     ;
 
 header
-    : Identifier? (COLON Label)?
+    : Identifier? Label?
     ;
 
 properties
@@ -91,12 +91,12 @@ FloatLiteral
     ;
 
 Label
-    : UpperCaseLetter LowerCaseLetters?                 // graph and vertex label (e.g. Person)
-    | UpperCaseLetter (UpperCaseLetter | UNDERSCORE)*   // edge label (e.g. KNOWS, HAS_INTEREST)
+    : COLON UpperCaseLetter (LowerCaseLetter | UpperCaseLetter)*  // graph and vertex label (e.g. Person, BlogPost)
+    | COLON LowerCaseLetter (LowerCaseLetter | UpperCaseLetter)*  // edge label (e.g. knows, hasInterest)
     ;
 
 Identifier
-    : Characters
+    : LowerCaseLetter Characters?   // e.g. g0, alice, birthTown
     ;
 
 fragment

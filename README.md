@@ -53,17 +53,17 @@ Define an incoming edge:
 (alice)<--()
 ```
 
-Define an edge with label `KNOWS`, assign it to variable `e1` and give it some properties:
+Define an edge with label `knows`, assign it to variable `e1` and give it some properties:
 
 ```
-(alice)-[e1:KNOWS {since = 2014}]->(bob)
+(alice)-[e1:knows {since = 2014}]->(bob)
 ```
 
 Define multiple outgoing edges from the same source vertex (i.e. `alice`):
 
 ```
-(alice)-[e1:KNOWS {since = 2014}]->(bob)
-(alice)-[e2:KNOWS {since = 2013}]->(eve)
+(alice)-[e1:knows {since = 2014}]->(bob)
+(alice)-[e2:knows {since = 2013}]->(eve)
 ```
 
 Define paths (four vertices and three edges are created):
@@ -124,8 +124,8 @@ Define three graphs with overlapping vertex and edge sets (`e` is in `g1` and `g
 
 ```
 g1:Community {title = "Graphs", memberCount = 23}[
-    (alice:User)-[:KNOWS]->(bob:User)
-    (bob)-[e:KNOWS]->(eve:User)
+    (alice:User)-[:knows]->(bob:User)
+    (bob)-[e:knows]->(eve:User)
     (eve)
 ]
 g2:Community {title = "Databases", memberCount = 42}[
@@ -141,7 +141,7 @@ g2:Community {title = "Hadoop", memberCount = 31}[
 Create a database from a GDL string:
 
 ```java
-GDLHandler handler = GDLHandler.initFromString("g[(alice)-[e1:KNOWS {since = 2014}]->(bob)]");
+GDLHandler handler = GDLHandler.initFromString("g[(alice)-[e1:knows {since = 2014}]->(bob)]");
 
 for (Vertex v : handler.getVertices()) {
     // do something

@@ -351,7 +351,7 @@ public class GDLLoader extends GDLBaseListener {
    */
   private String getLabel(GDLParser.HeaderContext header) {
     if (header != null && header.Label() != null) {
-      return header.Label().getText();
+      return header.Label().getText().substring(1);
     }
     return null;
   }

@@ -44,9 +44,15 @@ public class GDLLoaderTest {
   @Test
   public void readVertexWithLabelTest() {
     GDLLoader loader = getLoaderFromGDLString("(var:Label)");
-
     Vertex v = loader.getVertexCache().get("var");
     assertEquals("vertex has wrong label", "Label", v.getLabel());
+  }
+
+  @Test
+  public void readVertexWithCamelCaseLabelTest() {
+    GDLLoader loader = getLoaderFromGDLString("(var:BlogPost)");
+    Vertex v = loader.getVertexCache().get("var");
+    assertEquals("vertex has wrong label", "BlogPost", v.getLabel());
   }
 
   @Test
@@ -101,18 +107,18 @@ public class GDLLoaderTest {
 
   @Test
   public void readEdgeWithLabelTest() {
-    GDLLoader loader = getLoaderFromGDLString("()-[e:KNOWS]->()");
+    GDLLoader loader = getLoaderFromGDLString("()-[e:knows]->()");
 
     Edge e = loader.getEdgeCache().get("e");
-    assertEquals("edge has wrong label", "KNOWS", e.getLabel());
+    assertEquals("edge has wrong label", "knows", e.getLabel());
   }
 
   @Test
-  public void readEdgeWithUnderscoreLabelTest() {
-    GDLLoader loader = getLoaderFromGDLString("()-[e:HAS_INTEREST]->()");
+  public void readEdgeWithCamelCaseLabelTest() {
+    GDLLoader loader = getLoaderFromGDLString("()-[e:hasInterest]->()");
 
     Edge e = loader.getEdgeCache().get("e");
-    assertEquals("edge has wrong label", "HAS_INTEREST", e.getLabel());
+    assertEquals("edge has wrong label", "hasInterest", e.getLabel());
   }
 
   @Test
@@ -121,8 +127,6 @@ public class GDLLoaderTest {
 
     validateProperties(loader.getEdgeCache().get("e"));
   }
-
-
 
   // --------------------------------------------------------------------------------------------
   //  Graph only tests
@@ -151,6 +155,13 @@ public class GDLLoaderTest {
     validateCacheSizes(loader, 1, 0, 0);
     Graph g = loader.getGraphCache().get("g");
     assertEquals("graph has wrong label", "Label", g.getLabel());
+  }
+
+  @Test
+  public void readGraphWithCamelCaseLabelTest() {
+    GDLLoader loader = getLoaderFromGDLString("g:LabelParty[()]");
+    Graph g = loader.getGraphCache().get("g");
+    assertEquals("graph has wrong label", "LabelParty", g.getLabel());
   }
 
   @Test
