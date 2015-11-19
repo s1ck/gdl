@@ -69,6 +69,7 @@ literal
     : StringLiteral
     | BooleanLiteral
     | IntegerLiteral
+    | FloatLiteral
     ;
 
 StringLiteral
@@ -83,6 +84,10 @@ BooleanLiteral
 IntegerLiteral
     : '0'
     | '-'? NONZERODIGIT DIGIT*
+    ;
+
+FloatLiteral
+    : IntegerLiteral? '.' DIGIT*     // match 0.1, 1.0, 1., 3.14 etc.
     ;
 
 Label

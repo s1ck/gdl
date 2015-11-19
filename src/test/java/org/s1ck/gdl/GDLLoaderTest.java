@@ -19,10 +19,6 @@ import static org.junit.Assert.*;
 
 public class GDLLoaderTest {
 
-  // contains all valid property types
-  private static final String PROPERTIES =
-    "{key1 = \"value\", key2 = 12, key3 = true, key4 = -10, key5 =0}";
-
   // --------------------------------------------------------------------------------------------
   //  Vertex only tests
   // --------------------------------------------------------------------------------------------
@@ -340,13 +336,29 @@ public class GDLLoaderTest {
     return loader;
   }
 
+  // contains all valid property types
+  private static final String PROPERTIES =
+    "{" +
+      "key1 = \"value\"" +
+      ",key2 =   12"      +
+      ",key3 =   true"    +
+      ",key4 =   -10"     +
+      ",key5 =   0"       +
+      ",key6 =   3.14"    +
+      ",key7 =   .14"      +
+      ",key8 =   -3.14"    +
+      "}";
+
   private void validateProperties(Element element) {
-    assertEquals("wrong number of properties", 5, element.getProperties().size());
+    assertEquals("wrong number of properties", 8, element.getProperties().size());
     assertEquals("wrong value for key1", "value", element.getProperties().get("key1"));
     assertEquals("wrong value for key2", 12, element.getProperties().get("key2"));
     assertEquals("wrong value for key3", true, element.getProperties().get("key3"));
     assertEquals("wrong value for key4", -10, element.getProperties().get("key4"));
     assertEquals("wrong value for key5", 0, element.getProperties().get("key5"));
+    assertEquals("wrong value for key6", 3.14f, element.getProperties().get("key6"));
+    assertEquals("wrong value for key7", .14f, element.getProperties().get("key7"));
+    assertEquals("wrong value for key8", -3.14f, element.getProperties().get("key8"));
   }
 
   private void validateCollectionSizes(GDLLoader loader,

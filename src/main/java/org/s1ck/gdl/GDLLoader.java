@@ -386,6 +386,8 @@ public class GDLLoader extends GDLBaseListener {
       return Boolean.parseBoolean(literalContext.BooleanLiteral().getText());
     } else if (literalContext.IntegerLiteral() != null) {
       return Integer.parseInt(literalContext.IntegerLiteral().getText());
+    } else if(literalContext.FloatLiteral() != null) {
+      return Float.parseFloat(literalContext.FloatLiteral().getText());
     }
     return null;
   }
