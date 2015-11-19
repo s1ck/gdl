@@ -29,13 +29,13 @@ Define a vertex and assign it to variable `alice`:
 (alice)
 ```
 
-Define a vertex with label `Person`:
+Define a vertex with label `User`:
 
 ```
 (:User)
 ```
 
-Define a vertex with label `Person`, assign it to variable `alice` and give it some properties:
+Define a vertex with label `User`, assign it to variable `alice` and give it some properties:
 
 ```
 (alice:User {name = "Alice", age = 23})
