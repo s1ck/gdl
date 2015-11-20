@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/s1ck/gdl.svg?branch=master)](https://travis-ci.org/s1ck/gdl)
+
 ## GDL - Graph Definition Language
 
 Inspired by the popular graph query language [Cypher](http://neo4j.com/docs/stable/cypher-query-lang.html),
