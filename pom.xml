@@ -10,24 +10,20 @@
 
     <name>GDL - Graph Definition Language</name>
     <description>ANTLR Grammar for the definition of extended property graphs.</description>
-    <!--Add Project-URL
-    <url>Project-URL</url> 
-    -->
+    <url>github.com/s1ck/gdl.git</url> 
     
-    <!-- Add licences 
     <licenses>
         <license>
-            <name>The Apache License, Version 2.0</name>
-            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <name>GNU General Public License, Version 3</name>
+            <url>https://www.gnu.org/licenses/gpl.txt</url>
         </license>
     </licenses>
-    -->
     
     <developers>
         <developer>
             <name>Martin Junghanns</name>
             <email>m.junghanns@mailbox.org</email>
-            <organization>Uni-Leipzig</organization>
+            <organization>Leipzig University</organization>
             <organizationUrl>http://dbs.uni-leipzig.de/</organizationUrl>
             <id>s1ck</id>
         </developer>
