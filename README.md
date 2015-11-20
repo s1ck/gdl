@@ -141,7 +141,7 @@ g2:Community {title = "Hadoop", memberCount = 31}[
 Create a database from a GDL string:
 
 ```java
-GDLHandler handler = GDLHandler.initFromString("g[(alice)-[e1:knows {since = 2014}]->(bob)]");
+GDLHandler handler = new GDLHandler.Builder().buildFromString("g[(alice)-[e1:knows {since = 2014}]->(bob)]");
 
 for (Vertex v : handler.getVertices()) {
     // do something
@@ -156,8 +156,8 @@ Edge e = handler.getEdgeCache().get("e1");
 Create a database from an `InputStream` or an input file:
 
 ```java
-GDLHandler handler1 = GDLHandler.initFromStream(stream);
-GDLHandler handler2 = GDLHandler.initFromFile(fileName);
+GDLHandler handler1 = new GDLHandler.Builder().buildFromStream(stream);
+GDLHandler handler2 = new GDLHandler.Builder().buildFromFile(fileName);
 ```
 
 ## License

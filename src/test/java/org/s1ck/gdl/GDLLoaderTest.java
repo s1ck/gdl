@@ -299,38 +299,20 @@ public class GDLLoaderTest {
       (Long) v2.getId(), e2.getTargetVertexId());
   }
 
-  // just for playing around
-  @Test
-  public void testExternalFile() throws IOException {
-    GDLLoader loader = getLoaderFromFile("/social_network.gdl");
-
-    for (Graph g : loader.getGraphs()) {
-      System.out.println(g);
-    }
-
-    for (Vertex vertex : loader.getVertices()) {
-      System.out.println(vertex);
-    }
-
-    for (Edge edge : loader.getEdges()) {
-      System.out.println(edge);
-    }
-
-    System.out.println(loader.getGraphCache());
-    System.out.println(loader.getVertexCache());
-    System.out.println(loader.getEdgeCache());
-  }
-
   // --------------------------------------------------------------------------------------------
   //  Test helpers
   // --------------------------------------------------------------------------------------------
+
+  private static final String DEFAULT_GRAPH_LABEL = "DefaultGraph";
+  private static final String DEFAULT_VERTEX_LABEL = "DefaultVertex";
+  private static final String DEFAULT_EDGE_LABEL = "DefaultEdge";
 
   private GDLLoader getLoaderFromGDLString(String gdlString) {
     GDLLexer lexer = new GDLLexer(new ANTLRInputStream(gdlString));
     GDLParser parser = new GDLParser(new CommonTokenStream(lexer));
 
     ParseTreeWalker walker = new ParseTreeWalker();
-    GDLLoader loader = new GDLLoader();
+    GDLLoader loader = new GDLLoader(DEFAULT_GRAPH_LABEL, DEFAULT_VERTEX_LABEL, DEFAULT_EDGE_LABEL);
     walker.walk(loader, parser.database());
     return loader;
   }
@@ -342,7 +324,7 @@ public class GDLLoaderTest {
     GDLParser parser = new GDLParser(new CommonTokenStream(lexer));
 
     ParseTreeWalker walker = new ParseTreeWalker();
-    GDLLoader loader = new GDLLoader();
+    GDLLoader loader = new GDLLoader(DEFAULT_GRAPH_LABEL, DEFAULT_VERTEX_LABEL, DEFAULT_EDGE_LABEL);
     walker.walk(loader, parser.database());
     return loader;
   }

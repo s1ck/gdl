@@ -49,38 +49,6 @@ public class GDLHandler {
   }
 
   /**
-   * Creates a new GDL Handler from the given GDL string.
-   *
-   * @param gdlString GDL string
-   * @return GDL handler
-   */
-  public static GDLHandler initFromString(String gdlString) {
-    return new GDLHandler(init(new ANTLRInputStream(gdlString)));
-  }
-
-  /**
-   * Creates a new GDL handler from the given GDL input stream.
-   *
-   * @param gdlStream GDL input stream
-   * @return GDL handler
-   * @throws IOException
-   */
-  public static GDLHandler initFromStream(InputStream gdlStream) throws IOException {
-    return new GDLHandler(init(new ANTLRInputStream(gdlStream)));
-  }
-
-  /**
-   * Creates a new GDL handler from the given GDL file.
-   *
-   * @param fileName path to a file that contains GDL input
-   * @return GDL handler
-   * @throws IOException
-   */
-  public static GDLHandler initFromFile(String fileName) throws IOException {
-    return new GDLHandler(init(new ANTLRFileStream(fileName)));
-  }
-
-  /**
    * Returns a collection of all graphs defined in the GDL script.
    *
    * @return graph collection
@@ -138,18 +106,117 @@ public class GDLHandler {
   }
 
   /**
-   * Initializes the GDL loader from the given ANTLR input stream.
-   *
-   * @param antlrInputStream ANTLR input stream
-   * @return GDL loader
+   * Builds a GDL Handler.
    */
-  private static GDLLoader init(ANTLRInputStream antlrInputStream) {
-    GDLLexer lexer = new GDLLexer(antlrInputStream);
-    GDLParser parser = new GDLParser(new CommonTokenStream(lexer));
+  public static class Builder {
 
-    ParseTreeWalker walker = new ParseTreeWalker();
-    GDLLoader loader = new GDLLoader();
-    walker.walk(loader, parser.database());
-    return loader;
+    /**
+     * Graph label.
+     */
+    private String graphLabel = "__GRAPH";
+
+    /**
+     * Vertex label.
+     */
+    private String vertexLabel = "__VERTEX";
+
+    /**
+     * Edge label.
+     */
+    private String edgeLabel = "__EDGE";
+
+    /**
+     * Default graph label is used if none is set in the GDL script.
+     *
+     * @param graphLabel graph label (must not be {@code null}).
+     * @return builder
+     */
+    public Builder setDefaultGraphLabel(String graphLabel) {
+      this.graphLabel = graphLabel;
+      return this;
+    }
+
+    /**
+     * Default vertex label is used if none is set in the GDL script.
+     *
+     * @param vertexLabel vertex label (must not be {@code null}).
+     * @return builder
+     */
+    public Builder setDefaultVertexLabel(String vertexLabel) {
+      this.vertexLabel = vertexLabel;
+      return this;
+    }
+
+    /**
+     * Default edge label is used if none is set in the GDL script.
+     *
+     * @param edgeLabel edge label (must not be {@code null}).
+     * @return builder
+     */
+    public Builder setDefaultEdgeLabel(String edgeLabel) {
+      this.edgeLabel = edgeLabel;
+      return this;
+    }
+
+    /**
+     * Initialize GDL Handler from given ASCII String.
+     *
+     * @param asciiString GDL string (must not be {@code null}).
+     * @return GDL handler
+     */
+    public GDLHandler buildFromString(String asciiString) {
+      ANTLRInputStream antlrInputStream = new ANTLRInputStream(asciiString);
+      return build(antlrInputStream);
+    }
+
+    /**
+     * Initializes GDL Handler from given input stream.
+     *
+     * @param stream InputStream (must not be {@code null}).
+     * @return GDL handler
+     * @throws IOException
+     */
+    public GDLHandler buildFromStream(InputStream stream) throws IOException {
+      ANTLRInputStream antlrInputStream = new ANTLRInputStream(stream);
+      return build(antlrInputStream);
+    }
+
+    /**
+     * Initializes GDL Handler from given file.
+     *
+     * @param fileName GDL file (must not be {@code null}).
+     * @return GDL handler
+     */
+    public GDLHandler buildFromFile(String fileName) throws IOException {
+      ANTLRInputStream antlrInputStream = new ANTLRFileStream(fileName);
+      return build(antlrInputStream);
+    }
+
+    /**
+     * Checks valid input and creates GDL Handler.
+     *
+     * @param antlrInputStream ANTLR input stream
+     * @return GDL handler
+     */
+    private GDLHandler build(ANTLRInputStream antlrInputStream) {
+      if (graphLabel == null) {
+        throw new IllegalArgumentException("Graph label must not be null.");
+      }
+      if (vertexLabel == null) {
+        throw new IllegalArgumentException("Vertex label must not be null.");
+      }
+      if (edgeLabel == null) {
+        throw new IllegalArgumentException("Edge label must not be null.");
+      }
+
+      GDLLexer lexer = new GDLLexer(antlrInputStream);
+      GDLParser parser = new GDLParser(new CommonTokenStream(lexer));
+
+      ParseTreeWalker walker = new ParseTreeWalker();
+      GDLLoader loader = new GDLLoader(graphLabel, vertexLabel, edgeLabel);
+      walker.walk(loader, parser.database());
+      return new GDLHandler(loader);
+    }
   }
- }
+}
+

@@ -31,10 +31,6 @@ import java.util.Set;
 
 public class GDLLoader extends GDLBaseListener {
 
-  private static final String DEFAULT_GRAPH_LABEL = "__GRAPH";
-  private static final String DEFAULT_VERTEX_LABEL = "__VERTEX";
-  private static final String DEFAULT_EDGE_LABEL = "__EDGE";
-
   // used to cache elements which are used with variables
   private final Map<String, Graph> graphCache;
   private final Map<String, Vertex> vertexCache;
@@ -62,25 +58,15 @@ public class GDLLoader extends GDLBaseListener {
 
   /**
    * Initializes a new GDL Loader.
-   */
-  GDLLoader() {
-    this(null, null, null);
-  }
-
-  /**
-   * Initializes a new GDL Loader.
    *
    * @param defaultGraphLabel   graph label to be used if no label is given in the GDL script
    * @param defaultVertexLabel  vertex label to be used if no label is given in the GDL script
    * @param defaultEdgeLabel    edge label to be used if no label is given in the GDL script
    */
   GDLLoader(String defaultGraphLabel, String defaultVertexLabel, String defaultEdgeLabel) {
-    this.defaultGraphLabel = (defaultGraphLabel != null) ?
-      defaultGraphLabel : DEFAULT_GRAPH_LABEL;
-    this.defaultVertexLabel = (defaultVertexLabel != null) ?
-      defaultVertexLabel : DEFAULT_VERTEX_LABEL;
-    this.defaultEdgeLabel = (defaultEdgeLabel != null) ?
-      defaultEdgeLabel : DEFAULT_EDGE_LABEL;
+    this.defaultGraphLabel = defaultGraphLabel;
+    this.defaultVertexLabel = defaultVertexLabel;
+    this.defaultEdgeLabel = defaultEdgeLabel;
 
     graphCache = Maps.newHashMap();
     vertexCache = Maps.newHashMap();
