@@ -9,21 +9,23 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class GDLHandlerTest {
 
   @Test
   public void initFromStringTest() {
-    GDLHandler handler = new GDLHandler.Builder().buildFromString("[()]");
-    assertEquals("wrong number of graphs", 1, handler.getVertices().size());
-    assertEquals("wrong number of vertices", 1, handler.getVertices().size());
+    GDLHandler handler = new GDLHandler.Builder().buildFromString("[()-->()]");
+    assertEquals("wrong number of graphs", 1, handler.getGraphs().size());
+    assertEquals("wrong number of vertices", 2, handler.getVertices().size());
+    assertEquals("wrong number of edges", 1, handler.getEdges().size());
   }
 
   @Test
   public void initFromStreamTest() throws IOException {
     InputStream inputStream = GDLHandler.class.getResourceAsStream("/single_graph.gdl");
     GDLHandler handler = new GDLHandler.Builder().buildFromStream(inputStream);
-    assertEquals("wrong number of graphs", 1, handler.getVertices().size());
+    assertEquals("wrong number of graphs", 1, handler.getGraphs().size());
     assertEquals("wrong number of vertices", 1, handler.getVertices().size());
   }
 
@@ -31,7 +33,7 @@ public class GDLHandlerTest {
   public void initFromFileTest() throws IOException {
     String fileName = GDLHandler.class.getResource("/single_graph.gdl").getFile();
     GDLHandler handler = new GDLHandler.Builder().buildFromFile(fileName);
-    assertEquals("wrong number of graphs", 1, handler.getVertices().size());
+    assertEquals("wrong number of graphs", 1, handler.getGraphs().size());
     assertEquals("wrong number of vertices", 1, handler.getVertices().size());
   }
 
@@ -50,5 +52,49 @@ public class GDLHandlerTest {
     assertEquals("Graph has wrong label", "G", g.getLabel());
     assertEquals("Vertex has wrong label", "V", v.getLabel());
     assertEquals("Edge has wrong label", "E", e.getLabel());
+  }
+
+  @Test
+  public void appendTest() {
+    GDLHandler handler = new GDLHandler.Builder().buildFromString("[()]");
+    handler.append("[()]");
+
+    assertEquals("wrong number of graphs", 2, handler.getGraphs().size());
+    assertEquals("wrong number of vertices", 2, handler.getVertices().size());
+  }
+
+  @Test
+  public void appendExistingVertexTest() {
+    GDLHandler handler = new GDLHandler.Builder().buildFromString("g[(v)]");
+    handler.append("h[(v)]");
+
+    assertEquals("wrong number of graphs", 2, handler.getGraphs().size());
+    assertEquals("wrong number of vertices", 1, handler.getVertices().size());
+
+    Graph g = handler.getGraphCache().get("g");
+    Graph h = handler.getGraphCache().get("h");
+    Vertex v = handler.getVertexCache().get("v");
+
+    assertEquals("Vertex has wrong number of graphs", 2, v.getGraphs().size());
+    assertTrue("Vertex is in wrong graph", v.getGraphs().contains(g.getId()));
+    assertTrue("Vertex is in wrong graph", v.getGraphs().contains(h.getId()));
+  }
+
+  @Test
+  public void appendExistingGraphTest() {
+    GDLHandler handler = new GDLHandler.Builder().buildFromString("g[(v)]");
+    handler.append("g[(u)]");
+
+    assertEquals("wrong number of graphs", 1, handler.getGraphs().size());
+    assertEquals("wrong number of vertices", 2, handler.getVertices().size());
+
+    Graph g = handler.getGraphCache().get("g");
+    Vertex v = handler.getVertexCache().get("v");
+    Vertex u = handler.getVertexCache().get("u");
+
+    assertEquals("Vertex has wrong number of graphs", 1, v.getGraphs().size());
+    assertEquals("Vertex has wrong number of graphs", 1, u.getGraphs().size());
+    assertTrue("Vertex is in wrong graph", v.getGraphs().contains(g.getId()));
+    assertTrue("Vertex is in wrong graph", u.getGraphs().contains(g.getId()));
   }
 }

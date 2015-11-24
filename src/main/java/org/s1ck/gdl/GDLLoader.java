@@ -45,13 +45,15 @@ public class GDLLoader extends GDLBaseListener {
   private final String defaultVertexLabel;
   private final String defaultEdgeLabel;
 
-  // needs to be replaced by GradoopId factory
-  private long currentGraphId = 0L;
-  private long currentVertexId = 0L;
-  private long currentEdgeId = 0L;
+  // used to generate sequential ids
+  private long nextGraphId = 0L;
+  private long nextVertexId = 0L;
+  private long nextEdgeId = 0L;
 
   // flag that tells if the parser is inside a logical graph
   private boolean inGraph = false;
+  // holds the graph of the current graph
+  private long currentGraphId;
   // used to track vertex and edge ids for correct source and target binding
   private Vertex lastSeenVertex;
   private Edge lastSeenEdge;
@@ -146,14 +148,20 @@ public class GDLLoader extends GDLBaseListener {
   public void enterGraph(GDLParser.GraphContext graphContext) {
     inGraph = true;
     String variable = getVariable(graphContext.header());
-    if (variable != null && !graphCache.containsKey(variable)) {
-      Graph g = initNewGraph(graphContext);
-      graphs.add(g);
-      graphCache.put(variable, g);
+    Graph g;
+    if (variable != null) {
+      if (!graphCache.containsKey(variable)) {
+        g = initNewGraph(graphContext);
+        graphs.add(g);
+        graphCache.put(variable, g);
+      } else {
+        g = graphCache.get(variable);
+      }
     } else {
-      Graph g = initNewGraph(graphContext);
+      g = initNewGraph(graphContext);
       graphs.add(g);
     }
+    currentGraphId = g.getId();
   }
 
   @Override
@@ -307,7 +315,7 @@ public class GDLLoader extends GDLBaseListener {
    */
   private void updateGraphElement(GraphElement graphElement) {
     if (inGraph) {
-      graphElement.addToGraph(getCurrentGraphId());
+      graphElement.addToGraph(getNextGraphId());
     }
   }
 
@@ -387,7 +395,7 @@ public class GDLLoader extends GDLBaseListener {
    *
    * @return current graph identifier
    */
-  private Long getCurrentGraphId() {
+  private Long getNextGraphId() {
     return currentGraphId;
   }
 
@@ -397,7 +405,7 @@ public class GDLLoader extends GDLBaseListener {
    * @return new graph identifier
    */
   private Long getNewGraphId() {
-    return ++currentGraphId;
+    return ++nextGraphId;
   }
 
   /**
@@ -406,7 +414,7 @@ public class GDLLoader extends GDLBaseListener {
    * @return new vertex identifier
    */
   private Long getNewVertexId() {
-    return ++currentVertexId;
+    return ++nextVertexId;
   }
 
   /**
@@ -415,7 +423,7 @@ public class GDLLoader extends GDLBaseListener {
    * @return new edge identifier
    */
   private Long getNewEdgeId() {
-    return ++currentEdgeId;
+    return ++nextEdgeId;
   }
 
   // --------------------------------------------------------------------------------------------

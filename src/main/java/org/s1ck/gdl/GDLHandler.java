@@ -49,6 +49,22 @@ public class GDLHandler {
   }
 
   /**
+   * Append the given GDL string to the current database.
+   *
+   * @param asciiString GDL string (must not be {@code null}).
+   */
+  public void append(String asciiString) {
+    if (asciiString == null) {
+      throw new IllegalArgumentException("AsciiString must not be null");
+    }
+    ANTLRInputStream antlrInputStream = new ANTLRInputStream(asciiString);
+    GDLLexer lexer = new GDLLexer(antlrInputStream);
+    GDLParser parser = new GDLParser(new CommonTokenStream(lexer));
+    // update the loader state while walking the parse tree
+    new ParseTreeWalker().walk(loader, parser.database());
+  }
+
+  /**
    * Returns a collection of all graphs defined in the GDL script.
    *
    * @return graph collection
@@ -212,9 +228,8 @@ public class GDLHandler {
       GDLLexer lexer = new GDLLexer(antlrInputStream);
       GDLParser parser = new GDLParser(new CommonTokenStream(lexer));
 
-      ParseTreeWalker walker = new ParseTreeWalker();
       GDLLoader loader = new GDLLoader(graphLabel, vertexLabel, edgeLabel);
-      walker.walk(loader, parser.database());
+      new ParseTreeWalker().walk(loader, parser.database());
       return new GDLHandler(loader);
     }
   }

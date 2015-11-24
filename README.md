@@ -105,6 +105,14 @@ Define mixed path and graph statements (elements in the paths don't belong to a 
 [()]
 ```
 
+Define a fragmented graph with variable reuse:
+
+```
+g[(a)-->()]
+g[(a)-->(b)]
+g[(b)-->(c)]
+```
+
 Define three graphs with overlapping vertex sets (e.g. `alice` is in `g1` and `g2`):
 
 ```
@@ -160,6 +168,14 @@ Create a database from an `InputStream` or an input file:
 ```java
 GDLHandler handler1 = new GDLHandler.Builder().buildFromStream(stream);
 GDLHandler handler2 = new GDLHandler.Builder().buildFromFile(fileName);
+```
+
+Append data to a given handler:
+
+```java
+GDLHandler handler = new GDLHandler.Builder().buildFromString("g[(alice)-[e1:knows {since = 2014}]->(bob)]");
+
+handler.append("g[(alice)-[:knows]->(eve)]");
 ```
 
 ## License

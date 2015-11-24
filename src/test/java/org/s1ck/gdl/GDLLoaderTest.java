@@ -180,6 +180,13 @@ public class GDLLoaderTest {
     validateProperties(loader.getGraphs().iterator().next());
   }
 
+  @Test
+  public void readFragmentedGraphTest() {
+    GDLLoader loader = getLoaderFromGDLString("g[()];g[()]");
+    validateCollectionSizes(loader, 1, 2, 0);
+    validateCacheSizes(loader, 1, 0, 0);
+  }
+
   // --------------------------------------------------------------------------------------------
   //  Path cases
   // --------------------------------------------------------------------------------------------
@@ -255,6 +262,33 @@ public class GDLLoaderTest {
       1, loader.getEdgeCache().get("s").getGraphs().size());
     assertTrue("edge s was not in graph g2",
       loader.getEdgeCache().get("s").getGraphs().contains(g2.getId()));
+  }
+
+  @Test
+  public void testFragmentedGraphWithVariables() {
+    GDLLoader loader = getLoaderFromGDLString(
+      "g[(a)-->(b)];g[(a)-[e]->(b)];g[(a)-[f]->(b)];h[(a)-[f]->(b)]");
+    validateCollectionSizes(loader, 2, 2, 3);
+    validateCacheSizes(loader, 2, 2, 2);
+
+    Graph g = loader.getGraphCache().get("g");
+    Graph h = loader.getGraphCache().get("h");
+    Vertex a = loader.getVertexCache().get("a");
+    Vertex b = loader.getVertexCache().get("b");
+    Edge e = loader.getEdgeCache().get("e");
+    Edge f = loader.getEdgeCache().get("f");
+
+    assertEquals("vertex a has wrong graph size", 2, a.getGraphs().size());
+    assertEquals("vertex b has wrong graph size", 2, b.getGraphs().size());
+    assertTrue("vertex a was not in g", a.getGraphs().contains(g.getId()));
+    assertTrue("vertex a was not in h", a.getGraphs().contains(h.getId()));
+    assertTrue("vertex b was not in g", b.getGraphs().contains(g.getId()));
+    assertTrue("vertex b was not in h", b.getGraphs().contains(h.getId()));
+    assertEquals("edge e has wrong graph size", 1, e.getGraphs().size());
+    assertEquals("edge f has wrong graph size", 2, f.getGraphs().size());
+    assertTrue("edge e was not in g", e.getGraphs().contains(g.getId()));
+    assertTrue("edge f was not in g", f.getGraphs().contains(g.getId()));
+    assertTrue("edge f was not in h", f.getGraphs().contains(h.getId()));
   }
 
   // --------------------------------------------------------------------------------------------
