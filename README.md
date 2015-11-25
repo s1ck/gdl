@@ -74,7 +74,7 @@ Define paths (four vertices and three edges are created):
 ()-->()<--()-->()
 ```
 
-Define a graph (must contain at least one vertex):
+Define a graph with one vertex (graphs can be empty):
 
 ```
 [()]

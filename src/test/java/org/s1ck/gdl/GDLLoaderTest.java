@@ -133,7 +133,14 @@ public class GDLLoaderTest {
   // --------------------------------------------------------------------------------------------
 
   @Test
-  public void readGraphTest() {
+  public void readEmptyGraphTest() {
+    GDLLoader loader = getLoaderFromGDLString("[]");
+    validateCollectionSizes(loader, 1, 0, 0);
+    validateCacheSizes(loader, 0, 0, 0);
+  }
+
+  @Test
+  public void readSimpleGraphTest() {
     GDLLoader loader = getLoaderFromGDLString("[()]");
     validateCollectionSizes(loader, 1, 1, 0);
     validateCacheSizes(loader, 0, 0, 0);
