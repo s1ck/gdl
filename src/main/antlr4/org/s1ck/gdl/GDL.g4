@@ -70,6 +70,7 @@ literal
     | BooleanLiteral
     | IntegerLiteral
     | FloatLiteral
+    | NULL
     ;
 
 StringLiteral
@@ -156,6 +157,10 @@ SEMICOLON
 
 EQUALS
     : '='
+    ;
+
+NULL
+    : 'NULL'
     ;
 
 WS

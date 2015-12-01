@@ -303,6 +303,16 @@ public class GDLLoaderTest {
   // --------------------------------------------------------------------------------------------
 
   @Test
+  public void readNullValueTest() {
+    GDLLoader loader = getLoaderFromGDLString("(v{name=NULL})");
+    validateCollectionSizes(loader, 0, 1, 0);
+    validateCacheSizes(loader, 0, 1, 0);
+    Vertex a = loader.getVertexCache().get("v");
+    assertTrue("missing property at vertex", a.getProperties().containsKey("name"));
+    assertNull("property value was not null", a.getProperties().get("name"));
+  }
+
+  @Test
   public void readEmptyGDLTest() {
     GDLLoader loader = getLoaderFromGDLString("");
     validateCollectionSizes(loader, 0, 0, 0);

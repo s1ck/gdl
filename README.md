@@ -43,6 +43,12 @@ Define a vertex with label `User`, assign it to variable `alice` and give it som
 (alice:User {name = "Alice", age = 23})
 ```
 
+Property values can also be null:
+
+```
+(alice:User {name = "Alice", age = 23, city = NULL})
+```
+
 Define an outgoing edge:
 
 ```
