@@ -32,7 +32,7 @@
     <scm>
        <connection>scm:git:s1ck@github.com/s1ck/gdl.git</connection>
        <developerConnection>scm:s1ck@github.com/s1ck/gdl.git</developerConnection>
-       <url>github.com/s1ck/gdl.git</url>
+       <url>http://github.com/s1ck/gdl.git</url>
     </scm>
 
     <distributionManagement>
