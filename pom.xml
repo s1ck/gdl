@@ -10,7 +10,7 @@
 
     <name>GDL - Graph Definition Language</name>
     <description>ANTLR Grammar for the definition of extended property graphs.</description>
-    <url>github.com/s1ck/gdl.git</url> 
+    <url>http://github.com/s1ck/gdl.git</url>
     
     <licenses>
         <license>
