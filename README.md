@@ -154,6 +154,30 @@ g2:Community {title = "Hadoop", memberCount = 31}[
 
 ## Usage examples
 
+Add dependency to your maven project:
+
+```
+<repositories>
+  <repository>
+    <id>dbleipzig</id>
+    <name>Database Group Leipzig University</name>
+    <url>https://wdiserv1.informatik.uni-leipzig.de:443/archiva/repository/dbleipzig/</url>
+    <releases>
+      <enabled>true</enabled>
+    </releases>
+    <snapshots>
+      <enabled>true</enabled>
+    </snapshots>
+   </repository>
+</repositories>
+
+<dependency>
+  <groupId>org.s1ck</groupId>
+  <artifactId>gdl</artifactId>
+  <version>0.2-SNAPSHOT</version>
+</dependency>
+```
+
 Create a database from a GDL string:
 
 ```java
