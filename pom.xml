@@ -6,7 +6,7 @@
 
     <groupId>org.s1ck</groupId>
     <artifactId>gdl</artifactId>
-    <version>0.1</version>
+    <version>0.2-SNAPSHOT</version>
 
     <name>GDL - Graph Definition Language</name>
     <description>ANTLR Grammar for the definition of extended property graphs.</description>
