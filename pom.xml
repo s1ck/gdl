@@ -34,7 +34,14 @@
        <developerConnection>scm:s1ck@github.com/s1ck/gdl.git</developerConnection>
        <url>github.com/s1ck/gdl.git</url>
     </scm>
-   
+
+    <distributionManagement>
+        <repository>
+            <id>dbleipzig</id>
+            <url>https://wdiserv1.informatik.uni-leipzig.de:443/archiva/repository/dbleipzig/</url>
+        </repository>
+    </distributionManagement>
+
     <properties>
         <project.build.targetJdk>1.7</project.build.targetJdk>
 
