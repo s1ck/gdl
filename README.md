@@ -5,8 +5,11 @@
 Inspired by the popular graph query language [Cypher](http://neo4j.com/docs/stable/cypher-query-lang.html),
 which is implemented in [Neo4j](http://neo4j.com/), I started developing an [ANTLR](http://www.antlr.org/)
 grammar to define property graphs. I added the concept of subgraphs into the language to support multiple, 
-possible overlapping property graphs in one database. For me, this project is a way to learn more about 
-ANTLR and context-free grammars.
+possible overlapping property graphs in one database. 
+
+For me, this project is a way to learn more about ANTLR and context-free grammars. Furthermore, GDL is used
+for unit testing and graph definition in [Gradoop](https://github.com/dbs-leipzig/gradoop), a framework for 
+distributed graph analytics.
 
 The project contains the grammar and a listener implementation which transforms GDL scripts into
 property graph model elements (i.e. graphs, vertices and edges).
