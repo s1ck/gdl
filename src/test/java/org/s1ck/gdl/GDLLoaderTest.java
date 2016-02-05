@@ -13,6 +13,7 @@ import org.s1ck.gdl.model.Vertex;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Iterator;
 import java.util.List;
 
 import static org.junit.Assert.*;
@@ -57,7 +58,7 @@ public class GDLLoaderTest {
 
   @Test
   public void readVertexWithPropertiesTest() {
-    GDLLoader loader = getLoaderFromGDLString(String.format("(var %s)", PROPERTIES));
+    GDLLoader loader = getLoaderFromGDLString(String.format("(var %s)", PROPERTIES_STRING));
 
     validateProperties(loader.getVertexCache().get("var"));
   }
@@ -123,7 +124,7 @@ public class GDLLoaderTest {
 
   @Test
   public void readEdgeWithPropertiesTest() {
-    GDLLoader loader = getLoaderFromGDLString(String.format("()-[e %s]->()", PROPERTIES));
+    GDLLoader loader = getLoaderFromGDLString(String.format("()-[e %s]->()", PROPERTIES_STRING));
 
     validateProperties(loader.getEdgeCache().get("e"));
   }
@@ -173,7 +174,7 @@ public class GDLLoaderTest {
 
   @Test
   public void readGraphWithPropertiesTest() {
-    GDLLoader loader = getLoaderFromGDLString(String.format("g%s[()]", PROPERTIES));
+    GDLLoader loader = getLoaderFromGDLString(String.format("g%s[()]", PROPERTIES_STRING));
     validateCollectionSizes(loader, 1, 1, 0);
     validateCacheSizes(loader, 1, 0, 0);
     validateProperties(loader.getGraphCache().get("g"));
@@ -181,7 +182,7 @@ public class GDLLoaderTest {
 
   @Test
   public void readGraphWithPropertiesOnly() {
-    GDLLoader loader = getLoaderFromGDLString(String.format("%s[()]", PROPERTIES));
+    GDLLoader loader = getLoaderFromGDLString(String.format("%s[()]", PROPERTIES_STRING));
     validateCollectionSizes(loader, 1, 1, 0);
     validateCacheSizes(loader, 0, 0, 0);
     validateProperties(loader.getGraphs().iterator().next());
@@ -380,29 +381,108 @@ public class GDLLoaderTest {
     return loader;
   }
 
-  // contains all valid property types
-  private static final String PROPERTIES =
-    "{" +
-      "key1 = \"value\"" +
-      ",key2 =   12"      +
-      ",key3 =   true"    +
-      ",key4 =   -10"     +
-      ",key5 =   0"       +
-      ",key6 =   3.14"    +
-      ",key7 =   .14"     +
-      ",key8 =   -3.14"   +
-      "}";
+  // string representation of all valid properties
+  private static String PROPERTIES_STRING;
+
+  // contains all valid properties
+  private static final List<PropertyTriple<?>> PROPERTIES_LIST = Lists.newArrayList();
+
+  /**
+   * Represents a property for testing.
+   *
+   * @param <T>
+   */
+  private static class PropertyTriple<T> {
+    private String key;
+    private String value;
+    private T expected;
+
+    public PropertyTriple(String key, String value, T expected) {
+      this.key = key;
+      this.value = value;
+      this.expected = expected;
+    }
+
+    public String getKey() {
+      return key;
+    }
+
+    public String getValue() {
+      return value;
+    }
+
+    public T getExpected() {
+      return expected;
+    }
+
+    @Override
+    public String toString() {
+      return String.format("%s=%s", getKey(), getValue());
+    }
+  }
+
+  static {
+    PROPERTIES_LIST.add(new PropertyTriple<>("k1", "\"value\"", "value"));
+    PROPERTIES_LIST.add(new PropertyTriple<>("k2", "true", true));
+    PROPERTIES_LIST.add(new PropertyTriple<>("k3", "false", false));
+    PROPERTIES_LIST.add(new PropertyTriple<>("k4", "TRUE", true));
+    PROPERTIES_LIST.add(new PropertyTriple<>("k5", "FALSE", false));
+    PROPERTIES_LIST.add(new PropertyTriple<>("k6", "0", 0));
+    PROPERTIES_LIST.add(new PropertyTriple<>("k7", "0L", 0L));
+    PROPERTIES_LIST.add(new PropertyTriple<>("k8", "0l", 0L));
+    PROPERTIES_LIST.add(new PropertyTriple<>("k9", "42", 42));
+    PROPERTIES_LIST.add(new PropertyTriple<>("k10", "42L", 42L));
+    PROPERTIES_LIST.add(new PropertyTriple<>("k11", "42l", 42L));
+    PROPERTIES_LIST.add(new PropertyTriple<>("k12", "-42", -42));
+    PROPERTIES_LIST.add(new PropertyTriple<>("k13", "-42L", -42L));
+    PROPERTIES_LIST.add(new PropertyTriple<>("k14", "-42l", -42L));
+    PROPERTIES_LIST.add(new PropertyTriple<>("k15", "0.0", 0.0f));
+    PROPERTIES_LIST.add(new PropertyTriple<>("k16", "0.0f", 0.0f));
+    PROPERTIES_LIST.add(new PropertyTriple<>("k17", "0.0F", 0.0f));
+    PROPERTIES_LIST.add(new PropertyTriple<>("k18", "0.0d", 0.0d));
+    PROPERTIES_LIST.add(new PropertyTriple<>("k19", "0.0D", 0.0D));
+    PROPERTIES_LIST.add(new PropertyTriple<>("k20", "-0.0", -0.0f));
+    PROPERTIES_LIST.add(new PropertyTriple<>("k21", "-0.0f", -0.0f));
+    PROPERTIES_LIST.add(new PropertyTriple<>("k22", "-0.0F", -0.0F));
+    PROPERTIES_LIST.add(new PropertyTriple<>("k23", "-0.0d", -0.0d));
+    PROPERTIES_LIST.add(new PropertyTriple<>("k24", "-0.0D", -0.0D));
+    PROPERTIES_LIST.add(new PropertyTriple<>("k25", ".0", .0f));
+    PROPERTIES_LIST.add(new PropertyTriple<>("k26", ".0f", .0f));
+    PROPERTIES_LIST.add(new PropertyTriple<>("k27", ".0F", .0F));
+    PROPERTIES_LIST.add(new PropertyTriple<>("k28", ".0d", .0d));
+    PROPERTIES_LIST.add(new PropertyTriple<>("k29", ".0D", .0D));
+    PROPERTIES_LIST.add(new PropertyTriple<>("k30", "3.14", 3.14f));
+    PROPERTIES_LIST.add(new PropertyTriple<>("k31", "3.14f", 3.14f));
+    PROPERTIES_LIST.add(new PropertyTriple<>("k32", "3.14F", 3.14F));
+    PROPERTIES_LIST.add(new PropertyTriple<>("k33", "3.14d", 3.14d));
+    PROPERTIES_LIST.add(new PropertyTriple<>("k34", "3.14D", 3.14D));
+    PROPERTIES_LIST.add(new PropertyTriple<>("k35", "-3.14", -3.14f));
+    PROPERTIES_LIST.add(new PropertyTriple<>("k36", "-3.14f", -3.14f));
+    PROPERTIES_LIST.add(new PropertyTriple<>("k37", "-3.14F", -3.14F));
+    PROPERTIES_LIST.add(new PropertyTriple<>("k38", "-3.14d", -3.14d));
+    PROPERTIES_LIST.add(new PropertyTriple<>("k39", "-3.14D", -3.14D));
+
+    Iterator<PropertyTriple<?>> iterator = PROPERTIES_LIST.iterator();
+    StringBuilder sb = new StringBuilder();
+    sb.append("{");
+    while (iterator.hasNext()) {
+      sb.append(iterator.next().toString());
+      if (iterator.hasNext()) {
+        sb.append(",");
+      }
+    }
+    sb.append("}");
+
+    PROPERTIES_STRING = sb.toString();
+  }
 
   private void validateProperties(Element element) {
-    assertEquals("wrong number of properties", 8, element.getProperties().size());
-    assertEquals("wrong value for key1", "value", element.getProperties().get("key1"));
-    assertEquals("wrong value for key2", 12, element.getProperties().get("key2"));
-    assertEquals("wrong value for key3", true, element.getProperties().get("key3"));
-    assertEquals("wrong value for key4", -10, element.getProperties().get("key4"));
-    assertEquals("wrong value for key5", 0, element.getProperties().get("key5"));
-    assertEquals("wrong value for key6", 3.14f, element.getProperties().get("key6"));
-    assertEquals("wrong value for key7", .14f, element.getProperties().get("key7"));
-    assertEquals("wrong value for key8", -3.14f, element.getProperties().get("key8"));
+    assertEquals("wrong number of properties", PROPERTIES_LIST.size(), element.getProperties().size());
+
+    for (PropertyTriple<?> expectedProperty : PROPERTIES_LIST) {
+      assertEquals("wrong property for key: " + expectedProperty.getKey(),
+        expectedProperty.getExpected(), element.getProperties().get(expectedProperty.getKey()));
+    }
   }
 
   private void validateCollectionSizes(GDLLoader loader,

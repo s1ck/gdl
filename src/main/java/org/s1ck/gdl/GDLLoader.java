@@ -374,14 +374,25 @@ public class GDLLoader extends GDLBaseListener {
    * @return parsed value
    */
   private Object getPropertyValue(GDLParser.LiteralContext literalContext) {
+    String text;
     if (literalContext.StringLiteral() != null) {
       return literalContext.StringLiteral().getText().replaceAll("^.|.$", "");
     } else if (literalContext.BooleanLiteral() != null) {
       return Boolean.parseBoolean(literalContext.BooleanLiteral().getText());
     } else if (literalContext.IntegerLiteral() != null) {
-      return Integer.parseInt(literalContext.IntegerLiteral().getText());
-    } else if(literalContext.FloatLiteral() != null) {
-      return Float.parseFloat(literalContext.FloatLiteral().getText());
+      text = literalContext.IntegerLiteral().getText().toLowerCase();
+      if (text.endsWith("l")) {
+        return Long.parseLong(text.substring(0, text.length() - 1));
+      }
+      return Integer.parseInt(text);
+    } else if(literalContext.FloatingPointLiteral() != null) {
+      text = literalContext.FloatingPointLiteral().getText().toLowerCase();
+      if (text.endsWith("f")) {
+        return Float.parseFloat(text.substring(0, text.length() - 1));
+      } else if (text.endsWith("d")) {
+        return Double.parseDouble(text.substring(0, text.length() - 1));
+      }
+      return Float.parseFloat(text);
     }
     return null;
   }

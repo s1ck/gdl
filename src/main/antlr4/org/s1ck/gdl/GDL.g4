@@ -24,7 +24,7 @@ database
     ;
 
 elementList
-    : (element SEMICOLON?)*
+    : (element ';'?)*
     ;
 
 element
@@ -33,7 +33,7 @@ element
     ;
 
 graph
-    : header properties? '[' (path SEMICOLON?)* ']'
+    : header properties? '[' (path ';'?)* ']'
     ;
 
 path
@@ -62,43 +62,100 @@ properties
     ;
 
 property
-    : Identifier EQUALS literal
+    : Identifier '=' literal
     ;
 
 literal
     : StringLiteral
     | BooleanLiteral
     | IntegerLiteral
-    | FloatLiteral
-    | NULL
+    | FloatingPointLiteral
+    | Null
     ;
+
+
+//-------------------------------
+// String Literal
+//-------------------------------
 
 StringLiteral
     : '"' ('\\"'|.)*? '"'
     ;
 
+//-------------------------------
+// Boolean Literal
+//-------------------------------
+
 BooleanLiteral
     : 'true'
+    | 'TRUE'
     | 'false'
+    | 'FALSE'
     ;
+
+//-------------------------------
+// Integer Literal
+//-------------------------------
 
 IntegerLiteral
-    : '0'
-    | '-'? NONZERODIGIT DIGIT*
+    : DecimalIntegerLiteral
     ;
 
-FloatLiteral
-    : IntegerLiteral? '.' DIGIT*     // match 0.1, 1.0, 1., 3.14 etc.
+fragment
+DecimalIntegerLiteral
+    : DecimalNumeral IntegerTypeSuffix?
     ;
+
+fragment
+DecimalNumeral
+    : '0'
+    | '-'? NonZeroDigit Digit*
+    ;
+fragment
+IntegerTypeSuffix
+    : [lL]
+    ;
+
+//-------------------------------
+// Floating Point Literal
+//-------------------------------
+
+FloatingPointLiteral
+    :   DecimalFloatingPointLiteral
+    ;
+
+fragment
+DecimalFloatingPointLiteral
+    :   DecimalFloatingPointNumeral? '.' Digits?  FloatTypeSuffix?
+    ;
+
+fragment
+DecimalFloatingPointNumeral
+    : '0'
+    | '-'? Digits
+    ;
+
+fragment
+FloatTypeSuffix
+    :   [fFdD]
+    ;
+
+//-------------------------------
+// Label & Identifier
+//-------------------------------
 
 Label
-    : COLON UpperCaseLetter (LowerCaseLetter | UpperCaseLetter)*  // graph and vertex label (e.g. Person, BlogPost)
-    | COLON LowerCaseLetter (LowerCaseLetter | UpperCaseLetter)*  // edge label (e.g. knows, hasInterest)
+    : Colon UpperCaseLetter (LowerCaseLetter | UpperCaseLetter)*  // graph and vertex label (e.g. Person, BlogPost)
+    | Colon LowerCaseLetter (LowerCaseLetter | UpperCaseLetter)*  // edge label (e.g. knows, hasInterest)
     ;
 
 Identifier
     : LowerCaseLetter Characters?   // e.g. g0, alice, birthTown
     ;
+
+//-------------------------------
+// General fragments
+//-------------------------------
 
 fragment
 Characters
@@ -109,7 +166,7 @@ fragment
 Character
     : UpperCaseLetter
     | LowerCaseLetter
-    | DIGIT
+    | Digit
     ;
 
 fragment
@@ -133,33 +190,31 @@ LowerCaseLetter
     ;
 
 fragment
-DIGIT
+Digits
+    : Digit+
+    ;
+
+fragment
+Digit
     : [0-9]
     ;
 
 fragment
-NONZERODIGIT
+NonZeroDigit
     : [1-9]
     ;
 
 fragment
-UNDERSCORE
+UnderScore
     : '_'
     ;
 
-COLON
+fragment
+Colon
     : ':'
     ;
 
-SEMICOLON
-    : ';'
-    ;
-
-EQUALS
-    : '='
-    ;
-
-NULL
+Null
     : 'NULL'
     ;
 
