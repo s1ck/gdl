@@ -422,6 +422,10 @@ public class GDLLoaderTest {
   }
 
   static {
+    PROPERTIES_LIST.add(new PropertyTriple<>("_", "true", true));
+    PROPERTIES_LIST.add(new PropertyTriple<>("_k1", "true", true));
+    PROPERTIES_LIST.add(new PropertyTriple<>("__k1", "true", true));
+    PROPERTIES_LIST.add(new PropertyTriple<>("_k_1", "true", true));
     PROPERTIES_LIST.add(new PropertyTriple<>("k1", "\"value\"", "value"));
     PROPERTIES_LIST.add(new PropertyTriple<>("k2", "true", true));
     PROPERTIES_LIST.add(new PropertyTriple<>("k3", "false", false));

@@ -150,7 +150,7 @@ Label
     ;
 
 Identifier
-    : LowerCaseLetter Characters?   // e.g. g0, alice, birthTown
+    : (UnderScore | LowerCaseLetter) (UnderScore | Character)*   // e.g. _temp, _0, t_T, g0, alice, birthTown
     ;
 
 //-------------------------------

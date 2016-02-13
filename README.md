@@ -52,6 +52,12 @@ Property values can also be null:
 (alice:User {name = "Alice", age = 23, city = NULL})
 ```
 
+Numeric property values can have specific data types:
+
+```
+(alice:User {name = "Alice", age = 23L, height  = 1.82f, weight = 42.7d})
+```
+
 Define an outgoing edge:
 
 ```
