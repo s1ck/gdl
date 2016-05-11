@@ -416,7 +416,7 @@ public class GDLLoader extends GDLBaseListener {
    * @return new graph identifier
    */
   private Long getNewGraphId() {
-    return ++nextGraphId;
+    return nextGraphId++;
   }
 
   /**
@@ -425,7 +425,7 @@ public class GDLLoader extends GDLBaseListener {
    * @return new vertex identifier
    */
   private Long getNewVertexId() {
-    return ++nextVertexId;
+    return nextVertexId++;
   }
 
   /**
@@ -434,7 +434,7 @@ public class GDLLoader extends GDLBaseListener {
    * @return new edge identifier
    */
   private Long getNewEdgeId() {
-    return ++nextEdgeId;
+    return nextEdgeId++;
   }
 
   // --------------------------------------------------------------------------------------------
