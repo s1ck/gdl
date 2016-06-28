@@ -28,6 +28,8 @@ public class Element {
 
   private Map<String, Object> properties;
 
+  private String variable;
+
   public Element() {
     properties = Maps.newHashMap();
   }
@@ -46,6 +48,14 @@ public class Element {
 
   public void setLabel(String label) {
     this.label = label;
+  }
+
+  public String getVariable() {
+    return variable;
+  }
+
+  public void addVariable(String variable) {
+    this.variable = variable;
   }
 
   public Map<String, Object> getProperties() {

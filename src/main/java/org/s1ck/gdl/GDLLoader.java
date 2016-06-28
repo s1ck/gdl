@@ -152,6 +152,7 @@ public class GDLLoader extends GDLBaseListener {
     if (variable != null) {
       if (!graphCache.containsKey(variable)) {
         g = initNewGraph(graphContext);
+        g.addVariable(variable);
         graphs.add(g);
         graphCache.put(variable, g);
       } else {
@@ -185,6 +186,7 @@ public class GDLLoader extends GDLBaseListener {
       v = vertexCache.get(variable);
     } else {
       v = initNewVertex(vertexContext);
+      v.addVariable(variable);
       vertices.add(v);
 
       if (variable != null) {
@@ -236,6 +238,7 @@ public class GDLLoader extends GDLBaseListener {
       e = edgeCache.get(variable);
     } else {
       e = initNewEdge(edgeBodyContext, isIncoming);
+      e.addVariable(variable);
       edges.add(e);
 
       if (variable != null) {
