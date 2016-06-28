@@ -63,6 +63,15 @@ public class GDLLoaderTest {
     validateProperties(loader.getVertexCache().get("var"));
   }
 
+  @Test
+  public void readVertexWithVariablesTest() {
+    GDLLoader loader = getLoaderFromGDLString("(var)");
+
+
+    Vertex v = loader.getVertices().iterator().next();
+    assertEquals("vertex has wrong variable", "var", v.getVariable());
+  }
+
   // --------------------------------------------------------------------------------------------
   //  Edge only tests
   // --------------------------------------------------------------------------------------------
@@ -129,6 +138,15 @@ public class GDLLoaderTest {
     validateProperties(loader.getEdgeCache().get("e"));
   }
 
+  @Test
+  public void readEdgeWithVariablesTest() {
+    GDLLoader loader = getLoaderFromGDLString("()-[e]->()");
+
+
+    Edge e = loader.getEdges().iterator().next();
+    assertEquals("edge has wrong variable", "e", e.getVariable());
+  }
+
   // --------------------------------------------------------------------------------------------
   //  Graph only tests
   // --------------------------------------------------------------------------------------------
@@ -186,6 +204,15 @@ public class GDLLoaderTest {
     validateCollectionSizes(loader, 1, 1, 0);
     validateCacheSizes(loader, 0, 0, 0);
     validateProperties(loader.getGraphs().iterator().next());
+  }
+
+  @Test
+  public void readGraphWithVariablesTest() {
+    GDLLoader loader = getLoaderFromGDLString("g[()]");
+
+
+    Graph g = loader.getGraphs().iterator().next();
+    assertEquals("edge has wrong variable", "g", g.getVariable());
   }
 
   @Test
