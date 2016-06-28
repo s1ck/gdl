@@ -54,7 +54,7 @@ public class Element {
     return variable;
   }
 
-  public void addVariable(String variable) {
+  public void setVariable(String variable) {
     this.variable = variable;
   }
 
