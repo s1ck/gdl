@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>org.s1ck</groupId>
@@ -33,7 +31,8 @@
         <url>http://github.com/s1ck/gdl.git</url>
         <connection>scm:git:git@github.com:s1ck/gdl.git</connection>
         <developerConnection>scm:git:s1ck@github.com/s1ck/gdl.git</developerConnection>
-    </scm>
+      <tag>release/0.2.0</tag>
+  </scm>
 
     <distributionManagement>
         <repository>
