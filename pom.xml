@@ -4,7 +4,7 @@
 
     <groupId>org.s1ck</groupId>
     <artifactId>gdl</artifactId>
-    <version>0.2-SNAPSHOT</version>
+    <version>0.3.0-SNAPSHOT</version>
 
     <name>GDL - Graph Definition Language</name>
     <description>ANTLR Grammar for the definition of extended property graphs.</description>
@@ -31,7 +31,7 @@
         <url>http://github.com/s1ck/gdl.git</url>
         <connection>scm:git:git@github.com:s1ck/gdl.git</connection>
         <developerConnection>scm:git:s1ck@github.com/s1ck/gdl.git</developerConnection>
-      <tag>release/0.2.0</tag>
+      <tag>HEAD</tag>
   </scm>
 
     <distributionManagement>
