@@ -31,7 +31,7 @@
     
     <scm>
         <url>http://github.com/s1ck/gdl.git</url>
-        <connection>scm:git:s1ck@github.com/s1ck/gdl.git</connection>
+        <connection>scm:git:git@github.com:s1ck/gdl.git</connection>
         <developerConnection>scm:git:s1ck@github.com/s1ck/gdl.git</developerConnection>
     </scm>
 
