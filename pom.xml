@@ -30,9 +30,9 @@
     </developers>
     
     <scm>
-       <connection>scm:git:s1ck@github.com/s1ck/gdl.git</connection>
-       <developerConnection>scm:s1ck@github.com/s1ck/gdl.git</developerConnection>
-       <url>http://github.com/s1ck/gdl.git</url>
+        <url>http://github.com/s1ck/gdl.git</url>
+        <connection>scm:git:s1ck@github.com/s1ck/gdl.git</connection>
+        <developerConnection>scm:git:s1ck@github.com/s1ck/gdl.git</developerConnection>
     </scm>
 
     <distributionManagement>
@@ -50,6 +50,7 @@
         <dep.guava.version>18.0</dep.guava.version>
 
         <plugin.maven-compiler.version>3.0</plugin.maven-compiler.version>
+        <plugin.maven-release.version>2.5.3</plugin.maven-release.version>
     </properties>
 
     <dependencies>
@@ -96,6 +97,17 @@
                         </goals>
                     </execution>
                 </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-release-plugin</artifactId>
+                <version>${plugin.maven-release.version}</version>
+                <configuration>
+                    <autoVersionSubmodules>true</autoVersionSubmodules>
+                    <pushChanges>false</pushChanges>
+                    <tagNameFormat>v@{project.version}</tagNameFormat>
+                </configuration>
             </plugin>
         </plugins>
     </build>
