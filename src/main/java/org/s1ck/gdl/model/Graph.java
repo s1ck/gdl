@@ -17,13 +17,22 @@
 
 package org.s1ck.gdl.model;
 
+import org.s1ck.gdl.model.operators.Filter;
+
 public class Graph extends Element {
+
+  private Filter filter;
+
+  public Filter getFilter() { return filter; }
+  public void setFilter(Filter filter) { this.filter = filter; }
+
   @Override
   public String toString() {
-    return "Graph{" +
-      "id=" + getId() +
-      ", label='" + getLabel() + '\'' +
-      ", properties=" + getProperties() +
-      '}';
+    return "Graph{" + ",\n" +
+      "\t" + "id=" + getId() + ",\n" +
+      "\t" + "label='" + getLabel() + "',\n" +
+      "\t" + "properties=" + getProperties() + ",\n" +
+      "\t" + "filter='" + getFilter() + "',\n" +
+    '}';
   }
 }

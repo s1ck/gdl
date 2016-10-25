@@ -20,12 +20,25 @@ package org.s1ck.gdl;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import org.antlr.v4.runtime.tree.TerminalNode;
 import org.s1ck.gdl.model.Edge;
 import org.s1ck.gdl.model.Graph;
 import org.s1ck.gdl.model.GraphElement;
 import org.s1ck.gdl.model.Vertex;
+import org.s1ck.gdl.model.operators.And;
+import org.s1ck.gdl.model.operators.Comparison;
+import org.s1ck.gdl.model.operators.Filter;
+import org.s1ck.gdl.model.operators.Not;
+import org.s1ck.gdl.model.operators.Or;
+import org.s1ck.gdl.model.operators.Xor;
+import org.s1ck.gdl.model.operators.comparables.Comparable;
+import org.s1ck.gdl.model.operators.comparables.Literal;
+import org.s1ck.gdl.model.operators.comparables.PropertySelector;
 
+import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -54,9 +67,13 @@ public class GDLLoader extends GDLBaseListener {
   private boolean inGraph = false;
   // holds the graph of the current graph
   private long currentGraphId;
-  // used to track vertex and edge ids for correct source and target binding
+
+  // used to track graph, vertex and edge ids for correct source and target
+  // binding
+  private Graph lastSeenGraph;
   private Vertex lastSeenVertex;
   private Edge lastSeenEdge;
+  private ArrayDeque<Filter> currentFilters;
 
   /**
    * Initializes a new GDL Loader.
@@ -77,6 +94,8 @@ public class GDLLoader extends GDLBaseListener {
     graphs = Sets.newHashSet();
     vertices = Sets.newHashSet();
     edges = Sets.newHashSet();
+
+    currentFilters = new ArrayDeque<>();
   }
 
   /**
@@ -163,6 +182,7 @@ public class GDLLoader extends GDLBaseListener {
       graphs.add(g);
     }
     currentGraphId = g.getId();
+    lastSeenGraph = g;
   }
 
   @Override
@@ -248,6 +268,65 @@ public class GDLLoader extends GDLBaseListener {
     updateGraphElement(e);
     setLastSeenEdge(e);
   }
+
+  @Override
+  public void enterWhere(GDLParser.WhereContext ctx) {
+    currentFilters.clear();
+  }
+
+  @Override
+  public void exitWhere(GDLParser.WhereContext ctx) {
+    Graph graph = lastSeenGraph;
+
+    if(graph.getFilter() != null) {
+      Filter and = new And(graph.getFilter(),currentFilters.pop());
+      graph.setFilter(and);
+    } else {
+      graph.setFilter(currentFilters.pop());
+    }
+  }
+
+  @Override
+  public void enterComparisonExpression(GDLParser
+    .ComparisonExpressionContext ctx) {
+
+    currentFilters.add(buildComparisson(ctx));
+  }
+
+  @Override
+  public void exitExpression4(GDLParser.Expression4Context ctx) {
+    if (!ctx.NOT().isEmpty()) {
+     Filter not = new Not(currentFilters.pop());
+     currentFilters.add(not);
+    }
+  }
+
+  @Override
+  public void exitExpression5(GDLParser.Expression5Context ctx) {
+    List<TerminalNode> conjuctions = ctx.Conjunction();
+    Filter conjunctionReuse;
+
+    for(int i=conjuctions.size()-1;i>=0;i--) {
+      Filter lhs = currentFilters.pop();
+      Filter rhs = currentFilters.pop();
+
+
+      switch(conjuctions.get(i).getText().toLowerCase()) {
+      case "and": conjunctionReuse = new And(lhs,rhs);
+                  break;
+      case "or":  conjunctionReuse = new Or(lhs,rhs);
+                  break;
+      default: conjunctionReuse = new Xor(lhs,rhs);
+                  break;
+      }
+
+      currentFilters.add(conjunctionReuse);
+    }
+  }
+
+
+
+
 
   // --------------------------------------------------------------------------------------------
   //  Init handlers
@@ -514,5 +593,37 @@ public class GDLLoader extends GDLBaseListener {
    */
   private Long getTargetVertexId(boolean isIncoming) {
     return isIncoming ? getLastSeenVertex().getId() : null;
+  }
+
+  private Comparison buildComparisson(GDLParser.ComparisonExpressionContext ctx) {
+    Comparable lhs = buildPropertySelector(ctx.propertyLookup(0));
+
+    Comparable rhs = ctx.literal() != null ?
+      new Literal(getPropertyValue(ctx.literal())) :
+      buildPropertySelector(ctx.propertyLookup(1));
+
+    Comparison.Comparator comp = Comparison.Comparator.fromString(
+      ctx .ComparisonOP().getText());
+
+    return new Comparison(lhs,comp,rhs);
+  }
+
+  private PropertySelector buildPropertySelector(GDLParser
+    .PropertyLookupContext ctx) {
+
+    GraphElement element;
+
+    String identifier = ctx.Identifier(0).getText();
+    String property = ctx.Identifier(1).getText();
+
+    if(vertexCache.containsKey(identifier)) {
+      element = vertexCache.get(identifier);
+    }
+    else if(edgeCache.containsKey(identifier)) {
+      element = edgeCache.get(identifier);
+    }
+    else { return null; } //TODO raise reference error
+    
+    return new PropertySelector(element,property);
   }
 }

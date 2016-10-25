@@ -24,6 +24,7 @@ public class GDLLoaderTest {
   //  Vertex only tests
   // --------------------------------------------------------------------------------------------
 
+
   @Test
   public void readVertexTest() {
     GDLLoader loader = getLoaderFromGDLString("()");
@@ -250,7 +251,7 @@ public class GDLLoaderTest {
 
   @Test
   public void testGraphWithContentTest() {
-    GDLLoader loader = getLoaderFromGDLString("g[(alice)-[r]->(bob);(alice)-[s]->(eve)]");
+    GDLLoader loader = getLoaderFromGDLString("g[(alice)-[r]->(bob),(alice)-[s]->(eve)]");
     validateCollectionSizes(loader, 1, 3, 2);
     validateCacheSizes(loader, 1, 3, 2);
     Graph g = loader.getGraphCache().get("g");
@@ -329,7 +330,7 @@ public class GDLLoaderTest {
 
   @Test
   public void readNullValueTest() {
-    GDLLoader loader = getLoaderFromGDLString("(v{name=NULL})");
+    GDLLoader loader = getLoaderFromGDLString("(v{name: NULL})");
     validateCollectionSizes(loader, 0, 1, 0);
     validateCacheSizes(loader, 0, 1, 0);
     Vertex a = loader.getVertexCache().get("v");
@@ -441,7 +442,7 @@ public class GDLLoaderTest {
 
     @Override
     public String toString() {
-      return String.format("%s=%s", getKey(), getValue());
+      return String.format("%s: %s", getKey(), getValue());
     }
   }
 

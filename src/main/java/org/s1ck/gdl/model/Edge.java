@@ -22,6 +22,19 @@ public class Edge extends GraphElement {
 
   private Long targetVertexId;
 
+  private boolean hasVariableLength;
+
+  private int lowerBound;
+
+  private int upperBound;
+
+  public Edge() {
+    super();
+    this.lowerBound = 1;
+    this.upperBound = 1000;
+  }
+
+
   public Long getSourceVertexId() {
     return sourceVertexId;
   }
@@ -38,15 +51,45 @@ public class Edge extends GraphElement {
     this.targetVertexId = targetVertexId;
   }
 
+  public void setHasVariableLength(boolean val) {
+    this.hasVariableLength = val;
+  }
+
+  public boolean gethasVariableLength() {
+    return this.hasVariableLength;
+  }
+
+  public int getLowerBound() { return lowerBound; }
+
+  public void setLowerBound(int lowerBound) {
+    this.lowerBound = lowerBound;
+  }
+
+  public int getUpperBound() { return upperBound; }
+
+  public void setUpperBound(int upperBound) {
+    this.upperBound = upperBound;
+  }
+
   @Override
   public String toString() {
-    return "Edge{" +
+    String out = "Edge{" +
       "id=" + getId() +
       ", label='" + getLabel() + '\'' +
       ", properties=" + getProperties() +
       ", sourceVertexId=" + sourceVertexId +
       ", targetVertexId=" + targetVertexId +
-      ", graphs=" + getGraphs() +
+      ", hasVariableLength=" + hasVariableLength;
+
+    if(hasVariableLength) {
+      out = out +
+        ", lowerBound=" + lowerBound +
+        ", upperBound=" + upperBound;
+    }
+
+    out = out + ", graphs=" + getGraphs() +
       '}';
+
+      return out;
   }
 }

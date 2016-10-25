@@ -33,7 +33,15 @@ element
     ;
 
 graph
-    : header properties? '[' (path ';'?)* ']'
+    : header properties? (('[' (path ','?)* ']') | query)
+    ;
+
+query
+    : match where*
+    ;
+
+match
+    : 'MATCH' (path ','?)+
     ;
 
 path
@@ -62,7 +70,7 @@ properties
     ;
 
 property
-    : Identifier '=' literal
+    : Identifier ':' literal
     ;
 
 literal
@@ -73,6 +81,35 @@ literal
     | Null
     ;
 
+
+
+where
+    : ('where' | 'WHERE') expression
+    ;
+
+expression : expression5 ;
+
+expression5: expression4 ( Conjunction expression4 )* ;
+
+expression4 : ( NOT )* expression2 ;
+
+expression2 : atom ;
+
+
+atom : parenthesizedExpression
+     | comparisonExpression
+     ;
+
+comparisonExpression :
+     propertyLookup ComparisonOP (propertyLookup | literal)
+                            ;
+
+parenthesizedExpression : '(' expression ')' ;
+
+
+propertyLookup
+    : Identifier '.' Identifier
+    ;
 
 //-------------------------------
 // String Literal
@@ -126,7 +163,8 @@ FloatingPointLiteral
 
 fragment
 DecimalFloatingPointLiteral
-    :   DecimalFloatingPointNumeral? '.' Digits?  FloatTypeSuffix?
+    :   (DecimalFloatingPointNumeral '.' Digits)
+    |   (DecimalFloatingPointNumeral? '.' Digits)  FloatTypeSuffix?
     ;
 
 fragment
@@ -152,6 +190,34 @@ Label
 Identifier
     : (UnderScore | LowerCaseLetter) (UnderScore | Character)*   // e.g. _temp, _0, t_T, g0, alice, birthTown
     ;
+
+
+//-------------------------------
+// Comparison
+//-------------------------------
+
+Conjunction
+    : 'AND'
+    | 'and'
+    | 'OR'
+    | 'or'
+    | 'XOR'
+    | 'xor'
+    ;
+
+NOT
+    : ('OR'|'or')
+    ;
+
+ComparisonOP
+    : '='
+    | '!='
+    | '>'
+    | '<'
+    | '>='
+    | '<='
+    ;
+
 
 //-------------------------------
 // General fragments
@@ -209,13 +275,17 @@ UnderScore
     : '_'
     ;
 
-fragment
+
 Colon
     : ':'
     ;
 
 Null
     : 'NULL'
+    ;
+
+PERIOD
+    : '.'
     ;
 
 WS
@@ -229,3 +299,4 @@ COMMENT
 LINE_COMMENT
     : '//' ~[\r\n]* -> skip
     ;
+
