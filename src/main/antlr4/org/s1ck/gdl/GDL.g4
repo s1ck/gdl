@@ -24,16 +24,16 @@ database
     ;
 
 elementList
-    : (element ';'?)*
+    : (element ','?)*
     ;
 
 element
     : graph
-    | path
+    | query
     ;
 
 graph
-    : header properties? (('[' (path ','?)* ']') | query)
+    : header properties? (('[' (path ','?)* ']'))
     ;
 
 query
@@ -58,7 +58,11 @@ edge
     ;
 
 edgeBody
-    : '[' header properties? ']'
+    : '[' header properties? edgeLength?']'
+    ;
+
+edgeLength
+    : '*' IntegerLiteral? ('..' IntegerLiteral)?
     ;
 
 header

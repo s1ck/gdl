@@ -19,6 +19,7 @@ package org.s1ck.gdl;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Range;
 import com.google.common.collect.Sets;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import org.s1ck.gdl.model.Edge;
@@ -36,7 +37,6 @@ import org.s1ck.gdl.model.operators.comparables.Literal;
 import org.s1ck.gdl.model.operators.comparables.PropertySelector;
 
 import java.util.ArrayDeque;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -307,9 +307,8 @@ public class GDLLoader extends GDLBaseListener {
     Filter conjunctionReuse;
 
     for(int i=conjuctions.size()-1;i>=0;i--) {
-      Filter lhs = currentFilters.pop();
-      Filter rhs = currentFilters.pop();
-
+      Filter rhs = currentFilters.removeLast();
+      Filter lhs = currentFilters.removeLast();
 
       switch(conjuctions.get(i).getText().toLowerCase()) {
       case "and": conjunctionReuse = new And(lhs,rhs);
@@ -378,10 +377,13 @@ public class GDLLoader extends GDLBaseListener {
     e.setSourceVertexId(getSourceVertexId(isIncoming));
     e.setTargetVertexId(getTargetVertexId(isIncoming));
 
-    String label = (hasBody ? getLabel(edgeBodyContext.header()) : null);
-    e.setLabel(label != null ? label : defaultEdgeLabel);
 
-    e.setProperties(hasBody ? getProperties(edgeBodyContext.properties()) : null);
+    if(hasBody) {
+      String label = getLabel(edgeBodyContext.header());
+      e.setLabel(label != null ? label : defaultEdgeLabel);
+      e.setProperties(getProperties(edgeBodyContext.properties()));
+      e.setLengthRange(parseEdgeLengthContext(edgeBodyContext.edgeLength()));
+    }
 
     return e;
   }
@@ -400,7 +402,6 @@ public class GDLLoader extends GDLBaseListener {
       graphElement.addToGraph(getNextGraphId());
     }
   }
-
 
   // --------------------------------------------------------------------------------------------
   //  Payload handlers
@@ -477,6 +478,38 @@ public class GDLLoader extends GDLBaseListener {
       return Float.parseFloat(text);
     }
     return null;
+  }
+
+  /**
+   * Parses an {@code EdgeLengthContext} and returns the indicated Range
+   *
+   * @param lengthCtx the edges length context
+   * @return edge length range
+   */
+  private Range<Integer> parseEdgeLengthContext(GDLParser.EdgeLengthContext lengthCtx) {
+    int lowerBound;
+    int upperBound;
+
+    if(lengthCtx != null) {
+      int children = lengthCtx.getChildCount();
+
+      if(children == 4) {
+        lowerBound = terminalNodeToInt(lengthCtx.IntegerLiteral(0));
+        upperBound = terminalNodeToInt(lengthCtx.IntegerLiteral(1));
+        return Range.closed(lowerBound,upperBound);
+
+      } else if(children == 3) {
+        upperBound = terminalNodeToInt(lengthCtx.IntegerLiteral(0));
+        return Range.atMost(upperBound);
+
+      } else if(children == 2){
+        lowerBound = terminalNodeToInt(lengthCtx.IntegerLiteral(0));
+        return Range.atLeast(lowerBound);
+      } else { return Range.all(); }
+
+    }
+
+    return Range.closed(1,1);
   }
 
   // --------------------------------------------------------------------------------------------
@@ -593,6 +626,16 @@ public class GDLLoader extends GDLBaseListener {
    */
   private Long getTargetVertexId(boolean isIncoming) {
     return isIncoming ? getLastSeenVertex().getId() : null;
+  }
+
+  /**
+   * Parses a terminal node to an integer.
+   *
+   * @param node the node which represents an integer
+   * @return the parsed integer
+   */
+  private int terminalNodeToInt(TerminalNode node) {
+    return Integer.parseInt(node.getText());
   }
 
   private Comparison buildComparisson(GDLParser.ComparisonExpressionContext ctx) {

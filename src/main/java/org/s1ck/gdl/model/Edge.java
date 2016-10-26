@@ -17,21 +17,17 @@
 
 package org.s1ck.gdl.model;
 
+import com.google.common.collect.Range;
+
 public class Edge extends GraphElement {
   private Long sourceVertexId;
 
   private Long targetVertexId;
 
-  private boolean hasVariableLength;
-
-  private int lowerBound;
-
-  private int upperBound;
+  private Range<Integer> lengthRange = Range.closed(1,1);
 
   public Edge() {
     super();
-    this.lowerBound = 1;
-    this.upperBound = 1000;
   }
 
 
@@ -51,25 +47,21 @@ public class Edge extends GraphElement {
     this.targetVertexId = targetVertexId;
   }
 
-  public void setHasVariableLength(boolean val) {
-    this.hasVariableLength = val;
+
+  public Range<Integer> getLengthRange() { return this.lengthRange; }
+
+  public void setLengthRange(Range<Integer> range) {
+    this.lengthRange = range;
   }
 
-  public boolean gethasVariableLength() {
-    return this.hasVariableLength;
+  public boolean hasVariableLength() {
+    return !(lengthRange.equals(Range.closed(1,1)));
   }
 
-  public int getLowerBound() { return lowerBound; }
+  public int getLowerBound() { return lengthRange.lowerEndpoint(); }
 
-  public void setLowerBound(int lowerBound) {
-    this.lowerBound = lowerBound;
-  }
+  public int getUpperBound() { return lengthRange.upperEndpoint(); }
 
-  public int getUpperBound() { return upperBound; }
-
-  public void setUpperBound(int upperBound) {
-    this.upperBound = upperBound;
-  }
 
   @Override
   public String toString() {
@@ -78,13 +70,12 @@ public class Edge extends GraphElement {
       ", label='" + getLabel() + '\'' +
       ", properties=" + getProperties() +
       ", sourceVertexId=" + sourceVertexId +
-      ", targetVertexId=" + targetVertexId +
-      ", hasVariableLength=" + hasVariableLength;
+      ", targetVertexId=" + targetVertexId;
 
-    if(hasVariableLength) {
+    if(hasVariableLength()) {
       out = out +
-        ", lowerBound=" + lowerBound +
-        ", upperBound=" + upperBound;
+        ", lowerBound=" + getLowerBound() +
+        ", upperBound=" + getUpperBound();
     }
 
     out = out + ", graphs=" + getGraphs() +
