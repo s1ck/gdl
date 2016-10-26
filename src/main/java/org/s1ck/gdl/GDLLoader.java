@@ -192,6 +192,14 @@ public class GDLLoader extends GDLBaseListener {
   }
 
 
+  /**
+   * Called when the parser enters a query context, which means that we begin
+   * a new query.
+   *
+   * Ensures that we have exactly one graph object
+   *
+   * @param ctx query context
+   */
   @Override
   public void enterQuery(GDLParser.QueryContext ctx) {
     Graph g = new Graph();
@@ -286,6 +294,14 @@ public class GDLLoader extends GDLBaseListener {
     currentFilters.clear();
   }
 
+  /**
+   * Called when the parser leaves a WHERE expression
+   *
+   * Takes care that the filter build from the current expression is stored
+   * in the graph and, if needed, merged with previouse expressions
+   *
+   * @param ctx where context
+   */
   @Override
   public void exitWhere(GDLParser.WhereContext ctx) {
     Graph graph = lastSeenGraph;
@@ -298,13 +314,24 @@ public class GDLLoader extends GDLBaseListener {
     }
   }
 
+  /**
+   * Builds a {@code Comparison} expression from comparison context
+   *
+   * @param ctx comparison context
+   */
   @Override
   public void enterComparisonExpression(GDLParser
     .ComparisonExpressionContext ctx) {
 
-    currentFilters.add(buildComparisson(ctx));
+    currentFilters.add(buildComparison(ctx));
   }
 
+  /**
+   * Called when we leave an Expression4.
+   *
+   * Checks if the expression is preceded by a Not and adds the filter in that case.
+   * @param ctx expression context
+   */
   @Override
   public void exitExpression4(GDLParser.Expression4Context ctx) {
     if (!ctx.NOT().isEmpty()) {
@@ -313,6 +340,12 @@ public class GDLLoader extends GDLBaseListener {
     }
   }
 
+  /**
+   * Called when parser leaves Expression5
+   *
+   * Checks if we have conjunctions like AND, OR, XOR and builds filters for them.
+   * @param ctx expression context
+   */
   @Override
   public void exitExpression5(GDLParser.Expression5Context ctx) {
     List<TerminalNode> conjuctions = ctx.Conjunction();
@@ -650,19 +683,29 @@ public class GDLLoader extends GDLBaseListener {
     return Integer.parseInt(node.getText());
   }
 
-  private Comparison buildComparisson(GDLParser.ComparisonExpressionContext ctx) {
+  /**
+   * Builds a Comparison filter operator from comparison context
+   *
+   * @param ctx the comparisson context that will be parsed
+   * @return parsed operator
+   */
+  private Comparison buildComparison(GDLParser.ComparisonExpressionContext ctx) {
     ComparableExpression lhs = buildPropertySelector(ctx.propertyLookup(0));
 
     ComparableExpression rhs = ctx.literal() != null ?
-      new Literal(getPropertyValue(ctx.literal())) :
-      buildPropertySelector(ctx.propertyLookup(1));
+      new Literal(getPropertyValue(ctx.literal())) : buildPropertySelector(ctx.propertyLookup(1));
 
-    Comparison.Comparator comp = Comparison.Comparator.fromString(
-      ctx .ComparisonOP().getText());
+    Comparison.Comparator comp = Comparison.Comparator.fromString(ctx .ComparisonOP().getText());
 
     return new Comparison(lhs,comp,rhs);
   }
 
+  /**
+   * Builds an property selector expression like alice.age
+   *
+   * @param ctx the property lookup context that will be parsed
+   * @return parsed property selector expression
+   */
   private PropertySelector buildPropertySelector(GDLParser
     .PropertyLookupContext ctx) {
 
