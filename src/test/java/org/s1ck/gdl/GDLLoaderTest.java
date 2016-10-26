@@ -266,7 +266,7 @@ public class GDLLoaderTest {
 
   @Test
   public void readFragmentedGraphTest() {
-    GDLLoader loader = getLoaderFromGDLString("g[()];g[()]");
+    GDLLoader loader = getLoaderFromGDLString("g[()],g[()]");
     validateCollectionSizes(loader, 1, 2, 0);
     validateCacheSizes(loader, 1, 0, 0);
   }
@@ -359,7 +359,7 @@ public class GDLLoaderTest {
 
   @Test
   public void testGraphsWithOverlappingContent() {
-    GDLLoader loader = getLoaderFromGDLString("g1[(alice)-[r]->(bob)];g2[(alice)-[s]->(bob)]");
+    GDLLoader loader = getLoaderFromGDLString("g1[(alice)-[r]->(bob)],g2[(alice)-[s]->(bob)]");
     validateCollectionSizes(loader, 2, 2, 2);
     validateCacheSizes(loader, 2, 2, 2);
     Graph g1 = loader.getGraphCache().get("g1");
@@ -389,7 +389,7 @@ public class GDLLoaderTest {
   @Test
   public void testFragmentedGraphWithVariables() {
     GDLLoader loader = getLoaderFromGDLString(
-      "g[(a)-->(b)];g[(a)-[e]->(b)];g[(a)-[f]->(b)];h[(a)-[f]->(b)]");
+      "g[(a)-->(b)],g[(a)-[e]->(b)],g[(a)-[f]->(b)],h[(a)-[f]->(b)]");
     validateCollectionSizes(loader, 2, 2, 3);
     validateCacheSizes(loader, 2, 2, 2);
 
@@ -434,7 +434,7 @@ public class GDLLoaderTest {
 
   @Test
   public void readNullValueTest() {
-    GDLLoader loader = getLoaderFromGDLString("(v{name: NULL})");
+    GDLLoader loader = getLoaderFromGDLString("(v{name:NULL})");
     validateCollectionSizes(loader, 0, 1, 0);
     validateCacheSizes(loader, 0, 1, 0);
     Vertex a = loader.getVertexCache().get("v");
@@ -546,7 +546,7 @@ public class GDLLoaderTest {
 
     @Override
     public String toString() {
-      return String.format("%s: %s", getKey(), getValue());
+      return String.format("%s:%s", getKey(), getValue());
     }
   }
 

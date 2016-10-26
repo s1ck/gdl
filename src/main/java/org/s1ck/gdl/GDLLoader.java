@@ -32,7 +32,7 @@ import org.s1ck.gdl.model.operators.Filter;
 import org.s1ck.gdl.model.operators.Not;
 import org.s1ck.gdl.model.operators.Or;
 import org.s1ck.gdl.model.operators.Xor;
-import org.s1ck.gdl.model.operators.comparables.Comparable;
+import org.s1ck.gdl.model.operators.comparables.ComparableExpression;
 import org.s1ck.gdl.model.operators.comparables.Literal;
 import org.s1ck.gdl.model.operators.comparables.PropertySelector;
 
@@ -94,6 +94,7 @@ public class GDLLoader extends GDLBaseListener {
     graphs = Sets.newHashSet();
     vertices = Sets.newHashSet();
     edges = Sets.newHashSet();
+
 
     currentFilters = new ArrayDeque<>();
   }
@@ -188,6 +189,17 @@ public class GDLLoader extends GDLBaseListener {
   @Override
   public void exitGraph(GDLParser.GraphContext ctx) {
     inGraph = false;
+  }
+
+
+  @Override
+  public void enterQuery(GDLParser.QueryContext ctx) {
+    Graph g = new Graph();
+    g.setId(getNewGraphId());
+    graphs.add(g);
+    graphCache.put("query", g);
+    currentGraphId = g.getId();
+    lastSeenGraph = g;
   }
 
   /**
@@ -427,8 +439,8 @@ public class GDLLoader extends GDLBaseListener {
    * @return element label or {@code null} if context was null
    */
   private String getLabel(GDLParser.HeaderContext header) {
-    if (header != null && header.Label() != null) {
-      return header.Label().getText().substring(1);
+    if (header != null && header.label() != null) {
+      return header.label().getText().substring(1);
     }
     return null;
   }
@@ -639,9 +651,9 @@ public class GDLLoader extends GDLBaseListener {
   }
 
   private Comparison buildComparisson(GDLParser.ComparisonExpressionContext ctx) {
-    Comparable lhs = buildPropertySelector(ctx.propertyLookup(0));
+    ComparableExpression lhs = buildPropertySelector(ctx.propertyLookup(0));
 
-    Comparable rhs = ctx.literal() != null ?
+    ComparableExpression rhs = ctx.literal() != null ?
       new Literal(getPropertyValue(ctx.literal())) :
       buildPropertySelector(ctx.propertyLookup(1));
 

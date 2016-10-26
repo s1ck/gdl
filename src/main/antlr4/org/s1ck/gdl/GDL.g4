@@ -24,12 +24,12 @@ database
     ;
 
 elementList
-    : (element ','?)*
+    : (definition ','?)+ | query
     ;
 
-element
+definition
     : graph
-    | query
+    | path
     ;
 
 graph
@@ -65,27 +65,24 @@ edgeLength
     : '*' IntegerLiteral? ('..' IntegerLiteral)?
     ;
 
+
 header
-    : Identifier? Label?
+    : Identifier? label?
     ;
 
 properties
     : '{' (property (',' property)*)? '}'
     ;
 
+
 property
-    : Identifier ':' literal
-    ;
-
-literal
-    : StringLiteral
-    | BooleanLiteral
-    | IntegerLiteral
-    | FloatingPointLiteral
-    | Null
+    : Identifier Colon literal
     ;
 
 
+label
+    : Colon (Characters | Identifier)
+    ;
 
 where
     : ('where' | 'WHERE') expression
@@ -115,10 +112,18 @@ propertyLookup
     : Identifier '.' Identifier
     ;
 
+literal
+    : StringLiteral
+    | BooleanLiteral
+    | IntegerLiteral
+    | FloatingPointLiteral
+    | Null
+    ;
+
+
 //-------------------------------
 // String Literal
 //-------------------------------
-
 StringLiteral
     : '"' ('\\"'|.)*? '"'
     ;
@@ -126,7 +131,6 @@ StringLiteral
 //-------------------------------
 // Boolean Literal
 //-------------------------------
-
 BooleanLiteral
     : 'true'
     | 'TRUE'
@@ -137,7 +141,6 @@ BooleanLiteral
 //-------------------------------
 // Integer Literal
 //-------------------------------
-
 IntegerLiteral
     : DecimalIntegerLiteral
     ;
@@ -160,7 +163,6 @@ IntegerTypeSuffix
 //-------------------------------
 // Floating Point Literal
 //-------------------------------
-
 FloatingPointLiteral
     :   DecimalFloatingPointLiteral
     ;
@@ -183,18 +185,13 @@ FloatTypeSuffix
     ;
 
 //-------------------------------
-// Label & Identifier
+// Identifier
 //-------------------------------
 
-Label
-    : Colon UpperCaseLetter (LowerCaseLetter | UpperCaseLetter)*  // graph and vertex label (e.g. Person, BlogPost)
-    | Colon LowerCaseLetter (LowerCaseLetter | UpperCaseLetter)*  // edge label (e.g. knows, hasInterest)
-    ;
 
 Identifier
     : (UnderScore | LowerCaseLetter) (UnderScore | Character)*   // e.g. _temp, _0, t_T, g0, alice, birthTown
     ;
-
 
 //-------------------------------
 // Comparison
@@ -227,34 +224,32 @@ ComparisonOP
 // General fragments
 //-------------------------------
 
-fragment
+Null
+    : 'NULL'
+    ;
+
 Characters
     : Character+
     ;
 
-fragment
 Character
     : UpperCaseLetter
     | LowerCaseLetter
     | Digit
     ;
 
-fragment
 UpperCaseLetters
     : UpperCaseLetter+
     ;
 
-fragment
 UpperCaseLetter
     : [A-Z]
     ;
 
-fragment
 LowerCaseLetters
     : LowerCaseLetter+
     ;
 
-fragment
 LowerCaseLetter
     : [a-z]
     ;
@@ -284,9 +279,6 @@ Colon
     : ':'
     ;
 
-Null
-    : 'NULL'
-    ;
 
 PERIOD
     : '.'

@@ -16,6 +16,8 @@
  */
 package org.s1ck.gdl.model.operators;
 
+import org.s1ck.gdl.model.operators.comparables.ComparableExpression;
+
 public class Comparison extends Filter {
 
   public enum Comparator {
@@ -61,10 +63,11 @@ public class Comparison extends Filter {
   }
 
   private Comparator comparator;
-  private Comparable lhs;
-  private Comparable rhs;
+  private ComparableExpression lhs;
+  private ComparableExpression rhs;
 
-  public Comparison(Comparable lhs, Comparator comparator, Comparable rhs) {
+  public Comparison(ComparableExpression lhs, Comparator comparator,
+    ComparableExpression rhs) {
     this.lhs = lhs;
     this.rhs = rhs;
     this.comparator = comparator;
