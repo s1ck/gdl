@@ -73,6 +73,8 @@ public class GDLLoader extends GDLBaseListener {
   private Graph lastSeenGraph;
   private Vertex lastSeenVertex;
   private Edge lastSeenEdge;
+
+  // used to keep track of filters that are yet to be handled
   private ArrayDeque<Filter> currentFilters;
 
   /**
@@ -191,7 +193,6 @@ public class GDLLoader extends GDLBaseListener {
     inGraph = false;
   }
 
-
   /**
    * Called when the parser enters a query context, which means that we begin
    * a new query.
@@ -258,37 +259,6 @@ public class GDLLoader extends GDLBaseListener {
     processEdge(outgoingEdgeContext.edgeBody(), false);
   }
 
-  /**
-   * Processes incoming and outgoing edges.
-   *
-   * Checks if the edge has already been created (using its variable). If not, a new edge is created
-   * and added to the edge cache.
-   *
-   * @param edgeBodyContext edge body context
-   * @param isIncoming      true, if edge is incoming, false for outgoing edge
-   */
-  private void processEdge(GDLParser.EdgeBodyContext edgeBodyContext, boolean isIncoming) {
-    String variable = null;
-    Edge e;
-
-    if (edgeBodyContext != null) {
-      variable = getVariable(edgeBodyContext.header());
-    }
-    if (variable != null && edgeCache.containsKey(variable)) {
-      e = edgeCache.get(variable);
-    } else {
-      e = initNewEdge(edgeBodyContext, isIncoming);
-      e.setVariable(variable);
-      edges.add(e);
-
-      if (variable != null) {
-        edgeCache.put(variable, e);
-      }
-    }
-    updateGraphElement(e);
-    setLastSeenEdge(e);
-  }
-
   @Override
   public void enterWhere(GDLParser.WhereContext ctx) {
     currentFilters.clear();
@@ -320,9 +290,7 @@ public class GDLLoader extends GDLBaseListener {
    * @param ctx comparison context
    */
   @Override
-  public void enterComparisonExpression(GDLParser
-    .ComparisonExpressionContext ctx) {
-
+  public void enterComparisonExpression(GDLParser.ComparisonExpressionContext ctx) {
     currentFilters.add(buildComparison(ctx));
   }
 
@@ -335,8 +303,8 @@ public class GDLLoader extends GDLBaseListener {
   @Override
   public void exitExpression4(GDLParser.Expression4Context ctx) {
     if (!ctx.NOT().isEmpty()) {
-     Filter not = new Not(currentFilters.pop());
-     currentFilters.add(not);
+      Filter not = new Not(currentFilters.pop());
+      currentFilters.add(not);
     }
   }
 
@@ -356,21 +324,47 @@ public class GDLLoader extends GDLBaseListener {
       Filter lhs = currentFilters.removeLast();
 
       switch(conjuctions.get(i).getText().toLowerCase()) {
-      case "and": conjunctionReuse = new And(lhs,rhs);
-                  break;
-      case "or":  conjunctionReuse = new Or(lhs,rhs);
-                  break;
-      default: conjunctionReuse = new Xor(lhs,rhs);
-                  break;
+        case "and": conjunctionReuse = new And(lhs, rhs);
+          break;
+        case "or":  conjunctionReuse = new Or(lhs, rhs);
+          break;
+        default: conjunctionReuse = new Xor(lhs, rhs);
+          break;
       }
-
       currentFilters.add(conjunctionReuse);
     }
   }
 
+  /**
+   * Processes incoming and outgoing edges.
+   *
+   * Checks if the edge has already been created (using its variable). If not, a new edge is created
+   * and added to the edge cache.
+   *
+   * @param edgeBodyContext edge body context
+   * @param isIncoming      true, if edge is incoming, false for outgoing edge
+   */
+  private void processEdge(GDLParser.EdgeBodyContext edgeBodyContext, boolean isIncoming) {
+    String variable = null;
+    Edge e;
 
+    if (edgeBodyContext != null) {
+      variable = getVariable(edgeBodyContext.header());
+    }
+    if (variable != null && edgeCache.containsKey(variable)) {
+      e = edgeCache.get(variable);
+    } else {
+      e = initNewEdge(edgeBodyContext, isIncoming);
+      e.setVariable(variable);
+      edges.add(e);
 
-
+      if (variable != null) {
+        edgeCache.put(variable, e);
+      }
+    }
+    updateGraphElement(e);
+    setLastSeenEdge(e);
+  }
 
   // --------------------------------------------------------------------------------------------
   //  Init handlers
@@ -422,14 +416,12 @@ public class GDLLoader extends GDLBaseListener {
     e.setSourceVertexId(getSourceVertexId(isIncoming));
     e.setTargetVertexId(getTargetVertexId(isIncoming));
 
-
     if(hasBody) {
       String label = getLabel(edgeBodyContext.header());
       e.setLabel(label != null ? label : defaultEdgeLabel);
       e.setProperties(getProperties(edgeBodyContext.properties()));
       e.setLengthRange(parseEdgeLengthContext(edgeBodyContext.edgeLength()));
     }
-
     return e;
   }
 
@@ -541,7 +533,7 @@ public class GDLLoader extends GDLBaseListener {
       if(children == 4) {
         lowerBound = terminalNodeToInt(lengthCtx.IntegerLiteral(0));
         upperBound = terminalNodeToInt(lengthCtx.IntegerLiteral(1));
-        return Range.closed(lowerBound,upperBound);
+        return Range.closed(lowerBound, upperBound);
 
       } else if(children == 3) {
         upperBound = terminalNodeToInt(lengthCtx.IntegerLiteral(0));
@@ -553,8 +545,47 @@ public class GDLLoader extends GDLBaseListener {
       } else { return Range.all(); }
 
     }
+    return Range.closed(1, 1);
+  }
 
-    return Range.closed(1,1);
+  /**
+   * Builds a Comparison filter operator from comparison context
+   *
+   * @param ctx the comparisson context that will be parsed
+   * @return parsed operator
+   */
+  private Comparison buildComparison(GDLParser.ComparisonExpressionContext ctx) {
+    ComparableExpression lhs = buildPropertySelector(ctx.propertyLookup(0));
+
+    ComparableExpression rhs = ctx.literal() != null ?
+            new Literal(getPropertyValue(ctx.literal())) : buildPropertySelector(ctx.propertyLookup(1));
+
+    Comparison.Comparator comp = Comparison.Comparator.fromString(ctx .ComparisonOP().getText());
+
+    return new Comparison(lhs, comp, rhs);
+  }
+
+  /**
+   * Builds an property selector expression like alice.age
+   *
+   * @param ctx the property lookup context that will be parsed
+   * @return parsed property selector expression
+   */
+  private PropertySelector buildPropertySelector(GDLParser.PropertyLookupContext ctx) {
+    GraphElement element;
+
+    String identifier = ctx.Identifier(0).getText();
+    String property = ctx.Identifier(1).getText();
+
+    if(vertexCache.containsKey(identifier)) {
+      element = vertexCache.get(identifier);
+    }
+    else if(edgeCache.containsKey(identifier)) {
+      element = edgeCache.get(identifier);
+    }
+    else { return null; } //TODO raise reference error
+
+    return new PropertySelector(element,property);
   }
 
   // --------------------------------------------------------------------------------------------
@@ -681,47 +712,5 @@ public class GDLLoader extends GDLBaseListener {
    */
   private int terminalNodeToInt(TerminalNode node) {
     return Integer.parseInt(node.getText());
-  }
-
-  /**
-   * Builds a Comparison filter operator from comparison context
-   *
-   * @param ctx the comparisson context that will be parsed
-   * @return parsed operator
-   */
-  private Comparison buildComparison(GDLParser.ComparisonExpressionContext ctx) {
-    ComparableExpression lhs = buildPropertySelector(ctx.propertyLookup(0));
-
-    ComparableExpression rhs = ctx.literal() != null ?
-      new Literal(getPropertyValue(ctx.literal())) : buildPropertySelector(ctx.propertyLookup(1));
-
-    Comparison.Comparator comp = Comparison.Comparator.fromString(ctx .ComparisonOP().getText());
-
-    return new Comparison(lhs,comp,rhs);
-  }
-
-  /**
-   * Builds an property selector expression like alice.age
-   *
-   * @param ctx the property lookup context that will be parsed
-   * @return parsed property selector expression
-   */
-  private PropertySelector buildPropertySelector(GDLParser
-    .PropertyLookupContext ctx) {
-
-    GraphElement element;
-
-    String identifier = ctx.Identifier(0).getText();
-    String property = ctx.Identifier(1).getText();
-
-    if(vertexCache.containsKey(identifier)) {
-      element = vertexCache.get(identifier);
-    }
-    else if(edgeCache.containsKey(identifier)) {
-      element = edgeCache.get(identifier);
-    }
-    else { return null; } //TODO raise reference error
-    
-    return new PropertySelector(element,property);
   }
 }

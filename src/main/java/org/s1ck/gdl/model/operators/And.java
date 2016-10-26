@@ -14,9 +14,10 @@
  * You should have received a copy of the GNU General Public License
  * along with GDL.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package org.s1ck.gdl.model.operators;
 
-public class And extends Filter{
+public class And extends Filter {
 
   private Filter lhs;
   private Filter rhs;

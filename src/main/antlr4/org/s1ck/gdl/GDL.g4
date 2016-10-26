@@ -65,7 +65,6 @@ edgeLength
     : '*' IntegerLiteral? ('..' IntegerLiteral)?
     ;
 
-
 header
     : Identifier? label?
     ;
@@ -74,11 +73,9 @@ properties
     : '{' (property (',' property)*)? '}'
     ;
 
-
 property
     : Identifier Colon literal
     ;
-
 
 label
     : Colon (Characters | Identifier)
@@ -96,7 +93,6 @@ expression4 : ( NOT )* expression2 ;
 
 expression2 : atom ;
 
-
 atom : parenthesizedExpression
      | comparisonExpression
      ;
@@ -106,7 +102,6 @@ comparisonExpression :
                             ;
 
 parenthesizedExpression : '(' expression ')' ;
-
 
 propertyLookup
     : Identifier '.' Identifier
@@ -119,7 +114,6 @@ literal
     | FloatingPointLiteral
     | Null
     ;
-
 
 //-------------------------------
 // String Literal

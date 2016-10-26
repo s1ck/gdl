@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with GDL.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package org.s1ck.gdl.model.operators;
 
 import org.s1ck.gdl.model.operators.comparables.ComparableExpression;
@@ -26,48 +27,33 @@ public class Comparison extends Filter {
     public static Comparator fromString(String str) {
       switch (str) {
         case "=":   return EQ;
-
         case "!=":  return NEQ;
-
         case ">":   return GT;
-
         case "<":   return LT;
-
         case ">=":  return GTE;
-
         case "<=":  return LTE;
-
         default:    return null;
-
       }
     }
 
     public String toString() {
       switch (this) {
-      case EQ:   return "=";
-
-      case NEQ:  return "!=";
-
-      case GT:   return ">";
-
-      case LT:   return "<";
-
-      case GTE:  return ">=";
-
-      case LTE:  return "<=";
-
-      default:    return null;
-
+        case EQ:   return "=";
+        case NEQ:  return "!=";
+        case GT:   return ">";
+        case LT:   return "<";
+        case GTE:  return ">=";
+        case LTE:  return "<=";
+        default:   return null;
       }
     }
   }
 
-  private Comparator comparator;
   private ComparableExpression lhs;
   private ComparableExpression rhs;
+  private Comparator comparator;
 
-  public Comparison(ComparableExpression lhs, Comparator comparator,
-    ComparableExpression rhs) {
+  public Comparison(ComparableExpression lhs, Comparator comparator, ComparableExpression rhs) {
     this.lhs = lhs;
     this.rhs = rhs;
     this.comparator = comparator;

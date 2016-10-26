@@ -25,7 +25,6 @@ public class GDLLoaderTest {
   //  Vertex only tests
   // --------------------------------------------------------------------------------------------
 
-
   @Test
   public void readVertexTest() {
     GDLLoader loader = getLoaderFromGDLString("()");
@@ -154,7 +153,7 @@ public class GDLLoaderTest {
 
     assertEquals("edge should not have variable length",
       false,e.hasVariableLength());
-    assertEquals("wrong length range", Range.closed(1,1),e.getLengthRange());
+    assertEquals("wrong length range", Range.closed(1,1), e.getLengthRange());
   }
 
   @Test
@@ -163,7 +162,7 @@ public class GDLLoaderTest {
     Edge e = loader.getEdgeCache().get("e");
 
     assertEquals("edge should have variable length",true,e.hasVariableLength());
-    assertEquals("wrong length range", Range.atLeast(2),e.getLengthRange());
+    assertEquals("wrong length range", Range.atLeast(2), e.getLengthRange());
   }
 
   @Test
@@ -172,7 +171,7 @@ public class GDLLoaderTest {
     Edge e = loader.getEdgeCache().get("e");
 
     assertEquals("edge should have variable length",true,e.hasVariableLength());
-    assertEquals("wrong length range", Range.atMost(5),e.getLengthRange());
+    assertEquals("wrong length range", Range.atMost(5), e.getLengthRange());
   }
 
   @Test
@@ -181,21 +180,17 @@ public class GDLLoaderTest {
     Edge e = loader.getEdgeCache().get("e");
 
     assertEquals("edge should have variable length",true,e.hasVariableLength());
-    assertEquals("wrong length range", Range.closed(3,5),e.getLengthRange());
+    assertEquals("wrong length range", Range.closed(3, 5), e.getLengthRange());
   }
 
-
   @Test
-  public void readEdgeWithunboundLengthTest() {
+  public void readEdgeWithUnboundLengthTest() {
     GDLLoader loader = getLoaderFromGDLString("()-[e*]->()");
     Edge e = loader.getEdgeCache().get("e");
 
     assertEquals("edge should have variable length",true,e.hasVariableLength());
-    assertEquals("wrong length range", Range.all(),e.getLengthRange());
+    assertEquals("wrong length range", Range.all(), e.getLengthRange());
   }
-
-
-
 
   // --------------------------------------------------------------------------------------------
   //  Graph only tests
@@ -296,11 +291,9 @@ public class GDLLoaderTest {
       (Long) v2.getId(), e2.getTargetVertexId());
   }
 
-
   // --------------------------------------------------------------------------------------------
   //  WHERE clause tests
   // --------------------------------------------------------------------------------------------
-
 
   @Test
   public void testSimpleWhereClause() {
@@ -318,21 +311,17 @@ public class GDLLoaderTest {
 
   @Test
   public void testComplexWhereClause() {
-    String query = "MATCH (alice)-[r]->(bob)" +
-      "WHERE alice.age > bob.age OR (alice.age < 30 AND bob.name = \"Bob\") " +
-            "AND alice.id != bob.id";
+    String query = "MATCH (alice)-[r]->(bob) WHERE alice.age > bob.age OR (alice.age < 30 AND bob.name = \"Bob\") " +
+      "AND alice.id != bob.id";
 
     GDLLoader loader = getLoaderFromGDLString(query);
     validateCollectionSizes(loader, 1, 2, 1);
     Graph graph = (Graph) loader.getGraphs().toArray()[0];
 
-
     assertEquals("wrong filter extracted",
       "(alice.age > bob.age OR ((alice.age < 30 AND bob.name = Bob) AND alice.id != bob.id))",
       graph.getFilter().toString());
   }
-
-
 
   // --------------------------------------------------------------------------------------------
   //  Combined tests
@@ -415,16 +404,14 @@ public class GDLLoaderTest {
 
   @Test
   public void testCompleteQuery() {
-    GDLLoader loader = getLoaderFromGDLString(
-      "MATCH (p:Person)-[e1:likes]->(other:Person) WHERE p.age >= other.age");
+    GDLLoader loader = getLoaderFromGDLString("MATCH (p:Person)-[e1:likes]->(other:Person) WHERE p.age >= other.age");
 
     validateCollectionSizes(loader, 1, 2, 1);
 
     Graph graph = (Graph) loader.getGraphs().toArray()[0];
     Vertex p = loader.getVertexCache().get("p");
 
-    assertEquals("filters do not match","p.age >= other.age",
-      graph.getFilter().toString());
+    assertEquals("filters do not match","p.age >= other.age",graph.getFilter().toString());
     assertEquals("vertex p has wrong label","Person",p.getLabel());
   }
 

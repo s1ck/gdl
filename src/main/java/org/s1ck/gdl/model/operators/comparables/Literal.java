@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with GDL.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package org.s1ck.gdl.model.operators.comparables;
 
 public class Literal extends ComparableExpression {

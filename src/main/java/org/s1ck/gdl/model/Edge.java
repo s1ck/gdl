@@ -24,12 +24,15 @@ public class Edge extends GraphElement {
 
   private Long targetVertexId;
 
+  /**
+   * Stores the length of the edge.
+   * This is used for expressions with variable path lengths.
+   */
   private Range<Integer> lengthRange = Range.closed(1,1);
 
   public Edge() {
     super();
   }
-
 
   public Long getSourceVertexId() {
     return sourceVertexId;
@@ -62,7 +65,6 @@ public class Edge extends GraphElement {
 
   public int getUpperBound() { return lengthRange.upperEndpoint(); }
 
-
   @Override
   public String toString() {
     String out = "Edge{" +
@@ -78,9 +80,8 @@ public class Edge extends GraphElement {
         ", upperBound=" + getUpperBound();
     }
 
-    out = out + ", graphs=" + getGraphs() +
-      '}';
+    out = out + ", graphs=" + getGraphs() + '}';
 
-      return out;
+    return out;
   }
 }
