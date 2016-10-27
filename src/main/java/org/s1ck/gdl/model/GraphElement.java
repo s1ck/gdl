@@ -22,6 +22,7 @@ import com.google.common.collect.Sets;
 import java.util.Set;
 
 public class GraphElement extends Element {
+
   private Set<Long> graphs;
 
   public GraphElement() {

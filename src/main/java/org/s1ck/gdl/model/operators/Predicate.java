@@ -22,36 +22,46 @@ import org.s1ck.gdl.model.operators.comparables.Literal;
 import org.s1ck.gdl.model.operators.comparables.PropertySelector;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
-public abstract class Filter {
+/**
+ * Represents a predicate defined on a query vertex or edge.
+ */
+public interface Predicate {
 
   /**
-   * This builds a filter from a GraphElement, extracting parameters and labels into filters
+   * Builds predicates from label and property definitions embedded at an
+   * {@link GraphElement}.
+   *
    * @param element the element to extract from
-   * @return list of extracted filters
+   * @return extracted predicates
    */
-  public static ArrayList<Filter> fromGraphElement(GraphElement element) {
-    ArrayList<Filter> filters = new ArrayList<>();
+  static List<Predicate> fromGraphElement(GraphElement element) {
+    ArrayList<Predicate> predicates = new ArrayList<>();
 
-    Filter filter;
+    Predicate predicate;
 
     if(element.getLabel() != null) {
-      filter = new Comparison(new PropertySelector(element,"label"), Comparison.Comparator.EQ, new Literal(element.getLabel()));
-      filters.add(filter);
+      predicate = new Comparison(
+        new PropertySelector(element,"label"),
+        Comparison.Comparator.EQ,
+        new Literal(element.getLabel()));
+
+      predicates.add(predicate);
     }
 
     if(element.getProperties() != null) {
       for (Map.Entry<String, Object> entry : element.getProperties().entrySet()) {
-        filter = new Comparison(
+        predicate = new Comparison(
                 new PropertySelector(element, entry.getKey()),
                 Comparison.Comparator.EQ,
                 new Literal(entry.getValue())
         );
 
-        filters.add(filter);
+        predicates.add(predicate);
       }
     }
-    return filters;
+    return predicates;
   }
 }

@@ -19,7 +19,7 @@ package org.s1ck.gdl.model.operators;
 
 import org.s1ck.gdl.model.operators.comparables.ComparableExpression;
 
-public class Comparison extends Filter {
+public class Comparison implements Predicate {
 
   public enum Comparator {
     EQ, NEQ, GT, LT, GTE, LTE;

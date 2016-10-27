@@ -17,12 +17,15 @@
 
 package org.s1ck.gdl.model.operators;
 
-public class And extends Filter {
+public class And implements Predicate {
 
-  private Filter lhs;
-  private Filter rhs;
+  // left hand side
+  private Predicate lhs;
 
-  public And(Filter lhs, Filter rhs) {
+  // right hand side
+  private Predicate rhs;
+
+  public And(Predicate lhs, Predicate rhs) {
     this.lhs = lhs;
     this.rhs = rhs;
   }

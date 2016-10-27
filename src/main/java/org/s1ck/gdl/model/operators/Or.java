@@ -17,12 +17,15 @@
 
 package org.s1ck.gdl.model.operators;
 
-public class Or extends Filter {
+public class Or implements Predicate {
 
-  private Filter lhs;
-  private Filter rhs;
+  // left hand side
+  private Predicate lhs;
 
-  public Or(Filter lhs, Filter rhs) {
+  // right hand side
+  private Predicate rhs;
+
+  public Or(Predicate lhs, Predicate rhs) {
     this.lhs = lhs;
     this.rhs = rhs;
   }

@@ -28,7 +28,7 @@ public class Edge extends GraphElement {
    * Stores the length of the edge.
    * This is used for expressions with variable path lengths.
    */
-  private Range<Integer> lengthRange = Range.closed(1,1);
+  private Range<Integer> range = Range.closed(1,1);
 
   public Edge() {
     super();
@@ -50,20 +50,19 @@ public class Edge extends GraphElement {
     this.targetVertexId = targetVertexId;
   }
 
+  public Range<Integer> getRange() { return this.range; }
 
-  public Range<Integer> getLengthRange() { return this.lengthRange; }
-
-  public void setLengthRange(Range<Integer> range) {
-    this.lengthRange = range;
+  public void setRange(Range<Integer> range) {
+    this.range = range;
   }
 
   public boolean hasVariableLength() {
-    return !(lengthRange.equals(Range.closed(1,1)));
+    return !(range.equals(Range.closed(1,1)));
   }
 
-  public int getLowerBound() { return lengthRange.lowerEndpoint(); }
+  public int getLowerBound() { return range.lowerEndpoint(); }
 
-  public int getUpperBound() { return lengthRange.upperEndpoint(); }
+  public int getUpperBound() { return range.upperEndpoint(); }
 
   @Override
   public String toString() {

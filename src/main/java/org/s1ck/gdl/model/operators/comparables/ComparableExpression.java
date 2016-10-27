@@ -17,5 +17,5 @@
 
 package org.s1ck.gdl.model.operators.comparables;
 
-public abstract class ComparableExpression {
+public interface ComparableExpression {
 }

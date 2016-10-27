@@ -25,7 +25,7 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 import org.s1ck.gdl.model.*;
 import org.s1ck.gdl.model.operators.And;
 import org.s1ck.gdl.model.operators.Comparison;
-import org.s1ck.gdl.model.operators.Filter;
+import org.s1ck.gdl.model.operators.Predicate;
 import org.s1ck.gdl.model.operators.Not;
 import org.s1ck.gdl.model.operators.Or;
 import org.s1ck.gdl.model.operators.Xor;
@@ -33,9 +33,15 @@ import org.s1ck.gdl.model.operators.comparables.ComparableExpression;
 import org.s1ck.gdl.model.operators.comparables.Literal;
 import org.s1ck.gdl.model.operators.comparables.PropertySelector;
 
-import java.util.*;
+import java.util.ArrayDeque;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Deque;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
-public class GDLLoader extends GDLBaseListener {
+class GDLLoader extends GDLBaseListener {
 
   // used to cache elements which are used with variables
   private final Map<String, Graph> graphCache;
@@ -46,7 +52,9 @@ public class GDLLoader extends GDLBaseListener {
   private final Set<Graph> graphs;
   private final Set<Vertex> vertices;
   private final Set<Edge> edges;
-  private Filter filter;
+
+  // stores the predicate tree for that query
+  private Predicate predicate;
 
   private final String defaultGraphLabel;
   private final String defaultVertexLabel;
@@ -62,13 +70,12 @@ public class GDLLoader extends GDLBaseListener {
   // holds the graph of the current graph
   private long currentGraphId;
 
-  // used to track vertex and edge ids for correct source and target
-  // binding
+  // used to track vertex and edge ids for correct source and target binding
   private Vertex lastSeenVertex;
   private Edge lastSeenEdge;
 
   // used to keep track of filter that are yet to be handled
-  private ArrayDeque<Filter> currentFilters;
+  private Deque<Predicate> currentPredicates;
 
   /**
    * Initializes a new GDL Loader.
@@ -78,21 +85,20 @@ public class GDLLoader extends GDLBaseListener {
    * @param defaultEdgeLabel    edge label to be used if no label is given in the GDL script
    */
   GDLLoader(String defaultGraphLabel, String defaultVertexLabel, String defaultEdgeLabel) {
-    this.defaultGraphLabel = defaultGraphLabel;
+    this.defaultGraphLabel  = defaultGraphLabel;
     this.defaultVertexLabel = defaultVertexLabel;
-    this.defaultEdgeLabel = defaultEdgeLabel;
+    this.defaultEdgeLabel   = defaultEdgeLabel;
 
-    graphCache = Maps.newHashMap();
+    graphCache  = Maps.newHashMap();
     vertexCache = Maps.newHashMap();
-    edgeCache = Maps.newHashMap();
+    edgeCache   = Maps.newHashMap();
 
-    graphs = Sets.newHashSet();
-    vertices = Sets.newHashSet();
-    edges = Sets.newHashSet();
-    filter = null;
+    graphs    = Sets.newHashSet();
+    vertices  = Sets.newHashSet();
+    edges     = Sets.newHashSet();
+    predicate = null;
 
-
-    currentFilters = new ArrayDeque<>();
+    currentPredicates = new ArrayDeque<>();
   }
 
   /**
@@ -127,7 +133,7 @@ public class GDLLoader extends GDLBaseListener {
      *
      * @return filter
      */
-  Filter getFilter() { return filter; }
+  Predicate getPredicate() { return predicate; }
   /**
    * Returns the graph cache that contains a mapping from variables used in the GDL script to
    * graph instances.
@@ -199,10 +205,10 @@ public class GDLLoader extends GDLBaseListener {
   @Override
   public void exitQuery(GDLParser.QueryContext ctx) {
     for(Vertex v : vertices) {
-      addFilter(Filter.fromGraphElement(v));
+      addPredicates(Predicate.fromGraphElement(v));
     }
     for(Edge e : edges) {
-      addFilter(Filter.fromGraphElement(e));
+      addPredicates(Predicate.fromGraphElement(e));
     }
   }
 
@@ -264,7 +270,7 @@ public class GDLLoader extends GDLBaseListener {
    */
   @Override
   public void exitWhere(GDLParser.WhereContext ctx) {
-    addFilter(new ArrayList<>(Arrays.asList(currentFilters.pop())));
+    addPredicates(Arrays.asList(currentPredicates.pop()));
   }
 
   /**
@@ -274,7 +280,7 @@ public class GDLLoader extends GDLBaseListener {
    */
   @Override
   public void enterComparisonExpression(GDLParser.ComparisonExpressionContext ctx) {
-    currentFilters.add(buildComparison(ctx));
+    currentPredicates.add(buildComparison(ctx));
   }
 
   /**
@@ -286,8 +292,8 @@ public class GDLLoader extends GDLBaseListener {
   @Override
   public void exitExpression4(GDLParser.Expression4Context ctx) {
     if (!ctx.NOT().isEmpty()) {
-      Filter not = new Not(currentFilters.pop());
-      currentFilters.add(not);
+      Predicate not = new Not(currentPredicates.pop());
+      currentPredicates.add(not);
     }
   }
 
@@ -299,14 +305,14 @@ public class GDLLoader extends GDLBaseListener {
    */
   @Override
   public void exitExpression5(GDLParser.Expression5Context ctx) {
-    List<TerminalNode> conjuctions = ctx.Conjunction();
-    Filter conjunctionReuse;
+    List<TerminalNode> conjunctions = ctx.Conjunction();
+    Predicate conjunctionReuse;
 
-    for(int i=conjuctions.size()-1;i>=0;i--) {
-      Filter rhs = currentFilters.removeLast();
-      Filter lhs = currentFilters.removeLast();
+    for(int i = conjunctions.size() - 1; i >= 0; i--) {
+      Predicate rhs = currentPredicates.removeLast();
+      Predicate lhs = currentPredicates.removeLast();
 
-      switch(conjuctions.get(i).getText().toLowerCase()) {
+      switch(conjunctions.get(i).getText().toLowerCase()) {
         case "and": conjunctionReuse = new And(lhs, rhs);
           break;
         case "or":  conjunctionReuse = new Or(lhs, rhs);
@@ -314,7 +320,7 @@ public class GDLLoader extends GDLBaseListener {
         default: conjunctionReuse = new Xor(lhs, rhs);
           break;
       }
-      currentFilters.add(conjunctionReuse);
+      currentPredicates.add(conjunctionReuse);
     }
   }
 
@@ -403,7 +409,7 @@ public class GDLLoader extends GDLBaseListener {
       String label = getLabel(edgeBodyContext.header());
       e.setLabel(label != null ? label : defaultEdgeLabel);
       e.setProperties(getProperties(edgeBodyContext.properties()));
-      e.setLengthRange(parseEdgeLengthContext(edgeBodyContext.edgeLength()));
+      e.setRange(parseEdgeLengthContext(edgeBodyContext.edgeLength()));
     }
     return e;
   }
@@ -534,14 +540,15 @@ public class GDLLoader extends GDLBaseListener {
   /**
    * Builds a Comparison filter operator from comparison context
    *
-   * @param ctx the comparisson context that will be parsed
+   * @param ctx the comparison context that will be parsed
    * @return parsed operator
    */
   private Comparison buildComparison(GDLParser.ComparisonExpressionContext ctx) {
     ComparableExpression lhs = buildPropertySelector(ctx.propertyLookup(0));
 
     ComparableExpression rhs = ctx.literal() != null ?
-            new Literal(getPropertyValue(ctx.literal())) : buildPropertySelector(ctx.propertyLookup(1));
+      new Literal(getPropertyValue(ctx.literal()))
+      : buildPropertySelector(ctx.propertyLookup(1));
 
     Comparison.Comparator comp = Comparison.Comparator.fromString(ctx .ComparisonOP().getText());
 
@@ -616,16 +623,16 @@ public class GDLLoader extends GDLBaseListener {
   // --------------------------------------------------------------------------------------------
 
   /**
-   * Adds a list of filters to the current filter using AND conjuctions
+   * Adds a list of predicates to the current predicate using AND conjunctions
    *
-   * @param newFilters the filters to add
+   * @param newPredicates predicates to be added
    */
-  private void addFilter(ArrayList<Filter> newFilters) {
-    for(Filter newFilter : newFilters) {
-      if(filter!=null) {
-        filter = new And(filter,newFilter);
+  private void addPredicates(List<Predicate> newPredicates) {
+    for(Predicate newPredicate : newPredicates) {
+      if(predicate != null) {
+        predicate = new And(predicate, newPredicate);
       } else {
-        filter = newFilter;
+        predicate = newPredicate;
       }
     }
   }
@@ -645,12 +652,6 @@ public class GDLLoader extends GDLBaseListener {
       }
     }
   }
-
-  /**
-   * Extracts the predicates from a GraphElement and transforms them into a filter
-   *
-   * @param e
-   */
 
   /**
    * Returns the vertex that was last seen by the parser.

@@ -17,7 +17,8 @@
 
 package org.s1ck.gdl.model.operators.comparables;
 
-public class Literal extends ComparableExpression {
+public class Literal implements ComparableExpression {
+
   private Object value;
 
   public Literal(Object value) {

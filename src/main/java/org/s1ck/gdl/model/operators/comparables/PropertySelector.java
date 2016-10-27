@@ -19,8 +19,10 @@ package org.s1ck.gdl.model.operators.comparables;
 
 import org.s1ck.gdl.model.GraphElement;
 
-public class PropertySelector extends ComparableExpression {
+public class PropertySelector implements ComparableExpression {
+
   private GraphElement element;
+
   private String propertyName;
 
   public PropertySelector(GraphElement element, String propertyName) {

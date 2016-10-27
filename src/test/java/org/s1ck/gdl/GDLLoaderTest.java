@@ -153,7 +153,7 @@ public class GDLLoaderTest {
 
     assertEquals("edge should not have variable length",
       false,e.hasVariableLength());
-    assertEquals("wrong length range", Range.closed(1,1), e.getLengthRange());
+    assertEquals("wrong length range", Range.closed(1,1), e.getRange());
   }
 
   @Test
@@ -162,7 +162,7 @@ public class GDLLoaderTest {
     Edge e = loader.getEdgeCache().get("e");
 
     assertEquals("edge should have variable length",true,e.hasVariableLength());
-    assertEquals("wrong length range", Range.atLeast(2), e.getLengthRange());
+    assertEquals("wrong length range", Range.atLeast(2), e.getRange());
   }
 
   @Test
@@ -171,7 +171,7 @@ public class GDLLoaderTest {
     Edge e = loader.getEdgeCache().get("e");
 
     assertEquals("edge should have variable length",true,e.hasVariableLength());
-    assertEquals("wrong length range", Range.atMost(5), e.getLengthRange());
+    assertEquals("wrong length range", Range.atMost(5), e.getRange());
   }
 
   @Test
@@ -180,7 +180,7 @@ public class GDLLoaderTest {
     Edge e = loader.getEdgeCache().get("e");
 
     assertEquals("edge should have variable length",true,e.hasVariableLength());
-    assertEquals("wrong length range", Range.closed(3, 5), e.getLengthRange());
+    assertEquals("wrong length range", Range.closed(3, 5), e.getRange());
   }
 
   @Test
@@ -189,7 +189,7 @@ public class GDLLoaderTest {
     Edge e = loader.getEdgeCache().get("e");
 
     assertEquals("edge should have variable length",true,e.hasVariableLength());
-    assertEquals("wrong length range", Range.all(), e.getLengthRange());
+    assertEquals("wrong length range", Range.all(), e.getRange());
   }
 
   // --------------------------------------------------------------------------------------------
@@ -292,25 +292,27 @@ public class GDLLoaderTest {
   }
 
   // --------------------------------------------------------------------------------------------
-  //  WHERE clause tests
+  //  MATCH ... WHERE ... tests
   // --------------------------------------------------------------------------------------------
 
   @Test
   public void testSimpleWhereClause() {
     String query = "MATCH (alice)-[r]->(bob)" +
-                   "WHERE alice.age > 50";
+      "WHERE alice.age > 50";
 
     GDLLoader loader = getLoaderFromGDLString(query);
     validateCollectionSizes(loader, 0, 2, 1);
 
     assertEquals("wrong filter extracted",
       "(((alice.age > 50 AND alice.label = DefaultVertex) AND bob.label = DefaultVertex) AND r.label = DefaultEdge)",
-      loader.getFilter().toString());
+      loader.getPredicate().toString());
   }
 
   @Test
   public void testComplexWhereClause() {
-    String query = "MATCH (alice)-[r]->(bob) WHERE alice.age > bob.age OR (alice.age < 30 AND bob.name = \"Bob\") " +
+    String query = "MATCH (alice)-[r]->(bob)" +
+      "WHERE alice.age > bob.age " +
+      "OR (alice.age < 30 AND bob.name = \"Bob\") " +
       "AND alice.id != bob.id";
 
     GDLLoader loader = getLoaderFromGDLString(query);
@@ -318,7 +320,36 @@ public class GDLLoaderTest {
 
     assertEquals("wrong filter extracted",
       "((((alice.age > bob.age OR ((alice.age < 30 AND bob.name = Bob) AND alice.id != bob.id)) AND alice.label = DefaultVertex) AND bob.label = DefaultVertex) AND r.label = DefaultEdge)",
-      loader.getFilter().toString());
+      loader.getPredicate().toString());
+  }
+
+  @Test
+  public void testEmbeddedWhereClause() {
+    String query = "MATCH (alice {age : 50})-[r:knows]->(bob:User)";
+
+    GDLLoader loader = getLoaderFromGDLString(query);
+    validateCollectionSizes(loader, 0, 2, 1);
+
+    assertEquals("wrong filter extracted",
+      "(((alice.label = DefaultVertex AND alice.age = 50) AND bob.label = User) AND r.label = knows)",
+      loader.getPredicate().toString());
+  }
+
+  @Test
+  public void testEmbeddedAndExplicitWhereClause() {
+    GDLLoader loader = getLoaderFromGDLString(
+      "MATCH (p:Person)-[e1:likes {love: TRUE}]->(other:Person) " +
+        "WHERE p.age >= other.age");
+
+    validateCollectionSizes(loader, 0, 2, 1);
+
+    Vertex p = loader.getVertexCache().get("p");
+
+    assertEquals("filters do not match",
+      "((((p.age >= other.age AND p.label = Person) AND other.label = Person) AND e1.label = likes) AND e1.love = true)",
+      loader.getPredicate().toString());
+
+    assertEquals("vertex p has wrong label","Person",p.getLabel());
   }
 
   // --------------------------------------------------------------------------------------------
@@ -398,21 +429,6 @@ public class GDLLoaderTest {
     assertTrue("edge e was not in g", e.getGraphs().contains(g.getId()));
     assertTrue("edge f was not in g", f.getGraphs().contains(g.getId()));
     assertTrue("edge f was not in h", f.getGraphs().contains(h.getId()));
-  }
-
-  @Test
-  public void testCompleteQuery() {
-    GDLLoader loader = getLoaderFromGDLString("MATCH (p:Person)-[e1:likes {love: TRUE}]->(other:Person) WHERE p.age >= other.age");
-
-    validateCollectionSizes(loader, 0, 2, 1);
-
-    Vertex p = loader.getVertexCache().get("p");
-
-    assertEquals("filters do not match",
-            "((((p.age >= other.age AND p.label = Person) AND other.label = Person) AND e1.label = likes) AND e1.love = true)",
-            loader.getFilter().toString());
-
-    assertEquals("vertex p has wrong label","Person",p.getLabel());
   }
 
   // --------------------------------------------------------------------------------------------

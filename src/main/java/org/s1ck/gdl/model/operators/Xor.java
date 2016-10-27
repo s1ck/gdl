@@ -17,12 +17,15 @@
 
 package org.s1ck.gdl.model.operators;
 
-public class Xor extends Filter {
+public class Xor implements Predicate {
 
-  private Filter lhs;
-  private Filter rhs;
+  // left hand side
+  private Predicate lhs;
 
-  public Xor(Filter lhs, Filter rhs) {
+  // right hand side
+  private Predicate rhs;
+
+  public Xor(Predicate lhs, Predicate rhs) {
     this.lhs = lhs;
     this.rhs = rhs;
   }

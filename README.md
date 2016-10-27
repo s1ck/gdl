@@ -166,7 +166,7 @@ Besides defining a graph it is also possible to formulate a query with patterns 
 
 ```
 MATCH (alice:Person)-[:knows]->(bob:Person)
-WHERE (alice.name  : "Alice" AND bob.name  : "Bob") OR alice.age > alice.bob
+WHERE (alice.name = "Alice" AND bob.name = "Bob") OR alice.age > alice.bob
 ```
 
 **Note** that queries always start with the `MATCH` keyword optionally followed by one or more

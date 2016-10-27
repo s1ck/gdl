@@ -24,11 +24,10 @@ import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.s1ck.gdl.model.Edge;
 import org.s1ck.gdl.model.Graph;
 import org.s1ck.gdl.model.Vertex;
-import org.s1ck.gdl.model.operators.Filter;
+import org.s1ck.gdl.model.operators.Predicate;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
 
@@ -98,7 +97,7 @@ public class GDLHandler {
    *
    * @return filters
    */
-  public Filter getFilters() { return loader.getFilter(); }
+  public Predicate getFilters() { return loader.getPredicate(); }
 
   /**
    * Returns the graph cache that contains a mapping from variables used in the GDL script to

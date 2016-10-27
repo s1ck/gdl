@@ -17,11 +17,11 @@
 
 package org.s1ck.gdl.model.operators;
 
-public class Not extends Filter {
+public class Not implements Predicate {
 
-  private Filter expression;
+  private Predicate expression;
 
-  public Not(Filter expression) {
+  public Not(Predicate expression) {
     this.expression = expression;
   }
 

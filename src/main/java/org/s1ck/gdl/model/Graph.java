@@ -17,10 +17,7 @@
 
 package org.s1ck.gdl.model;
 
-import org.s1ck.gdl.model.operators.Filter;
-
 public class Graph extends Element {
-
 
   @Override
   public String toString() {
