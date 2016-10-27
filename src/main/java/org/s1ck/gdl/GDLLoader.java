@@ -19,15 +19,21 @@ package org.s1ck.gdl;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Range;
 import com.google.common.collect.Sets;
-import org.s1ck.gdl.model.Edge;
-import org.s1ck.gdl.model.Graph;
-import org.s1ck.gdl.model.GraphElement;
-import org.s1ck.gdl.model.Vertex;
+import org.antlr.v4.runtime.tree.TerminalNode;
+import org.s1ck.gdl.model.*;
+import org.s1ck.gdl.model.operators.And;
+import org.s1ck.gdl.model.operators.Comparison;
+import org.s1ck.gdl.model.operators.Filter;
+import org.s1ck.gdl.model.operators.Not;
+import org.s1ck.gdl.model.operators.Or;
+import org.s1ck.gdl.model.operators.Xor;
+import org.s1ck.gdl.model.operators.comparables.ComparableExpression;
+import org.s1ck.gdl.model.operators.comparables.Literal;
+import org.s1ck.gdl.model.operators.comparables.PropertySelector;
 
-import java.util.Collection;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class GDLLoader extends GDLBaseListener {
 
@@ -40,6 +46,7 @@ public class GDLLoader extends GDLBaseListener {
   private final Set<Graph> graphs;
   private final Set<Vertex> vertices;
   private final Set<Edge> edges;
+  private Filter filter;
 
   private final String defaultGraphLabel;
   private final String defaultVertexLabel;
@@ -54,9 +61,14 @@ public class GDLLoader extends GDLBaseListener {
   private boolean inGraph = false;
   // holds the graph of the current graph
   private long currentGraphId;
-  // used to track vertex and edge ids for correct source and target binding
+
+  // used to track vertex and edge ids for correct source and target
+  // binding
   private Vertex lastSeenVertex;
   private Edge lastSeenEdge;
+
+  // used to keep track of filter that are yet to be handled
+  private ArrayDeque<Filter> currentFilters;
 
   /**
    * Initializes a new GDL Loader.
@@ -77,6 +89,10 @@ public class GDLLoader extends GDLBaseListener {
     graphs = Sets.newHashSet();
     vertices = Sets.newHashSet();
     edges = Sets.newHashSet();
+    filter = null;
+
+
+    currentFilters = new ArrayDeque<>();
   }
 
   /**
@@ -106,6 +122,12 @@ public class GDLLoader extends GDLBaseListener {
     return edges;
   }
 
+    /**
+     * Returns the predicates defined by the query represented as a tree
+     *
+     * @return filter
+     */
+  Filter getFilter() { return filter; }
   /**
    * Returns the graph cache that contains a mapping from variables used in the GDL script to
    * graph instances.
@@ -162,12 +184,26 @@ public class GDLLoader extends GDLBaseListener {
       g = initNewGraph(graphContext);
       graphs.add(g);
     }
-    currentGraphId = g.getId();
-  }
+    currentGraphId = g.getId();}
 
   @Override
   public void exitGraph(GDLParser.GraphContext ctx) {
     inGraph = false;
+  }
+
+  /**
+   * When leaving a query context its save to add the pattern predicates to the filters
+   *
+   * @param ctx query context
+   */
+  @Override
+  public void exitQuery(GDLParser.QueryContext ctx) {
+    for(Vertex v : vertices) {
+      addFilter(Filter.fromGraphElement(v));
+    }
+    for(Edge e : edges) {
+      addFilter(Filter.fromGraphElement(e));
+    }
   }
 
   /**
@@ -216,6 +252,70 @@ public class GDLLoader extends GDLBaseListener {
   @Override
   public void enterOutgoingEdge(GDLParser.OutgoingEdgeContext outgoingEdgeContext) {
     processEdge(outgoingEdgeContext.edgeBody(), false);
+  }
+
+  /**
+   * Called when the parser leaves a WHERE expression
+   *
+   * Takes care that the filter build from the current expression is stored
+   * in the graph
+   *
+   * @param ctx where context
+   */
+  @Override
+  public void exitWhere(GDLParser.WhereContext ctx) {
+    addFilter(new ArrayList<>(Arrays.asList(currentFilters.pop())));
+  }
+
+  /**
+   * Builds a {@code Comparison} expression from comparison context
+   *
+   * @param ctx comparison context
+   */
+  @Override
+  public void enterComparisonExpression(GDLParser.ComparisonExpressionContext ctx) {
+    currentFilters.add(buildComparison(ctx));
+  }
+
+  /**
+   * Called when we leave an Expression4.
+   *
+   * Checks if the expression is preceded by a Not and adds the filter in that case.
+   * @param ctx expression context
+   */
+  @Override
+  public void exitExpression4(GDLParser.Expression4Context ctx) {
+    if (!ctx.NOT().isEmpty()) {
+      Filter not = new Not(currentFilters.pop());
+      currentFilters.add(not);
+    }
+  }
+
+  /**
+   * Called when parser leaves Expression5
+   *
+   * Checks if we have conjunctions like AND, OR, XOR and builds filter for them.
+   * @param ctx expression context
+   */
+  @Override
+  public void exitExpression5(GDLParser.Expression5Context ctx) {
+    List<TerminalNode> conjuctions = ctx.Conjunction();
+    Filter conjunctionReuse;
+
+    for(int i=conjuctions.size()-1;i>=0;i--) {
+      Filter rhs = currentFilters.removeLast();
+      Filter lhs = currentFilters.removeLast();
+
+      switch(conjuctions.get(i).getText().toLowerCase()) {
+        case "and": conjunctionReuse = new And(lhs, rhs);
+          break;
+        case "or":  conjunctionReuse = new Or(lhs, rhs);
+          break;
+        default: conjunctionReuse = new Xor(lhs, rhs);
+          break;
+      }
+      currentFilters.add(conjunctionReuse);
+    }
   }
 
   /**
@@ -299,11 +399,12 @@ public class GDLLoader extends GDLBaseListener {
     e.setSourceVertexId(getSourceVertexId(isIncoming));
     e.setTargetVertexId(getTargetVertexId(isIncoming));
 
-    String label = (hasBody ? getLabel(edgeBodyContext.header()) : null);
-    e.setLabel(label != null ? label : defaultEdgeLabel);
-
-    e.setProperties(hasBody ? getProperties(edgeBodyContext.properties()) : null);
-
+    if(hasBody) {
+      String label = getLabel(edgeBodyContext.header());
+      e.setLabel(label != null ? label : defaultEdgeLabel);
+      e.setProperties(getProperties(edgeBodyContext.properties()));
+      e.setLengthRange(parseEdgeLengthContext(edgeBodyContext.edgeLength()));
+    }
     return e;
   }
 
@@ -321,7 +422,6 @@ public class GDLLoader extends GDLBaseListener {
       graphElement.addToGraph(getNextGraphId());
     }
   }
-
 
   // --------------------------------------------------------------------------------------------
   //  Payload handlers
@@ -347,8 +447,8 @@ public class GDLLoader extends GDLBaseListener {
    * @return element label or {@code null} if context was null
    */
   private String getLabel(GDLParser.HeaderContext header) {
-    if (header != null && header.Label() != null) {
-      return header.Label().getText().substring(1);
+    if (header != null && header.label() != null) {
+      return header.label().getText().substring(1);
     }
     return null;
   }
@@ -400,6 +500,77 @@ public class GDLLoader extends GDLBaseListener {
     return null;
   }
 
+  /**
+   * Parses an {@code EdgeLengthContext} and returns the indicated Range
+   *
+   * @param lengthCtx the edges length context
+   * @return edge length range
+   */
+  private Range<Integer> parseEdgeLengthContext(GDLParser.EdgeLengthContext lengthCtx) {
+    int lowerBound;
+    int upperBound;
+
+    if(lengthCtx != null) {
+      int children = lengthCtx.getChildCount();
+
+      if(children == 4) {
+        lowerBound = terminalNodeToInt(lengthCtx.IntegerLiteral(0));
+        upperBound = terminalNodeToInt(lengthCtx.IntegerLiteral(1));
+        return Range.closed(lowerBound, upperBound);
+
+      } else if(children == 3) {
+        upperBound = terminalNodeToInt(lengthCtx.IntegerLiteral(0));
+        return Range.atMost(upperBound);
+
+      } else if(children == 2){
+        lowerBound = terminalNodeToInt(lengthCtx.IntegerLiteral(0));
+        return Range.atLeast(lowerBound);
+      } else { return Range.all(); }
+
+    }
+    return Range.closed(1, 1);
+  }
+
+  /**
+   * Builds a Comparison filter operator from comparison context
+   *
+   * @param ctx the comparisson context that will be parsed
+   * @return parsed operator
+   */
+  private Comparison buildComparison(GDLParser.ComparisonExpressionContext ctx) {
+    ComparableExpression lhs = buildPropertySelector(ctx.propertyLookup(0));
+
+    ComparableExpression rhs = ctx.literal() != null ?
+            new Literal(getPropertyValue(ctx.literal())) : buildPropertySelector(ctx.propertyLookup(1));
+
+    Comparison.Comparator comp = Comparison.Comparator.fromString(ctx .ComparisonOP().getText());
+
+    return new Comparison(lhs, comp, rhs);
+  }
+
+  /**
+   * Builds an property selector expression like alice.age
+   *
+   * @param ctx the property lookup context that will be parsed
+   * @return parsed property selector expression
+   */
+  private PropertySelector buildPropertySelector(GDLParser.PropertyLookupContext ctx) {
+    GraphElement element;
+
+    String identifier = ctx.Identifier(0).getText();
+    String property = ctx.Identifier(1).getText();
+
+    if(vertexCache.containsKey(identifier)) {
+      element = vertexCache.get(identifier);
+    }
+    else if(edgeCache.containsKey(identifier)) {
+      element = edgeCache.get(identifier);
+    }
+    else { return null; } //TODO raise reference error
+
+    return new PropertySelector(element,property);
+  }
+
   // --------------------------------------------------------------------------------------------
   //  Identifier management
   // --------------------------------------------------------------------------------------------
@@ -445,6 +616,21 @@ public class GDLLoader extends GDLBaseListener {
   // --------------------------------------------------------------------------------------------
 
   /**
+   * Adds a list of filters to the current filter using AND conjuctions
+   *
+   * @param newFilters the filters to add
+   */
+  private void addFilter(ArrayList<Filter> newFilters) {
+    for(Filter newFilter : newFilters) {
+      if(filter!=null) {
+        filter = new And(filter,newFilter);
+      } else {
+        filter = newFilter;
+      }
+    }
+  }
+
+  /**
    * Updates the source or target vertex identifier of the last seen edge.
    *
    * @param v current vertex
@@ -459,6 +645,12 @@ public class GDLLoader extends GDLBaseListener {
       }
     }
   }
+
+  /**
+   * Extracts the predicates from a GraphElement and transforms them into a filter
+   *
+   * @param e
+   */
 
   /**
    * Returns the vertex that was last seen by the parser.
@@ -514,5 +706,15 @@ public class GDLLoader extends GDLBaseListener {
    */
   private Long getTargetVertexId(boolean isIncoming) {
     return isIncoming ? getLastSeenVertex().getId() : null;
+  }
+
+  /**
+   * Parses a terminal node to an integer.
+   *
+   * @param node the node which represents an integer
+   * @return the parsed integer
+   */
+  private int terminalNodeToInt(TerminalNode node) {
+    return Integer.parseInt(node.getText());
   }
 }

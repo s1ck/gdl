@@ -1,6 +1,7 @@
 package org.s1ck.gdl;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Range;
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
@@ -145,6 +146,52 @@ public class GDLLoaderTest {
     assertEquals("edge has wrong variable", "e", e.getVariable());
   }
 
+  @Test
+  public void readEdgeWithNoRangeExpression() {
+    GDLLoader loader = getLoaderFromGDLString("()-[e]->()");
+    Edge e = loader.getEdgeCache().get("e");
+
+    assertEquals("edge should not have variable length",
+      false,e.hasVariableLength());
+    assertEquals("wrong length range", Range.closed(1,1), e.getLengthRange());
+  }
+
+  @Test
+  public void readEdgeWithLowerBoundTest() {
+    GDLLoader loader = getLoaderFromGDLString("()-[e*2]->()");
+    Edge e = loader.getEdgeCache().get("e");
+
+    assertEquals("edge should have variable length",true,e.hasVariableLength());
+    assertEquals("wrong length range", Range.atLeast(2), e.getLengthRange());
+  }
+
+  @Test
+  public void readEdgeWithUpperBoundTest() {
+    GDLLoader loader = getLoaderFromGDLString("()-[e*..5]->()");
+    Edge e = loader.getEdgeCache().get("e");
+
+    assertEquals("edge should have variable length",true,e.hasVariableLength());
+    assertEquals("wrong length range", Range.atMost(5), e.getLengthRange());
+  }
+
+  @Test
+  public void readEdgeWithLoaderAndUpperBoundTest() {
+    GDLLoader loader = getLoaderFromGDLString("()-[e*3..5]->()");
+    Edge e = loader.getEdgeCache().get("e");
+
+    assertEquals("edge should have variable length",true,e.hasVariableLength());
+    assertEquals("wrong length range", Range.closed(3, 5), e.getLengthRange());
+  }
+
+  @Test
+  public void readEdgeWithUnboundLengthTest() {
+    GDLLoader loader = getLoaderFromGDLString("()-[e*]->()");
+    Edge e = loader.getEdgeCache().get("e");
+
+    assertEquals("edge should have variable length",true,e.hasVariableLength());
+    assertEquals("wrong length range", Range.all(), e.getLengthRange());
+  }
+
   // --------------------------------------------------------------------------------------------
   //  Graph only tests
   // --------------------------------------------------------------------------------------------
@@ -214,7 +261,7 @@ public class GDLLoaderTest {
 
   @Test
   public void readFragmentedGraphTest() {
-    GDLLoader loader = getLoaderFromGDLString("g[()];g[()]");
+    GDLLoader loader = getLoaderFromGDLString("g[()],g[()]");
     validateCollectionSizes(loader, 1, 2, 0);
     validateCacheSizes(loader, 1, 0, 0);
   }
@@ -245,12 +292,42 @@ public class GDLLoaderTest {
   }
 
   // --------------------------------------------------------------------------------------------
+  //  WHERE clause tests
+  // --------------------------------------------------------------------------------------------
+
+  @Test
+  public void testSimpleWhereClause() {
+    String query = "MATCH (alice)-[r]->(bob)" +
+                   "WHERE alice.age > 50";
+
+    GDLLoader loader = getLoaderFromGDLString(query);
+    validateCollectionSizes(loader, 0, 2, 1);
+
+    assertEquals("wrong filter extracted",
+      "(((alice.age > 50 AND alice.label = DefaultVertex) AND bob.label = DefaultVertex) AND r.label = DefaultEdge)",
+      loader.getFilter().toString());
+  }
+
+  @Test
+  public void testComplexWhereClause() {
+    String query = "MATCH (alice)-[r]->(bob) WHERE alice.age > bob.age OR (alice.age < 30 AND bob.name = \"Bob\") " +
+      "AND alice.id != bob.id";
+
+    GDLLoader loader = getLoaderFromGDLString(query);
+    validateCollectionSizes(loader, 0, 2, 1);
+
+    assertEquals("wrong filter extracted",
+      "((((alice.age > bob.age OR ((alice.age < 30 AND bob.name = Bob) AND alice.id != bob.id)) AND alice.label = DefaultVertex) AND bob.label = DefaultVertex) AND r.label = DefaultEdge)",
+      loader.getFilter().toString());
+  }
+
+  // --------------------------------------------------------------------------------------------
   //  Combined tests
   // --------------------------------------------------------------------------------------------
 
   @Test
   public void testGraphWithContentTest() {
-    GDLLoader loader = getLoaderFromGDLString("g[(alice)-[r]->(bob);(alice)-[s]->(eve)]");
+    GDLLoader loader = getLoaderFromGDLString("g[(alice)-[r]->(bob),(alice)-[s]->(eve)]");
     validateCollectionSizes(loader, 1, 3, 2);
     validateCacheSizes(loader, 1, 3, 2);
     Graph g = loader.getGraphCache().get("g");
@@ -269,7 +346,7 @@ public class GDLLoaderTest {
 
   @Test
   public void testGraphsWithOverlappingContent() {
-    GDLLoader loader = getLoaderFromGDLString("g1[(alice)-[r]->(bob)];g2[(alice)-[s]->(bob)]");
+    GDLLoader loader = getLoaderFromGDLString("g1[(alice)-[r]->(bob)],g2[(alice)-[s]->(bob)]");
     validateCollectionSizes(loader, 2, 2, 2);
     validateCacheSizes(loader, 2, 2, 2);
     Graph g1 = loader.getGraphCache().get("g1");
@@ -299,7 +376,7 @@ public class GDLLoaderTest {
   @Test
   public void testFragmentedGraphWithVariables() {
     GDLLoader loader = getLoaderFromGDLString(
-      "g[(a)-->(b)];g[(a)-[e]->(b)];g[(a)-[f]->(b)];h[(a)-[f]->(b)]");
+      "g[(a)-->(b)],g[(a)-[e]->(b)],g[(a)-[f]->(b)],h[(a)-[f]->(b)]");
     validateCollectionSizes(loader, 2, 2, 3);
     validateCacheSizes(loader, 2, 2, 2);
 
@@ -323,13 +400,28 @@ public class GDLLoaderTest {
     assertTrue("edge f was not in h", f.getGraphs().contains(h.getId()));
   }
 
+  @Test
+  public void testCompleteQuery() {
+    GDLLoader loader = getLoaderFromGDLString("MATCH (p:Person)-[e1:likes {love: TRUE}]->(other:Person) WHERE p.age >= other.age");
+
+    validateCollectionSizes(loader, 0, 2, 1);
+
+    Vertex p = loader.getVertexCache().get("p");
+
+    assertEquals("filters do not match",
+            "((((p.age >= other.age AND p.label = Person) AND other.label = Person) AND e1.label = likes) AND e1.love = true)",
+            loader.getFilter().toString());
+
+    assertEquals("vertex p has wrong label","Person",p.getLabel());
+  }
+
   // --------------------------------------------------------------------------------------------
   //  Special cases
   // --------------------------------------------------------------------------------------------
 
   @Test
   public void readNullValueTest() {
-    GDLLoader loader = getLoaderFromGDLString("(v{name=NULL})");
+    GDLLoader loader = getLoaderFromGDLString("(v{name:NULL})");
     validateCollectionSizes(loader, 0, 1, 0);
     validateCacheSizes(loader, 0, 1, 0);
     Vertex a = loader.getVertexCache().get("v");
@@ -441,7 +533,7 @@ public class GDLLoaderTest {
 
     @Override
     public String toString() {
-      return String.format("%s=%s", getKey(), getValue());
+      return String.format("%s:%s", getKey(), getValue());
     }
   }
 

@@ -15,19 +15,20 @@
  * along with GDL.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.s1ck.gdl.model;
+package org.s1ck.gdl.model.operators.comparables;
 
-import org.s1ck.gdl.model.operators.Filter;
+import org.s1ck.gdl.model.GraphElement;
 
-public class Graph extends Element {
+public class PropertySelector extends ComparableExpression {
+  private GraphElement element;
+  private String propertyName;
 
+  public PropertySelector(GraphElement element, String propertyName) {
+    this.element = element;
+    this.propertyName = propertyName;
+  }
 
-  @Override
   public String toString() {
-    return "Graph{" + ",\n" +
-      "\t" + "id=" + getId() + ",\n" +
-      "\t" + "label='" + getLabel() + "',\n" +
-      "\t" + "properties=" + getProperties() + ",\n" +
-    '}';
+    return element.getVariable() + "." + propertyName;
   }
 }

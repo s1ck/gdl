@@ -15,19 +15,19 @@
  * along with GDL.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.s1ck.gdl.model;
+package org.s1ck.gdl.model.operators;
 
-import org.s1ck.gdl.model.operators.Filter;
+public class And extends Filter {
 
-public class Graph extends Element {
+  private Filter lhs;
+  private Filter rhs;
 
+  public And(Filter lhs, Filter rhs) {
+    this.lhs = lhs;
+    this.rhs = rhs;
+  }
 
-  @Override
   public String toString() {
-    return "Graph{" + ",\n" +
-      "\t" + "id=" + getId() + ",\n" +
-      "\t" + "label='" + getLabel() + "',\n" +
-      "\t" + "properties=" + getProperties() + ",\n" +
-    '}';
+    return "(" + lhs + " AND " + rhs + ")";
   }
 }

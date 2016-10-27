@@ -43,19 +43,19 @@ Define a vertex with label `User`:
 Define a vertex with label `User`, assign it to variable `alice` and give it some properties:
 
 ```
-(alice:User {name = "Alice", age = 23})
+(alice:User {name : "Alice", age : 23})
 ```
 
 Property values can also be null:
 
 ```
-(alice:User {name = "Alice", age = 23, city = NULL})
+(alice:User {name : "Alice", age : 23, city : NULL})
 ```
 
 Numeric property values can have specific data types:
 
 ```
-(alice:User {name = "Alice", age = 23L, height = 1.82f, weight = 42.7d})
+(alice:User {name : "Alice", age : 23L, height : 1.82f, weight : 42.7d})
 ```
 
 Define an outgoing edge:
@@ -73,14 +73,14 @@ Define an incoming edge:
 Define an edge with label `knows`, assign it to variable `e1` and give it some properties:
 
 ```
-(alice)-[e1:knows {since = 2014}]->(bob)
+(alice)-[e1:knows {since : 2014}]->(bob)
 ```
 
 Define multiple outgoing edges from the same source vertex (i.e. `alice`):
 
 ```
-(alice)-[e1:knows {since = 2014}]->(bob)
-(alice)-[e2:knows {since = 2013}]->(eve)
+(alice)-[e1:knows {since : 2014}]->(bob)
+(alice)-[e2:knows {since : 2013}]->(eve)
 ```
 
 Define paths (four vertices and three edges are created):
@@ -110,7 +110,7 @@ Define a graph with label `Community`:
 Define a graph with label `Community`, assign it to variable `g` and give it some properties:
 
 ```
-g:Community {title = "Graphs", memberCount = 42}[()]
+g:Community {title : "Graphs", memberCount : 42}[()]
 ```
 
 Define mixed path and graph statements (elements in the paths don't belong to a specific graph):
@@ -131,15 +131,15 @@ g[(b)-->(c)]
 Define three graphs with overlapping vertex sets (e.g. `alice` is in `g1` and `g2`):
 
 ```
-g1:Community {title = "Graphs", memberCount = 23}[
+g1:Community {title : "Graphs", memberCount : 23}[
     (alice:User)
     (bob:User)
     (eve:User)
 ]
-g2:Community {title = "Databases", memberCount = 42}[
+g2:Community {title : "Databases", memberCount : 42}[
     (alice)
 ]
-g2:Community {title = "Hadoop", memberCount = 31}[
+g2:Community {title : "Hadoop", memberCount : 31}[
     (bob)
     (eve)
 ]
@@ -148,18 +148,29 @@ g2:Community {title = "Hadoop", memberCount = 31}[
 Define three graphs with overlapping vertex and edge sets (`e` is in `g1` and `g2`):
 
 ```
-g1:Community {title = "Graphs", memberCount = 23}[
-    (alice:User)-[:knows]->(bob:User)
-    (bob)-[e:knows]->(eve:User)
+g1:Community {title : "Graphs", memberCount : 23}[
+    (alice:User)-[:knows]->(bob:User),
+    (bob)-[e:knows]->(eve:User),
     (eve)
 ]
-g2:Community {title = "Databases", memberCount = 42}[
+g2:Community {title : "Databases", memberCount : 42}[
     (alice)
 ]
-g2:Community {title = "Hadoop", memberCount = 31}[
+g2:Community {title : "Hadoop", memberCount : 31}[
     (bob)-[e]->(eve)
 ]
 ```
+
+### Query Expressions
+Besides defining a graph it is also possible to formulate a query with patterns and predicates
+
+```
+MATCH (alice:Person)-[:knows]->(bob:Person)
+WHERE (alice.name  : "Alice" AND bob.name  : "Bob") OR alice.age > alice.bob
+```
+
+**Note** that queries always start with the `MATCH` keyword optionally followed by one or more
+`WHERE` clauses. 
 
 ## Usage examples
 
@@ -190,7 +201,7 @@ Add dependency to your maven project:
 Create a database from a GDL string:
 
 ```java
-GDLHandler handler = new GDLHandler.Builder().buildFromString("g[(alice)-[e1:knows {since = 2014}]->(bob)]");
+GDLHandler handler = new GDLHandler.Builder().buildFromString("g[(alice)-[e1:knows {since : 2014}]->(bob)]");
 
 for (Vertex v : handler.getVertices()) {
     // do something
@@ -212,7 +223,7 @@ GDLHandler handler2 = new GDLHandler.Builder().buildFromFile(fileName);
 Append data to a given handler:
 
 ```java
-GDLHandler handler = new GDLHandler.Builder().buildFromString("g[(alice)-[e1:knows {since = 2014}]->(bob)]");
+GDLHandler handler = new GDLHandler.Builder().buildFromString("g[(alice)-[e1:knows {since : 2014}]->(bob)]");
 
 handler.append("g[(alice)-[:knows]->(eve)]");
 ```

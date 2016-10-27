@@ -24,16 +24,24 @@ database
     ;
 
 elementList
-    : (element ';'?)*
+    : (definition ','?)+ | query
     ;
 
-element
+definition
     : graph
     | path
     ;
 
 graph
-    : header properties? '[' (path ';'?)* ']'
+    : header properties? (('[' (path ','?)* ']'))
+    ;
+
+query
+    : match where*
+    ;
+
+match
+    : 'MATCH' (path ','?)+
     ;
 
 path
@@ -50,11 +58,15 @@ edge
     ;
 
 edgeBody
-    : '[' header properties? ']'
+    : '[' header properties? edgeLength?']'
+    ;
+
+edgeLength
+    : '*' IntegerLiteral? ('..' IntegerLiteral)?
     ;
 
 header
-    : Identifier? Label?
+    : Identifier? label?
     ;
 
 properties
@@ -62,7 +74,37 @@ properties
     ;
 
 property
-    : Identifier '=' literal
+    : Identifier Colon literal
+    ;
+
+label
+    : Colon (Characters | Identifier)
+    ;
+
+where
+    : ('where' | 'WHERE') expression
+    ;
+
+expression : expression5 ;
+
+expression5: expression4 ( Conjunction expression4 )* ;
+
+expression4 : ( NOT )* expression2 ;
+
+expression2 : atom ;
+
+atom : parenthesizedExpression
+     | comparisonExpression
+     ;
+
+comparisonExpression :
+     propertyLookup ComparisonOP (propertyLookup | literal)
+                            ;
+
+parenthesizedExpression : '(' expression ')' ;
+
+propertyLookup
+    : Identifier '.' Identifier
     ;
 
 literal
@@ -73,11 +115,9 @@ literal
     | Null
     ;
 
-
 //-------------------------------
 // String Literal
 //-------------------------------
-
 StringLiteral
     : '"' ('\\"'|.)*? '"'
     ;
@@ -85,7 +125,6 @@ StringLiteral
 //-------------------------------
 // Boolean Literal
 //-------------------------------
-
 BooleanLiteral
     : 'true'
     | 'TRUE'
@@ -96,7 +135,6 @@ BooleanLiteral
 //-------------------------------
 // Integer Literal
 //-------------------------------
-
 IntegerLiteral
     : DecimalIntegerLiteral
     ;
@@ -119,14 +157,14 @@ IntegerTypeSuffix
 //-------------------------------
 // Floating Point Literal
 //-------------------------------
-
 FloatingPointLiteral
     :   DecimalFloatingPointLiteral
     ;
 
 fragment
 DecimalFloatingPointLiteral
-    :   DecimalFloatingPointNumeral? '.' Digits?  FloatTypeSuffix?
+    :   (DecimalFloatingPointNumeral '.' Digits)
+    |   (DecimalFloatingPointNumeral? '.' Digits)  FloatTypeSuffix?
     ;
 
 fragment
@@ -141,50 +179,71 @@ FloatTypeSuffix
     ;
 
 //-------------------------------
-// Label & Identifier
+// Identifier
 //-------------------------------
 
-Label
-    : Colon UpperCaseLetter (LowerCaseLetter | UpperCaseLetter)*  // graph and vertex label (e.g. Person, BlogPost)
-    | Colon LowerCaseLetter (LowerCaseLetter | UpperCaseLetter)*  // edge label (e.g. knows, hasInterest)
-    ;
 
 Identifier
     : (UnderScore | LowerCaseLetter) (UnderScore | Character)*   // e.g. _temp, _0, t_T, g0, alice, birthTown
     ;
 
 //-------------------------------
+// Comparison
+//-------------------------------
+
+Conjunction
+    : 'AND'
+    | 'and'
+    | 'OR'
+    | 'or'
+    | 'XOR'
+    | 'xor'
+    ;
+
+NOT
+    : ('OR'|'or')
+    ;
+
+ComparisonOP
+    : '='
+    | '!='
+    | '>'
+    | '<'
+    | '>='
+    | '<='
+    ;
+
+
+//-------------------------------
 // General fragments
 //-------------------------------
 
-fragment
+Null
+    : 'NULL'
+    ;
+
 Characters
     : Character+
     ;
 
-fragment
 Character
     : UpperCaseLetter
     | LowerCaseLetter
     | Digit
     ;
 
-fragment
 UpperCaseLetters
     : UpperCaseLetter+
     ;
 
-fragment
 UpperCaseLetter
     : [A-Z]
     ;
 
-fragment
 LowerCaseLetters
     : LowerCaseLetter+
     ;
 
-fragment
 LowerCaseLetter
     : [a-z]
     ;
@@ -209,13 +268,14 @@ UnderScore
     : '_'
     ;
 
-fragment
+
 Colon
     : ':'
     ;
 
-Null
-    : 'NULL'
+
+PERIOD
+    : '.'
     ;
 
 WS
@@ -229,3 +289,4 @@ COMMENT
 LINE_COMMENT
     : '//' ~[\r\n]* -> skip
     ;
+

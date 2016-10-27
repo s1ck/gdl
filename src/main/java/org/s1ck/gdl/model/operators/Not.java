@@ -15,19 +15,17 @@
  * along with GDL.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.s1ck.gdl.model;
+package org.s1ck.gdl.model.operators;
 
-import org.s1ck.gdl.model.operators.Filter;
+public class Not extends Filter {
 
-public class Graph extends Element {
+  private Filter expression;
 
+  public Not(Filter expression) {
+    this.expression = expression;
+  }
 
-  @Override
   public String toString() {
-    return "Graph{" + ",\n" +
-      "\t" + "id=" + getId() + ",\n" +
-      "\t" + "label='" + getLabel() + "',\n" +
-      "\t" + "properties=" + getProperties() + ",\n" +
-    '}';
+    return "( NOT " + expression + " )";
   }
 }

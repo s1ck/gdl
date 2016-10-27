@@ -17,10 +17,22 @@
 
 package org.s1ck.gdl.model;
 
+import com.google.common.collect.Range;
+
 public class Edge extends GraphElement {
   private Long sourceVertexId;
 
   private Long targetVertexId;
+
+  /**
+   * Stores the length of the edge.
+   * This is used for expressions with variable path lengths.
+   */
+  private Range<Integer> lengthRange = Range.closed(1,1);
+
+  public Edge() {
+    super();
+  }
 
   public Long getSourceVertexId() {
     return sourceVertexId;
@@ -38,15 +50,38 @@ public class Edge extends GraphElement {
     this.targetVertexId = targetVertexId;
   }
 
+
+  public Range<Integer> getLengthRange() { return this.lengthRange; }
+
+  public void setLengthRange(Range<Integer> range) {
+    this.lengthRange = range;
+  }
+
+  public boolean hasVariableLength() {
+    return !(lengthRange.equals(Range.closed(1,1)));
+  }
+
+  public int getLowerBound() { return lengthRange.lowerEndpoint(); }
+
+  public int getUpperBound() { return lengthRange.upperEndpoint(); }
+
   @Override
   public String toString() {
-    return "Edge{" +
+    String out = "Edge{" +
       "id=" + getId() +
       ", label='" + getLabel() + '\'' +
       ", properties=" + getProperties() +
       ", sourceVertexId=" + sourceVertexId +
-      ", targetVertexId=" + targetVertexId +
-      ", graphs=" + getGraphs() +
-      '}';
+      ", targetVertexId=" + targetVertexId;
+
+    if(hasVariableLength()) {
+      out = out +
+        ", lowerBound=" + getLowerBound() +
+        ", upperBound=" + getUpperBound();
+    }
+
+    out = out + ", graphs=" + getGraphs() + '}';
+
+    return out;
   }
 }
