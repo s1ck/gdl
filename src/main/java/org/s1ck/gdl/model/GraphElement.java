@@ -17,8 +17,7 @@
 
 package org.s1ck.gdl.model;
 
-import com.google.common.collect.Sets;
-
+import java.util.HashSet;
 import java.util.Set;
 
 public class GraphElement extends Element {
@@ -26,7 +25,7 @@ public class GraphElement extends Element {
   private Set<Long> graphs;
 
   public GraphElement() {
-    graphs = Sets.newHashSet();
+    graphs = new HashSet<>();
   }
 
   public void addToGraph(Long graphId) {

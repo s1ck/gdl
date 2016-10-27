@@ -1,7 +1,5 @@
 package org.s1ck.gdl;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Range;
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
@@ -14,6 +12,8 @@ import org.s1ck.gdl.model.Vertex;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
@@ -151,9 +151,9 @@ public class GDLLoaderTest {
     GDLLoader loader = getLoaderFromGDLString("()-[e]->()");
     Edge e = loader.getEdgeCache().get("e");
 
-    assertEquals("edge should not have variable length",
-      false,e.hasVariableLength());
-    assertEquals("wrong length range", Range.closed(1,1), e.getRange());
+    assertEquals("edge should not have variable length", false, e.hasVariableLength());
+    assertEquals("wrong lower bound", 1, e.getLowerBound());
+    assertEquals("wrong upper bound", 1, e.getUpperBound());
   }
 
   @Test
@@ -161,8 +161,9 @@ public class GDLLoaderTest {
     GDLLoader loader = getLoaderFromGDLString("()-[e*2]->()");
     Edge e = loader.getEdgeCache().get("e");
 
-    assertEquals("edge should have variable length",true,e.hasVariableLength());
-    assertEquals("wrong length range", Range.atLeast(2), e.getRange());
+    assertEquals("edge should have variable length", true, e.hasVariableLength());
+    assertEquals("wrong lower bound", 2, e.getLowerBound());
+    assertEquals("wrong lower bound", 0, e.getUpperBound());
   }
 
   @Test
@@ -170,17 +171,19 @@ public class GDLLoaderTest {
     GDLLoader loader = getLoaderFromGDLString("()-[e*..5]->()");
     Edge e = loader.getEdgeCache().get("e");
 
-    assertEquals("edge should have variable length",true,e.hasVariableLength());
-    assertEquals("wrong length range", Range.atMost(5), e.getRange());
+    assertEquals("edge should have variable length", true, e.hasVariableLength());
+    assertEquals("wrong lower bound", 0, e.getLowerBound());
+    assertEquals("wrong lower bound", 5, e.getUpperBound());
   }
 
   @Test
-  public void readEdgeWithLoaderAndUpperBoundTest() {
+  public void readEdgeWithLowerAndUpperBoundTest() {
     GDLLoader loader = getLoaderFromGDLString("()-[e*3..5]->()");
     Edge e = loader.getEdgeCache().get("e");
 
-    assertEquals("edge should have variable length",true,e.hasVariableLength());
-    assertEquals("wrong length range", Range.closed(3, 5), e.getRange());
+    assertEquals("edge should have variable length", true, e.hasVariableLength());
+    assertEquals("wrong lower bound", 3, e.getLowerBound());
+    assertEquals("wrong lower bound", 5, e.getUpperBound());
   }
 
   @Test
@@ -188,8 +191,9 @@ public class GDLLoaderTest {
     GDLLoader loader = getLoaderFromGDLString("()-[e*]->()");
     Edge e = loader.getEdgeCache().get("e");
 
-    assertEquals("edge should have variable length",true,e.hasVariableLength());
-    assertEquals("wrong length range", Range.all(), e.getRange());
+    assertEquals("edge should have variable length", true, e.hasVariableLength());
+    assertEquals("wrong lower bound", 0, e.getLowerBound());
+    assertEquals("wrong lower bound", 0, e.getUpperBound());
   }
 
   // --------------------------------------------------------------------------------------------
@@ -362,7 +366,7 @@ public class GDLLoaderTest {
     validateCollectionSizes(loader, 1, 3, 2);
     validateCacheSizes(loader, 1, 3, 2);
     Graph g = loader.getGraphCache().get("g");
-    List<GraphElement> graphElements = Lists.newArrayList(
+    List<GraphElement> graphElements = Arrays.asList(
       loader.getVertexCache().get("alice"),
       loader.getVertexCache().get("bob"),
       loader.getVertexCache().get("eve"),
@@ -383,7 +387,7 @@ public class GDLLoaderTest {
     Graph g1 = loader.getGraphCache().get("g1");
     Graph g2 = loader.getGraphCache().get("g2");
 
-    List<Vertex> overlapElements = Lists.newArrayList(
+    List<Vertex> overlapElements = Arrays.asList(
       loader.getVertexCache().get("alice"),
       loader.getVertexCache().get("bob")
     );
@@ -517,7 +521,7 @@ public class GDLLoaderTest {
   private static String PROPERTIES_STRING;
 
   // contains all valid properties
-  private static final List<PropertyTriple<?>> PROPERTIES_LIST = Lists.newArrayList();
+  private static final List<PropertyTriple<?>> PROPERTIES_LIST = new ArrayList<>();
 
   /**
    * Represents a property for testing.

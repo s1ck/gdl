@@ -1,9 +1,9 @@
-g0:Community{title="Databases", vertexCount=2} [
-	(a:User)-->()<-[r:KNOWS{since=2014}]-(b)
-	(alice:User{name="Alice Wonderland", city="Leipzig",gender=false, age=23})
+g0:Community {title : "Databases", vertexCount : 2} [
+	(a:User)-->()<-[r:KNOWS {since : 2014}]-(b)
+	(alice:User {name : "Alice Wonderland", city : "Leipzig",gender : false, age : 23})
 ]
 :Community [
-	(bob:User{name="Bob",city="Dresden",gender=true,age=25})
+	(bob:User {name : "Bob", city : "Dresden", gender : true, age  25})
 	(alice)-[:KNOWS]->(bob)
 ]
 [()-->()<--()-->()]

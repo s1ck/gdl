@@ -17,10 +17,6 @@
 
 package org.s1ck.gdl;
 
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Range;
-import com.google.common.collect.Sets;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import org.s1ck.gdl.model.*;
 import org.s1ck.gdl.model.operators.And;
@@ -33,13 +29,7 @@ import org.s1ck.gdl.model.operators.comparables.ComparableExpression;
 import org.s1ck.gdl.model.operators.comparables.Literal;
 import org.s1ck.gdl.model.operators.comparables.PropertySelector;
 
-import java.util.ArrayDeque;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Deque;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 class GDLLoader extends GDLBaseListener {
 
@@ -89,13 +79,13 @@ class GDLLoader extends GDLBaseListener {
     this.defaultVertexLabel = defaultVertexLabel;
     this.defaultEdgeLabel   = defaultEdgeLabel;
 
-    graphCache  = Maps.newHashMap();
-    vertexCache = Maps.newHashMap();
-    edgeCache   = Maps.newHashMap();
+    graphCache  = new HashMap<>();
+    vertexCache = new HashMap<>();
+    edgeCache   = new HashMap<>();
 
-    graphs    = Sets.newHashSet();
-    vertices  = Sets.newHashSet();
-    edges     = Sets.newHashSet();
+    graphs    = new HashSet<>();
+    vertices  = new HashSet<>();
+    edges     = new HashSet<>();
     predicate = null;
 
     currentPredicates = new ArrayDeque<>();
@@ -140,8 +130,8 @@ class GDLLoader extends GDLBaseListener {
    *
    * @return immutable graph cache
    */
-  ImmutableMap<String, Graph> getGraphCache() {
-    return new ImmutableMap.Builder<String, Graph>().putAll(graphCache).build();
+  Map<String, Graph> getGraphCache() {
+    return Collections.unmodifiableMap(new HashMap<>(graphCache));
   }
 
   /**
@@ -150,8 +140,8 @@ class GDLLoader extends GDLBaseListener {
    *
    * @return immutable vertex cache
    */
-  ImmutableMap<String, Vertex> getVertexCache() {
-    return new ImmutableMap.Builder<String, Vertex>().putAll(vertexCache).build();
+  Map<String, Vertex> getVertexCache() {
+    return Collections.unmodifiableMap(new HashMap<>(vertexCache));
   }
 
   /**
@@ -161,7 +151,7 @@ class GDLLoader extends GDLBaseListener {
    * @return immutable edge cache
    */
   Map<String, Edge> getEdgeCache() {
-    return new ImmutableMap.Builder<String, Edge>().putAll(edgeCache).build();
+    return Collections.unmodifiableMap(new HashMap<>(edgeCache));
   }
 
   /**
@@ -270,7 +260,7 @@ class GDLLoader extends GDLBaseListener {
    */
   @Override
   public void exitWhere(GDLParser.WhereContext ctx) {
-    addPredicates(Arrays.asList(currentPredicates.pop()));
+    addPredicates(Collections.singletonList(currentPredicates.pop()));
   }
 
   /**
@@ -405,11 +395,13 @@ class GDLLoader extends GDLBaseListener {
     e.setSourceVertexId(getSourceVertexId(isIncoming));
     e.setTargetVertexId(getTargetVertexId(isIncoming));
 
-    if(hasBody) {
+    if (hasBody) {
       String label = getLabel(edgeBodyContext.header());
       e.setLabel(label != null ? label : defaultEdgeLabel);
       e.setProperties(getProperties(edgeBodyContext.properties()));
-      e.setRange(parseEdgeLengthContext(edgeBodyContext.edgeLength()));
+      int[] range = parseEdgeLengthContext(edgeBodyContext.edgeLength());
+      e.setLowerBound(range[0]);
+      e.setUpperBound(range[1]);
     }
     return e;
   }
@@ -467,7 +459,7 @@ class GDLLoader extends GDLBaseListener {
    */
   private Map<String, Object> getProperties(GDLParser.PropertiesContext propertiesContext) {
     if (propertiesContext != null) {
-      Map<String, Object> properties = Maps.newHashMap();
+      Map<String, Object> properties = new HashMap<>();
       for (GDLParser.PropertyContext property : propertiesContext.property()) {
         properties.put(property.Identifier().getText(), getPropertyValue(property.literal()));
       }
@@ -494,7 +486,7 @@ class GDLLoader extends GDLBaseListener {
         return Long.parseLong(text.substring(0, text.length() - 1));
       }
       return Integer.parseInt(text);
-    } else if(literalContext.FloatingPointLiteral() != null) {
+    } else if (literalContext.FloatingPointLiteral() != null) {
       text = literalContext.FloatingPointLiteral().getText().toLowerCase();
       if (text.endsWith("f")) {
         return Float.parseFloat(text.substring(0, text.length() - 1));
@@ -510,31 +502,33 @@ class GDLLoader extends GDLBaseListener {
    * Parses an {@code EdgeLengthContext} and returns the indicated Range
    *
    * @param lengthCtx the edges length context
-   * @return edge length range
+   * @return int array representing lower and upper bound
    */
-  private Range<Integer> parseEdgeLengthContext(GDLParser.EdgeLengthContext lengthCtx) {
-    int lowerBound;
-    int upperBound;
+  private int[] parseEdgeLengthContext(GDLParser.EdgeLengthContext lengthCtx) {
+    int lowerBound = 0;
+    int upperBound = 0;
 
     if(lengthCtx != null) {
       int children = lengthCtx.getChildCount();
 
-      if(children == 4) {
+      if (children == 4) { // [*1..2]
         lowerBound = terminalNodeToInt(lengthCtx.IntegerLiteral(0));
         upperBound = terminalNodeToInt(lengthCtx.IntegerLiteral(1));
-        return Range.closed(lowerBound, upperBound);
-
-      } else if(children == 3) {
+      } else if (children == 3) { // [*..2]
         upperBound = terminalNodeToInt(lengthCtx.IntegerLiteral(0));
-        return Range.atMost(upperBound);
 
-      } else if(children == 2){
+      } else if (children == 2) { // [*1]
         lowerBound = terminalNodeToInt(lengthCtx.IntegerLiteral(0));
-        return Range.atLeast(lowerBound);
-      } else { return Range.all(); }
-
+      } else { // [*]
+        lowerBound = 0;
+        upperBound = 0;
+      }
+    } else {
+      // regular edge
+      lowerBound = 1;
+      upperBound = 1;
     }
-    return Range.closed(1, 1);
+    return new int[] { lowerBound, upperBound };
   }
 
   /**

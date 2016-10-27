@@ -17,8 +17,7 @@
 
 package org.s1ck.gdl.model;
 
-import com.google.common.collect.Maps;
-
+import java.util.HashMap;
 import java.util.Map;
 
 public class Element {
@@ -32,7 +31,7 @@ public class Element {
   private String variable;
 
   public Element() {
-    properties = Maps.newHashMap();
+    properties = new HashMap<>();
   }
 
   public long getId() {

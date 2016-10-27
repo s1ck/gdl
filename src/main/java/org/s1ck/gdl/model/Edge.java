@@ -17,18 +17,14 @@
 
 package org.s1ck.gdl.model;
 
-import com.google.common.collect.Range;
-
 public class Edge extends GraphElement {
   private Long sourceVertexId;
 
   private Long targetVertexId;
 
-  /**
-   * Stores the length of the edge.
-   * This is used for expressions with variable path lengths.
-   */
-  private Range<Integer> range = Range.closed(1,1);
+  private int lowerBound;
+
+  private int upperBound;
 
   public Edge() {
     super();
@@ -50,19 +46,25 @@ public class Edge extends GraphElement {
     this.targetVertexId = targetVertexId;
   }
 
-  public Range<Integer> getRange() { return this.range; }
-
-  public void setRange(Range<Integer> range) {
-    this.range = range;
-  }
-
   public boolean hasVariableLength() {
-    return !(range.equals(Range.closed(1,1)));
+    return !(upperBound == lowerBound && upperBound == 1);
   }
 
-  public int getLowerBound() { return range.lowerEndpoint(); }
+  public int getLowerBound() {
+    return lowerBound;
+  }
 
-  public int getUpperBound() { return range.upperEndpoint(); }
+  public void setLowerBound(int lowerBound) {
+    this.lowerBound = lowerBound;
+  }
+
+  public int getUpperBound() {
+    return upperBound;
+  }
+
+  public void setUpperBound(int upperBound) {
+    this.upperBound = upperBound;
+  }
 
   @Override
   public String toString() {
