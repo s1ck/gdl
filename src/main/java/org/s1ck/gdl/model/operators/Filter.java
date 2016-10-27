@@ -17,5 +17,41 @@
 
 package org.s1ck.gdl.model.operators;
 
+import org.s1ck.gdl.model.GraphElement;
+import org.s1ck.gdl.model.operators.comparables.Literal;
+import org.s1ck.gdl.model.operators.comparables.PropertySelector;
+
+import java.util.ArrayList;
+import java.util.Map;
+
 public abstract class Filter {
+
+  /**
+   * This builds a filter from a GraphElement, extracting parameters and labels into filters
+   * @param element the element to extract from
+   * @return list of extracted filters
+   */
+  public static ArrayList<Filter> fromGraphElement(GraphElement element) {
+    ArrayList<Filter> filters = new ArrayList<>();
+
+    Filter filter;
+
+    if(element.getLabel() != null) {
+      filter = new Comparison(new PropertySelector(element,"label"), Comparison.Comparator.EQ, new Literal(element.getLabel()));
+      filters.add(filter);
+    }
+
+    if(element.getProperties() != null) {
+      for (Map.Entry<String, Object> entry : element.getProperties().entrySet()) {
+        filter = new Comparison(
+                new PropertySelector(element, entry.getKey()),
+                Comparison.Comparator.EQ,
+                new Literal(entry.getValue())
+        );
+
+        filters.add(filter);
+      }
+    }
+    return filters;
+  }
 }

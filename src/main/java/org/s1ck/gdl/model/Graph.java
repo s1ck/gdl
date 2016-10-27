@@ -21,10 +21,6 @@ import org.s1ck.gdl.model.operators.Filter;
 
 public class Graph extends Element {
 
-  private Filter filter;
-
-  public Filter getFilter() { return filter; }
-  public void setFilter(Filter filter) { this.filter = filter; }
 
   @Override
   public String toString() {
@@ -32,7 +28,6 @@ public class Graph extends Element {
       "\t" + "id=" + getId() + ",\n" +
       "\t" + "label='" + getLabel() + "',\n" +
       "\t" + "properties=" + getProperties() + ",\n" +
-      "\t" + "filter='" + getFilter() + "',\n" +
     '}';
   }
 }

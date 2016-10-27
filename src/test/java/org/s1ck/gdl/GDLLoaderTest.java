@@ -301,12 +301,11 @@ public class GDLLoaderTest {
                    "WHERE alice.age > 50";
 
     GDLLoader loader = getLoaderFromGDLString(query);
-    validateCollectionSizes(loader, 1, 2, 1);
-    Graph graph = (Graph) loader.getGraphs().toArray()[0];
-
+    validateCollectionSizes(loader, 0, 2, 1);
 
     assertEquals("wrong filter extracted",
-      "alice.age > 50", graph.getFilter().toString());
+      "(((alice.age > 50 AND alice.label = DefaultVertex) AND bob.label = DefaultVertex) AND r.label = DefaultEdge)",
+      loader.getFilter().toString());
   }
 
   @Test
@@ -315,12 +314,11 @@ public class GDLLoaderTest {
       "AND alice.id != bob.id";
 
     GDLLoader loader = getLoaderFromGDLString(query);
-    validateCollectionSizes(loader, 1, 2, 1);
-    Graph graph = (Graph) loader.getGraphs().toArray()[0];
+    validateCollectionSizes(loader, 0, 2, 1);
 
     assertEquals("wrong filter extracted",
-      "(alice.age > bob.age OR ((alice.age < 30 AND bob.name = Bob) AND alice.id != bob.id))",
-      graph.getFilter().toString());
+      "((((alice.age > bob.age OR ((alice.age < 30 AND bob.name = Bob) AND alice.id != bob.id)) AND alice.label = DefaultVertex) AND bob.label = DefaultVertex) AND r.label = DefaultEdge)",
+      loader.getFilter().toString());
   }
 
   // --------------------------------------------------------------------------------------------
@@ -404,14 +402,16 @@ public class GDLLoaderTest {
 
   @Test
   public void testCompleteQuery() {
-    GDLLoader loader = getLoaderFromGDLString("MATCH (p:Person)-[e1:likes]->(other:Person) WHERE p.age >= other.age");
+    GDLLoader loader = getLoaderFromGDLString("MATCH (p:Person)-[e1:likes {love: TRUE}]->(other:Person) WHERE p.age >= other.age");
 
-    validateCollectionSizes(loader, 1, 2, 1);
+    validateCollectionSizes(loader, 0, 2, 1);
 
-    Graph graph = (Graph) loader.getGraphs().toArray()[0];
     Vertex p = loader.getVertexCache().get("p");
 
-    assertEquals("filters do not match","p.age >= other.age",graph.getFilter().toString());
+    assertEquals("filters do not match",
+            "((((p.age >= other.age AND p.label = Person) AND other.label = Person) AND e1.label = likes) AND e1.love = true)",
+            loader.getFilter().toString());
+
     assertEquals("vertex p has wrong label","Person",p.getLabel());
   }
 

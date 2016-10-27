@@ -22,10 +22,7 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Range;
 import com.google.common.collect.Sets;
 import org.antlr.v4.runtime.tree.TerminalNode;
-import org.s1ck.gdl.model.Edge;
-import org.s1ck.gdl.model.Graph;
-import org.s1ck.gdl.model.GraphElement;
-import org.s1ck.gdl.model.Vertex;
+import org.s1ck.gdl.model.*;
 import org.s1ck.gdl.model.operators.And;
 import org.s1ck.gdl.model.operators.Comparison;
 import org.s1ck.gdl.model.operators.Filter;
@@ -36,11 +33,7 @@ import org.s1ck.gdl.model.operators.comparables.ComparableExpression;
 import org.s1ck.gdl.model.operators.comparables.Literal;
 import org.s1ck.gdl.model.operators.comparables.PropertySelector;
 
-import java.util.ArrayDeque;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class GDLLoader extends GDLBaseListener {
 
@@ -53,6 +46,7 @@ public class GDLLoader extends GDLBaseListener {
   private final Set<Graph> graphs;
   private final Set<Vertex> vertices;
   private final Set<Edge> edges;
+  private Filter filter;
 
   private final String defaultGraphLabel;
   private final String defaultVertexLabel;
@@ -68,13 +62,12 @@ public class GDLLoader extends GDLBaseListener {
   // holds the graph of the current graph
   private long currentGraphId;
 
-  // used to track graph, vertex and edge ids for correct source and target
+  // used to track vertex and edge ids for correct source and target
   // binding
-  private Graph lastSeenGraph;
   private Vertex lastSeenVertex;
   private Edge lastSeenEdge;
 
-  // used to keep track of filters that are yet to be handled
+  // used to keep track of filter that are yet to be handled
   private ArrayDeque<Filter> currentFilters;
 
   /**
@@ -96,6 +89,7 @@ public class GDLLoader extends GDLBaseListener {
     graphs = Sets.newHashSet();
     vertices = Sets.newHashSet();
     edges = Sets.newHashSet();
+    filter = null;
 
 
     currentFilters = new ArrayDeque<>();
@@ -128,6 +122,12 @@ public class GDLLoader extends GDLBaseListener {
     return edges;
   }
 
+    /**
+     * Returns the predicates defined by the query represented as a tree
+     *
+     * @return filter
+     */
+  Filter getFilter() { return filter; }
   /**
    * Returns the graph cache that contains a mapping from variables used in the GDL script to
    * graph instances.
@@ -184,9 +184,7 @@ public class GDLLoader extends GDLBaseListener {
       g = initNewGraph(graphContext);
       graphs.add(g);
     }
-    currentGraphId = g.getId();
-    lastSeenGraph = g;
-  }
+    currentGraphId = g.getId();}
 
   @Override
   public void exitGraph(GDLParser.GraphContext ctx) {
@@ -194,21 +192,18 @@ public class GDLLoader extends GDLBaseListener {
   }
 
   /**
-   * Called when the parser enters a query context, which means that we begin
-   * a new query.
-   *
-   * Ensures that we have exactly one graph object
+   * When leaving a query context its save to add the pattern predicates to the filters
    *
    * @param ctx query context
    */
   @Override
-  public void enterQuery(GDLParser.QueryContext ctx) {
-    Graph g = new Graph();
-    g.setId(getNewGraphId());
-    graphs.add(g);
-    graphCache.put("query", g);
-    currentGraphId = g.getId();
-    lastSeenGraph = g;
+  public void exitQuery(GDLParser.QueryContext ctx) {
+    for(Vertex v : vertices) {
+      addFilter(Filter.fromGraphElement(v));
+    }
+    for(Edge e : edges) {
+      addFilter(Filter.fromGraphElement(e));
+    }
   }
 
   /**
@@ -259,29 +254,17 @@ public class GDLLoader extends GDLBaseListener {
     processEdge(outgoingEdgeContext.edgeBody(), false);
   }
 
-  @Override
-  public void enterWhere(GDLParser.WhereContext ctx) {
-    currentFilters.clear();
-  }
-
   /**
    * Called when the parser leaves a WHERE expression
    *
    * Takes care that the filter build from the current expression is stored
-   * in the graph and, if needed, merged with previouse expressions
+   * in the graph
    *
    * @param ctx where context
    */
   @Override
   public void exitWhere(GDLParser.WhereContext ctx) {
-    Graph graph = lastSeenGraph;
-
-    if(graph.getFilter() != null) {
-      Filter and = new And(graph.getFilter(),currentFilters.pop());
-      graph.setFilter(and);
-    } else {
-      graph.setFilter(currentFilters.pop());
-    }
+    addFilter(new ArrayList<>(Arrays.asList(currentFilters.pop())));
   }
 
   /**
@@ -311,7 +294,7 @@ public class GDLLoader extends GDLBaseListener {
   /**
    * Called when parser leaves Expression5
    *
-   * Checks if we have conjunctions like AND, OR, XOR and builds filters for them.
+   * Checks if we have conjunctions like AND, OR, XOR and builds filter for them.
    * @param ctx expression context
    */
   @Override
@@ -633,6 +616,21 @@ public class GDLLoader extends GDLBaseListener {
   // --------------------------------------------------------------------------------------------
 
   /**
+   * Adds a list of filters to the current filter using AND conjuctions
+   *
+   * @param newFilters the filters to add
+   */
+  private void addFilter(ArrayList<Filter> newFilters) {
+    for(Filter newFilter : newFilters) {
+      if(filter!=null) {
+        filter = new And(filter,newFilter);
+      } else {
+        filter = newFilter;
+      }
+    }
+  }
+
+  /**
    * Updates the source or target vertex identifier of the last seen edge.
    *
    * @param v current vertex
@@ -647,6 +645,12 @@ public class GDLLoader extends GDLBaseListener {
       }
     }
   }
+
+  /**
+   * Extracts the predicates from a GraphElement and transforms them into a filter
+   *
+   * @param e
+   */
 
   /**
    * Returns the vertex that was last seen by the parser.
