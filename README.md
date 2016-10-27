@@ -165,8 +165,10 @@ g2:Community {title : "Hadoop", memberCount : 31}[
 Besides defining a graph it is also possible to formulate a query with patterns and predicates
 
 ```
-MATCH (alice:Person)-[:knows]->(bob:Person)
-WHERE (alice.name = "Alice" AND bob.name = "Bob") OR alice.age > alice.bob
+MATCH (alice:Person)-[:knows]->(bob:Person)-[:knows*2..2]->(eve:Person)
+WHERE (alice.name = "Alice" AND bob.name = "Bob") 
+OR (alice.age > bob.age)
+OR (alice.age > eve.age)
 ```
 
 **Note** that queries always start with the `MATCH` keyword optionally followed by one or more
