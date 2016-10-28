@@ -53,8 +53,7 @@ public class Not implements Predicate {
       return new Or(new And(otherArguments[0],otherArguments[1]),new And(new Not(otherArguments[0]),new Not(otherArguments[0]))).toCNF();
     }
   }
-
-
+  
   public String toString() {
     return "( NOT " + expression + " )";
   }
