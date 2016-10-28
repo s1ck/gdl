@@ -303,13 +303,13 @@ class GDLLoader extends GDLBaseListener {
   }
 
   /**
-   * Called when we leave an Expression4.
+   * Called when we leave an NotExpression.
    *
    * Checks if the expression is preceded by a Not and adds the filter in that case.
    * @param ctx expression context
    */
   @Override
-  public void exitExpression4(GDLParser.Expression4Context ctx) {
+  public void exitNotExpression(GDLParser.NotExpressionContext ctx) {
     if (!ctx.NOT().isEmpty()) {
       Predicate not = new Not(currentPredicates.pop());
       currentPredicates.add(not);
@@ -317,30 +317,36 @@ class GDLLoader extends GDLBaseListener {
   }
 
   /**
-   * Called when parser leaves Expression5
+   * Called when parser leaves AndExpression
    *
-   * Checks if we have conjunctions like AND, OR, XOR and builds filter for them.
+   * Processes expressions connected by AND
    * @param ctx expression context
    */
   @Override
-  public void exitExpression5(GDLParser.Expression5Context ctx) {
-    List<TerminalNode> conjunctions = ctx.Conjunction();
-    Predicate conjunctionReuse;
+  public void exitAndExpression(GDLParser.AndExpressionContext ctx) {
+    processConjunctionExpression(ctx.AND());
+  }
 
-    for(int i = conjunctions.size() - 1; i >= 0; i--) {
-      Predicate rhs = currentPredicates.removeLast();
-      Predicate lhs = currentPredicates.removeLast();
+  /**
+   * Called when parser leaves OrExpression
+   *
+   * Processes expressions connected by OR
+   * @param ctx expression context
+   */
+  @Override
+  public void exitOrExpression(GDLParser.OrExpressionContext ctx) {
+    processConjunctionExpression(ctx.OR());
+  }
 
-      switch(conjunctions.get(i).getText().toLowerCase()) {
-        case "and": conjunctionReuse = new And(lhs, rhs);
-          break;
-        case "or":  conjunctionReuse = new Or(lhs, rhs);
-          break;
-        default: conjunctionReuse = new Xor(lhs, rhs);
-          break;
-      }
-      currentPredicates.add(conjunctionReuse);
-    }
+  /**
+   * Called when parser leaves AXorExpression
+   *
+   * Processes expressions connected by XOR
+   * @param ctx expression context
+   */
+  @Override
+  public void exitXorExpression(GDLParser.XorExpressionContext ctx) {
+    processConjunctionExpression(ctx.XOR());
   }
 
   /**
@@ -372,6 +378,33 @@ class GDLLoader extends GDLBaseListener {
     }
     updateGraphElement(e);
     setLastSeenEdge(e);
+  }
+
+  /**
+   * Processes a conjuctive expression (AND, OR, XOR) and connects the filter with the corresponding operator
+   *
+   * @param conjunctions list of conjunction operators
+   */
+  private void processConjunctionExpression(List<TerminalNode> conjunctions) {
+    Predicate conjunctionReuse;
+
+    for (int i = conjunctions.size() - 1; i >= 0; i--) {
+      Predicate rhs = currentPredicates.removeLast();
+      Predicate lhs = currentPredicates.removeLast();
+
+      switch (conjunctions.get(i).getText().toLowerCase()) {
+        case "and":
+          conjunctionReuse = new And(lhs, rhs);
+          break;
+        case "or":
+          conjunctionReuse = new Or(lhs, rhs);
+          break;
+        default:
+          conjunctionReuse = new Xor(lhs, rhs);
+          break;
+      }
+      currentPredicates.add(conjunctionReuse);
+    }
   }
 
   // --------------------------------------------------------------------------------------------

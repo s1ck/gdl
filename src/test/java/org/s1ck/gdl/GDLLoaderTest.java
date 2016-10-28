@@ -336,6 +336,19 @@ public class GDLLoaderTest {
   }
 
   @Test
+  public void testNotClause() {
+    String query = "MATCH (alice)-[r]->(bob)" +
+            "WHERE Not alice.age > 50";
+
+    GDLLoader loader = getLoaderFromGDLString(query);
+    validateCollectionSizes(loader, 0, 2, 1);
+
+    assertEquals("wrong filter extracted",
+            "((( NOT alice.age > 50 )) AND (alice.label = DefaultVertex) AND (bob.label = DefaultVertex) AND (r.label = DefaultEdge))",
+            loader.getPredicates().toString());
+  }
+
+  @Test
   public void testComplexWhereClause() {
     String query = "MATCH (alice)-[r]->(bob)" +
       "WHERE (alice.age > bob.age OR (alice.age < 30 AND bob.name = \"Bob\")) " +

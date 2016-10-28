@@ -85,11 +85,15 @@ where
     : ('where' | 'WHERE') expression
     ;
 
-expression : expression5 ;
+expression : xorExpression ;
 
-expression5: expression4 ( Conjunction expression4 )* ;
+xorExpression: andExpression ( XOR andExpression )* ;
 
-expression4 : ( NOT )* expression2 ;
+andExpression: orExpression ( AND orExpression )* ;
+
+orExpression: notExpression ( OR notExpression )* ;
+
+notExpression : ( NOT )* expression2 ;
 
 expression2 : atom ;
 
@@ -191,17 +195,19 @@ Identifier
 // Comparison
 //-------------------------------
 
-Conjunction
-    : 'AND'
-    | 'and'
-    | 'OR'
-    | 'or'
-    | 'XOR'
-    | 'xor'
+
+AND
+    : ('a'|'A')('n'|'N')('d'|'D')
+    ;
+OR
+    : ('o'|'O')('r'|'R')
+    ;
+XOR
+    : ('x'|'X')('o'|'O')('r'|'R')
     ;
 
 NOT
-    : ('OR'|'or')
+    : ('N'|'n')('o'|'O')('t'|'T')
     ;
 
 ComparisonOP
