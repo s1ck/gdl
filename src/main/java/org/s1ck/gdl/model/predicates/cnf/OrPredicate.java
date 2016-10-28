@@ -15,22 +15,25 @@
  * along with GDL.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.s1ck.gdl.model.operators.comparables;
+package org.s1ck.gdl.model.predicates.cnf;
 
-import org.s1ck.gdl.model.GraphElement;
+import org.s1ck.gdl.model.predicates.Predicate;
+import java.util.ArrayList;
+import java.util.List;
 
-public class PropertySelector implements ComparableExpression {
+/**
+ * Represents a collection disjunct predicates
+ * This can be used to represent a CNF
+ */
+public class OrPredicate extends PredicateCollection<Predicate>{
 
-  private GraphElement element;
-
-  private String propertyName;
-
-  public PropertySelector(GraphElement element, String propertyName) {
-    this.element = element;
-    this.propertyName = propertyName;
+  public OrPredicate() {
+    this.predicates = new ArrayList<>();
   }
 
-  public String toString() {
-    return element.getVariable() + "." + propertyName;
+  public OrPredicate(List<Predicate> predicates) {
+    this.predicates = predicates;
   }
+
+  public String operatorName() { return "OR"; }
 }

@@ -15,7 +15,22 @@
  * along with GDL.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.s1ck.gdl.model.operators.comparables;
+package org.s1ck.gdl.model.predicates.comparables;
 
-public interface ComparableExpression {
+import org.s1ck.gdl.model.GraphElement;
+
+public class PropertySelector implements ComparableExpression {
+
+  private GraphElement element;
+
+  private String propertyName;
+
+  public PropertySelector(GraphElement element, String propertyName) {
+    this.element = element;
+    this.propertyName = propertyName;
+  }
+
+  public String toString() {
+    return element.getVariable() + "." + propertyName;
+  }
 }

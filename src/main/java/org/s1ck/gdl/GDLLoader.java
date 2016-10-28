@@ -19,15 +19,16 @@ package org.s1ck.gdl;
 
 import org.antlr.v4.runtime.tree.TerminalNode;
 import org.s1ck.gdl.model.*;
-import org.s1ck.gdl.model.operators.And;
-import org.s1ck.gdl.model.operators.Comparison;
-import org.s1ck.gdl.model.operators.Predicate;
-import org.s1ck.gdl.model.operators.Not;
-import org.s1ck.gdl.model.operators.Or;
-import org.s1ck.gdl.model.operators.Xor;
-import org.s1ck.gdl.model.operators.comparables.ComparableExpression;
-import org.s1ck.gdl.model.operators.comparables.Literal;
-import org.s1ck.gdl.model.operators.comparables.PropertySelector;
+import org.s1ck.gdl.model.predicates.And;
+import org.s1ck.gdl.model.predicates.Comparison;
+import org.s1ck.gdl.model.predicates.Predicate;
+import org.s1ck.gdl.model.predicates.Not;
+import org.s1ck.gdl.model.predicates.Or;
+import org.s1ck.gdl.model.predicates.Xor;
+import org.s1ck.gdl.model.predicates.cnf.AndPredicate;
+import org.s1ck.gdl.model.predicates.comparables.ComparableExpression;
+import org.s1ck.gdl.model.predicates.comparables.Literal;
+import org.s1ck.gdl.model.predicates.comparables.PropertySelector;
 
 import java.util.*;
 
@@ -43,8 +44,8 @@ class GDLLoader extends GDLBaseListener {
   private final Set<Vertex> vertices;
   private final Set<Edge> edges;
 
-  // stores the predicate tree for that query
-  private Predicate predicate;
+  // stores the predicates tree for that query
+  private AndPredicate predicates;
 
   private final String defaultGraphLabel;
   private final String defaultVertexLabel;
@@ -83,10 +84,11 @@ class GDLLoader extends GDLBaseListener {
     vertexCache = new HashMap<>();
     edgeCache   = new HashMap<>();
 
+    predicates = new AndPredicate();
+
     graphs    = new HashSet<>();
     vertices  = new HashSet<>();
     edges     = new HashSet<>();
-    predicate = null;
 
     currentPredicates = new ArrayDeque<>();
   }
@@ -119,11 +121,11 @@ class GDLLoader extends GDLBaseListener {
   }
 
     /**
-     * Returns the predicates defined by the query represented as a tree
+     * Returns the predicates defined by the query represented in CNF
      *
-     * @return filter
+     * @return predicates
      */
-  Predicate getPredicate() { return predicate; }
+  AndPredicate getPredicates() { return predicates; }
   /**
    * Returns the graph cache that contains a mapping from variables used in the GDL script to
    * graph instances.
@@ -617,17 +619,13 @@ class GDLLoader extends GDLBaseListener {
   // --------------------------------------------------------------------------------------------
 
   /**
-   * Adds a list of predicates to the current predicate using AND conjunctions
+   * Adds a list of predicates to the current predicates using AND conjunctions
    *
    * @param newPredicates predicates to be added
    */
   private void addPredicates(List<Predicate> newPredicates) {
     for(Predicate newPredicate : newPredicates) {
-      if(predicate != null) {
-        predicate = new And(predicate, newPredicate);
-      } else {
-        predicate = newPredicate;
-      }
+      this.predicates.and(newPredicate.toCNF());
     }
   }
 

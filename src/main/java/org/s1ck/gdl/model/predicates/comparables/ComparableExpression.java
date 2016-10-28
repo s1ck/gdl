@@ -15,22 +15,7 @@
  * along with GDL.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.s1ck.gdl.model.operators;
+package org.s1ck.gdl.model.predicates.comparables;
 
-public class And implements Predicate {
-
-  // left hand side
-  private Predicate lhs;
-
-  // right hand side
-  private Predicate rhs;
-
-  public And(Predicate lhs, Predicate rhs) {
-    this.lhs = lhs;
-    this.rhs = rhs;
-  }
-
-  public String toString() {
-    return "(" + lhs + " AND " + rhs + ")";
-  }
+public interface ComparableExpression {
 }

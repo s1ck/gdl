@@ -15,7 +15,9 @@
  * along with GDL.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.s1ck.gdl.model.operators;
+package org.s1ck.gdl.model.predicates;
+
+import org.s1ck.gdl.model.predicates.cnf.AndPredicate;
 
 public class Xor implements Predicate {
 
@@ -28,6 +30,15 @@ public class Xor implements Predicate {
   public Xor(Predicate lhs, Predicate rhs) {
     this.lhs = lhs;
     this.rhs = rhs;
+  }
+
+  public Predicate[] getArguments() {
+    Predicate[] arguments = {lhs,rhs};
+    return arguments;
+  }
+
+  public AndPredicate toCNF() {
+    return new Or(new And(lhs,new Not(rhs)),new And(new Not(lhs),rhs)).toCNF();
   }
 
   public String toString() {

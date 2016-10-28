@@ -15,17 +15,33 @@
  * along with GDL.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.s1ck.gdl.model.operators;
+package org.s1ck.gdl.model.predicates;
 
-public class Not implements Predicate {
+import org.s1ck.gdl.model.predicates.cnf.AndPredicate;
 
-  private Predicate expression;
+public class And implements Predicate {
 
-  public Not(Predicate expression) {
-    this.expression = expression;
+  // left hand side
+  private Predicate lhs;
+
+  // right hand side
+  private Predicate rhs;
+
+  public And(Predicate lhs, Predicate rhs) {
+    this.lhs = lhs;
+    this.rhs = rhs;
+  }
+
+  public Predicate[] getArguments() {
+    Predicate[] arguments = {lhs,rhs};
+    return arguments;
+  }
+
+  public AndPredicate toCNF() {
+    return lhs.toCNF().and(rhs.toCNF());
   }
 
   public String toString() {
-    return "( NOT " + expression + " )";
+    return "(" + lhs + " AND " + rhs + ")";
   }
 }

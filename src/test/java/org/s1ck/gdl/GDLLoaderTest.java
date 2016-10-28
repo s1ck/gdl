@@ -308,23 +308,23 @@ public class GDLLoaderTest {
     validateCollectionSizes(loader, 0, 2, 1);
 
     assertEquals("wrong filter extracted",
-      "(((alice.age > 50 AND alice.label = DefaultVertex) AND bob.label = DefaultVertex) AND r.label = DefaultEdge)",
-      loader.getPredicate().toString());
+      "((alice.age > 50) AND (alice.label = DefaultVertex) AND (bob.label = DefaultVertex) AND (r.label = DefaultEdge))",
+      loader.getPredicates().toString());
   }
 
   @Test
   public void testComplexWhereClause() {
     String query = "MATCH (alice)-[r]->(bob)" +
-      "WHERE alice.age > bob.age " +
-      "OR (alice.age < 30 AND bob.name = \"Bob\") " +
+      "WHERE (alice.age > bob.age OR (alice.age < 30 AND bob.name = \"Bob\")) " +
       "AND alice.id != bob.id";
 
     GDLLoader loader = getLoaderFromGDLString(query);
     validateCollectionSizes(loader, 0, 2, 1);
 
     assertEquals("wrong filter extracted",
-      "((((alice.age > bob.age OR ((alice.age < 30 AND bob.name = Bob) AND alice.id != bob.id)) AND alice.label = DefaultVertex) AND bob.label = DefaultVertex) AND r.label = DefaultEdge)",
-      loader.getPredicate().toString());
+      "((alice.age > bob.age OR alice.age < 30) AND (alice.age > bob.age OR bob.name = Bob) AND (alice.id != bob.id) " +
+      "AND (alice.label = DefaultVertex) AND (bob.label = DefaultVertex) AND (r.label = DefaultEdge))",
+      loader.getPredicates().toString());
   }
 
   @Test
@@ -335,8 +335,8 @@ public class GDLLoaderTest {
     validateCollectionSizes(loader, 0, 2, 1);
 
     assertEquals("wrong filter extracted",
-      "(((alice.label = DefaultVertex AND alice.age = 50) AND bob.label = User) AND r.label = knows)",
-      loader.getPredicate().toString());
+      "((alice.label = DefaultVertex) AND (alice.age = 50) AND (bob.label = User) AND (r.label = knows))",
+      loader.getPredicates().toString());
   }
 
   @Test
@@ -350,8 +350,8 @@ public class GDLLoaderTest {
     Vertex p = loader.getVertexCache().get("p");
 
     assertEquals("filters do not match",
-      "((((p.age >= other.age AND p.label = Person) AND other.label = Person) AND e1.label = likes) AND e1.love = true)",
-      loader.getPredicate().toString());
+      "((p.age >= other.age) AND (p.label = Person) AND (other.label = Person) AND (e1.label = likes) AND (e1.love = true))",
+      loader.getPredicates().toString());
 
     assertEquals("vertex p has wrong label","Person",p.getLabel());
   }
