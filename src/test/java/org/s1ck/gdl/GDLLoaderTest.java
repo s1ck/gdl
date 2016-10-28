@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.Assert.*;
 
@@ -31,6 +32,10 @@ public class GDLLoaderTest {
 
     validateCollectionSizes(loader, 0, 1, 0);
     validateCacheSizes(loader, 0, 0, 0);
+
+    Optional<Vertex> vertex = loader.getVertices().stream().findFirst();
+    assertTrue(vertex.isPresent());
+    assertEquals(loader.getDefaultVertexLabel(), vertex.get().getLabel());
   }
 
   @Test
@@ -81,6 +86,10 @@ public class GDLLoaderTest {
     GDLLoader loader = getLoaderFromGDLString("()-->()");
     validateCollectionSizes(loader, 0, 2, 1);
     validateCacheSizes(loader, 0, 0, 0);
+
+    Optional<Edge> edge = loader.getEdges().stream().findFirst();
+    assertTrue(edge.isPresent());
+    assertEquals("edge has wrong label", loader.getDefaultEdgeLabel(), edge.get().getLabel());
   }
 
   @Test
@@ -92,6 +101,7 @@ public class GDLLoaderTest {
     assertTrue("edge not cached", loader.getEdgeCache().containsKey("e1"));
     Edge e1 = loader.getEdgeCache().get("e1");
     assertNotNull("e was null", e1);
+    assertEquals(loader.getDefaultEdgeLabel(), e1.getLabel());
     Vertex v1 = loader.getVertexCache().get("v1");
     Vertex v2 = loader.getVertexCache().get("v2");
 
@@ -113,6 +123,13 @@ public class GDLLoaderTest {
 
     assertEquals("wrong source vertex identifier", (Long) v1.getId(), e1.getTargetVertexId());
     assertEquals("wrong target vertex identifier", (Long) v2.getId(), e1.getSourceVertexId());
+  }
+
+  @Test
+  public void readEdgeWithNoLabelTest() throws Exception {
+    GDLLoader loader = getLoaderFromGDLString("()-[e]->()");
+    Edge e = loader.getEdgeCache().get("e");
+    assertEquals("edge has wrong label", loader.getDefaultEdgeLabel(), e.getLabel());
   }
 
   @Test
@@ -205,6 +222,10 @@ public class GDLLoaderTest {
     GDLLoader loader = getLoaderFromGDLString("[]");
     validateCollectionSizes(loader, 1, 0, 0);
     validateCacheSizes(loader, 0, 0, 0);
+
+    Optional<Graph> graph = loader.getGraphs().stream().findFirst();
+    assertTrue(graph.isPresent());
+    assertEquals(loader.getDefaultGraphLabel(), graph.get().getLabel());
   }
 
   @Test
@@ -220,7 +241,9 @@ public class GDLLoaderTest {
     validateCollectionSizes(loader, 1, 1, 0);
     validateCacheSizes(loader, 1, 0, 0);
     assertTrue("graph not cached", loader.getGraphCache().containsKey("g"));
-    assertNotNull("graph was null", loader.getGraphCache().get("g"));
+    Graph g = loader.getGraphCache().get("g");
+    assertNotNull("graph was null", g);
+    assertEquals(loader.getDefaultGraphLabel(), g.getLabel());
   }
 
   @Test
