@@ -94,6 +94,33 @@ class GDLLoader extends GDLBaseListener {
   }
 
   /**
+   * Returns the default graph label.
+   *
+   * @return default graph label
+   */
+  public String getDefaultGraphLabel() {
+    return defaultGraphLabel;
+  }
+
+  /**
+   * Returns the default vertex label
+   *
+   * @return default vertex label
+   */
+  public String getDefaultVertexLabel() {
+    return defaultVertexLabel;
+  }
+
+  /**
+   * Returns the default edge label
+   *
+   * @return default edge label
+   */
+  public String getDefaultEdgeLabel() {
+    return defaultEdgeLabel;
+  }
+
+  /**
    * Returns a collection of all graphs defined in the GDL script.
    *
    * @return graph collection
@@ -404,6 +431,8 @@ class GDLLoader extends GDLBaseListener {
       int[] range = parseEdgeLengthContext(edgeBodyContext.edgeLength());
       e.setLowerBound(range[0]);
       e.setUpperBound(range[1]);
+    } else {
+      e.setLabel(defaultEdgeLabel);
     }
     return e;
   }
