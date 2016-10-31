@@ -15,17 +15,34 @@
  * along with GDL.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.s1ck.gdl.model.operators.comparables;
+package org.s1ck.gdl.model.predicates.booleans;
 
-public class Literal implements ComparableExpression {
+import org.s1ck.gdl.model.predicates.Predicate;
+import org.s1ck.gdl.model.cnf.CNF;
 
-  private Object value;
+public class And implements Predicate {
 
-  public Literal(Object value) {
-    this.value = value;
+  // left hand side
+  private Predicate lhs;
+
+  // right hand side
+  private Predicate rhs;
+
+  public And(Predicate lhs, Predicate rhs) {
+    this.lhs = lhs;
+    this.rhs = rhs;
+  }
+
+  public Predicate[] getArguments() {
+    Predicate[] arguments = {lhs,rhs};
+    return arguments;
+  }
+
+  public CNF toCNF() {
+    return lhs.toCNF().and(rhs.toCNF());
   }
 
   public String toString() {
-    return value.toString();
+    return "(" + lhs + " AND " + rhs + ")";
   }
 }

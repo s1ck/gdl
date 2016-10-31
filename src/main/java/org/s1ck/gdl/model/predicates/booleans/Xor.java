@@ -15,22 +15,34 @@
  * along with GDL.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.s1ck.gdl.model.operators.comparables;
+package org.s1ck.gdl.model.predicates.booleans;
 
-import org.s1ck.gdl.model.GraphElement;
+import org.s1ck.gdl.model.predicates.Predicate;
+import org.s1ck.gdl.model.cnf.CNF;
 
-public class PropertySelector implements ComparableExpression {
+public class Xor implements Predicate {
 
-  private GraphElement element;
+  // left hand side
+  private Predicate lhs;
 
-  private String propertyName;
+  // right hand side
+  private Predicate rhs;
 
-  public PropertySelector(GraphElement element, String propertyName) {
-    this.element = element;
-    this.propertyName = propertyName;
+  public Xor(Predicate lhs, Predicate rhs) {
+    this.lhs = lhs;
+    this.rhs = rhs;
+  }
+
+  public Predicate[] getArguments() {
+    Predicate[] arguments = {lhs,rhs};
+    return arguments;
+  }
+
+  public CNF toCNF() {
+    return new Or(new And(lhs,new Not(rhs)),new And(new Not(lhs),rhs)).toCNF();
   }
 
   public String toString() {
-    return element.getVariable() + "." + propertyName;
+    return "(" + lhs + " XOR " + rhs + ")";
   }
 }

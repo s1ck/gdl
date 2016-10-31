@@ -15,17 +15,7 @@
  * along with GDL.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.s1ck.gdl.model.operators;
+package org.s1ck.gdl.model.comparables;
 
-public class Not implements Predicate {
-
-  private Predicate expression;
-
-  public Not(Predicate expression) {
-    this.expression = expression;
-  }
-
-  public String toString() {
-    return "( NOT " + expression + " )";
-  }
+public interface ComparableExpression {
 }

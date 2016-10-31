@@ -24,7 +24,7 @@ import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.s1ck.gdl.model.Edge;
 import org.s1ck.gdl.model.Graph;
 import org.s1ck.gdl.model.Vertex;
-import org.s1ck.gdl.model.operators.Predicate;
+import org.s1ck.gdl.model.cnf.CNF;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -93,11 +93,11 @@ public class GDLHandler {
   }
 
   /**
-   * Returns the predicates defined by the query.
+   * Returns the predicates defined by the query in CNF.
    *
-   * @return filters
+   * @return predicates
    */
-  public Predicate getFilters() { return loader.getPredicate(); }
+  public CNF getFilters() { return loader.getPredicates(); }
 
   /**
    * Returns the graph cache that contains a mapping from variables used in the GDL script to

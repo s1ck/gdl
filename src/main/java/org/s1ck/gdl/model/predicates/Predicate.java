@@ -15,11 +15,13 @@
  * along with GDL.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.s1ck.gdl.model.operators;
+package org.s1ck.gdl.model.predicates;
 
 import org.s1ck.gdl.model.GraphElement;
-import org.s1ck.gdl.model.operators.comparables.Literal;
-import org.s1ck.gdl.model.operators.comparables.PropertySelector;
+import org.s1ck.gdl.model.predicates.expressions.Comparison;
+import org.s1ck.gdl.model.cnf.CNF;
+import org.s1ck.gdl.model.comparables.Literal;
+import org.s1ck.gdl.model.comparables.PropertySelector;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -64,4 +66,8 @@ public interface Predicate {
     }
     return predicates;
   }
+
+  public CNF toCNF();
+
+  public Predicate[] getArguments();
 }

@@ -15,22 +15,17 @@
  * along with GDL.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.s1ck.gdl.model.operators;
+package org.s1ck.gdl.model.comparables;
 
-public class Xor implements Predicate {
+public class Literal implements ComparableExpression {
 
-  // left hand side
-  private Predicate lhs;
+  private Object value;
 
-  // right hand side
-  private Predicate rhs;
-
-  public Xor(Predicate lhs, Predicate rhs) {
-    this.lhs = lhs;
-    this.rhs = rhs;
+  public Literal(Object value) {
+    this.value = value;
   }
 
   public String toString() {
-    return "(" + lhs + " XOR " + rhs + ")";
+    return value.toString();
   }
 }

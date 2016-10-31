@@ -19,15 +19,16 @@ package org.s1ck.gdl;
 
 import org.antlr.v4.runtime.tree.TerminalNode;
 import org.s1ck.gdl.model.*;
-import org.s1ck.gdl.model.operators.And;
-import org.s1ck.gdl.model.operators.Comparison;
-import org.s1ck.gdl.model.operators.Predicate;
-import org.s1ck.gdl.model.operators.Not;
-import org.s1ck.gdl.model.operators.Or;
-import org.s1ck.gdl.model.operators.Xor;
-import org.s1ck.gdl.model.operators.comparables.ComparableExpression;
-import org.s1ck.gdl.model.operators.comparables.Literal;
-import org.s1ck.gdl.model.operators.comparables.PropertySelector;
+import org.s1ck.gdl.model.predicates.booleans.And;
+import org.s1ck.gdl.model.predicates.expressions.Comparison;
+import org.s1ck.gdl.model.predicates.Predicate;
+import org.s1ck.gdl.model.predicates.booleans.Not;
+import org.s1ck.gdl.model.predicates.booleans.Or;
+import org.s1ck.gdl.model.predicates.booleans.Xor;
+import org.s1ck.gdl.model.cnf.CNF;
+import org.s1ck.gdl.model.comparables.ComparableExpression;
+import org.s1ck.gdl.model.comparables.Literal;
+import org.s1ck.gdl.model.comparables.PropertySelector;
 
 import java.util.*;
 
@@ -43,8 +44,8 @@ class GDLLoader extends GDLBaseListener {
   private final Set<Vertex> vertices;
   private final Set<Edge> edges;
 
-  // stores the predicate tree for that query
-  private Predicate predicate;
+  // stores the predicates tree for that query
+  private CNF predicates;
 
   private final String defaultGraphLabel;
   private final String defaultVertexLabel;
@@ -83,10 +84,11 @@ class GDLLoader extends GDLBaseListener {
     vertexCache = new HashMap<>();
     edgeCache   = new HashMap<>();
 
+    predicates = new CNF();
+
     graphs    = new HashSet<>();
     vertices  = new HashSet<>();
     edges     = new HashSet<>();
-    predicate = null;
 
     currentPredicates = new ArrayDeque<>();
   }
@@ -146,11 +148,11 @@ class GDLLoader extends GDLBaseListener {
   }
 
     /**
-     * Returns the predicates defined by the query represented as a tree
+     * Returns the predicates defined by the query represented in CNF
      *
-     * @return filter
+     * @return predicates
      */
-  Predicate getPredicate() { return predicate; }
+  CNF getPredicates() { return predicates; }
   /**
    * Returns the graph cache that contains a mapping from variables used in the GDL script to
    * graph instances.
@@ -301,13 +303,13 @@ class GDLLoader extends GDLBaseListener {
   }
 
   /**
-   * Called when we leave an Expression4.
+   * Called when we leave an NotExpression.
    *
    * Checks if the expression is preceded by a Not and adds the filter in that case.
    * @param ctx expression context
    */
   @Override
-  public void exitExpression4(GDLParser.Expression4Context ctx) {
+  public void exitNotExpression(GDLParser.NotExpressionContext ctx) {
     if (!ctx.NOT().isEmpty()) {
       Predicate not = new Not(currentPredicates.pop());
       currentPredicates.add(not);
@@ -315,30 +317,36 @@ class GDLLoader extends GDLBaseListener {
   }
 
   /**
-   * Called when parser leaves Expression5
+   * Called when parser leaves AndExpression
    *
-   * Checks if we have conjunctions like AND, OR, XOR and builds filter for them.
+   * Processes expressions connected by AND
    * @param ctx expression context
    */
   @Override
-  public void exitExpression5(GDLParser.Expression5Context ctx) {
-    List<TerminalNode> conjunctions = ctx.Conjunction();
-    Predicate conjunctionReuse;
+  public void exitAndExpression(GDLParser.AndExpressionContext ctx) {
+    processConjunctionExpression(ctx.AND());
+  }
 
-    for(int i = conjunctions.size() - 1; i >= 0; i--) {
-      Predicate rhs = currentPredicates.removeLast();
-      Predicate lhs = currentPredicates.removeLast();
+  /**
+   * Called when parser leaves OrExpression
+   *
+   * Processes expressions connected by OR
+   * @param ctx expression context
+   */
+  @Override
+  public void exitOrExpression(GDLParser.OrExpressionContext ctx) {
+    processConjunctionExpression(ctx.OR());
+  }
 
-      switch(conjunctions.get(i).getText().toLowerCase()) {
-        case "and": conjunctionReuse = new And(lhs, rhs);
-          break;
-        case "or":  conjunctionReuse = new Or(lhs, rhs);
-          break;
-        default: conjunctionReuse = new Xor(lhs, rhs);
-          break;
-      }
-      currentPredicates.add(conjunctionReuse);
-    }
+  /**
+   * Called when parser leaves AXorExpression
+   *
+   * Processes expressions connected by XOR
+   * @param ctx expression context
+   */
+  @Override
+  public void exitXorExpression(GDLParser.XorExpressionContext ctx) {
+    processConjunctionExpression(ctx.XOR());
   }
 
   /**
@@ -370,6 +378,33 @@ class GDLLoader extends GDLBaseListener {
     }
     updateGraphElement(e);
     setLastSeenEdge(e);
+  }
+
+  /**
+   * Processes a conjuctive expression (AND, OR, XOR) and connects the filter with the corresponding operator
+   *
+   * @param conjunctions list of conjunction operators
+   */
+  private void processConjunctionExpression(List<TerminalNode> conjunctions) {
+    Predicate conjunctionReuse;
+
+    for (int i = conjunctions.size() - 1; i >= 0; i--) {
+      Predicate rhs = currentPredicates.removeLast();
+      Predicate lhs = currentPredicates.removeLast();
+
+      switch (conjunctions.get(i).getText().toLowerCase()) {
+        case "and":
+          conjunctionReuse = new And(lhs, rhs);
+          break;
+        case "or":
+          conjunctionReuse = new Or(lhs, rhs);
+          break;
+        default:
+          conjunctionReuse = new Xor(lhs, rhs);
+          break;
+      }
+      currentPredicates.add(conjunctionReuse);
+    }
   }
 
   // --------------------------------------------------------------------------------------------
@@ -646,17 +681,13 @@ class GDLLoader extends GDLBaseListener {
   // --------------------------------------------------------------------------------------------
 
   /**
-   * Adds a list of predicates to the current predicate using AND conjunctions
+   * Adds a list of predicates to the current predicates using AND conjunctions
    *
    * @param newPredicates predicates to be added
    */
   private void addPredicates(List<Predicate> newPredicates) {
     for(Predicate newPredicate : newPredicates) {
-      if(predicate != null) {
-        predicate = new And(predicate, newPredicate);
-      } else {
-        predicate = newPredicate;
-      }
+      this.predicates.and(newPredicate.toCNF());
     }
   }
 
