@@ -1,7 +1,7 @@
 package org.s1ck.gdl.predicates;
 
-import org.s1ck.gdl.model.predicates.Comparison;
-import org.s1ck.gdl.model.predicates.comparables.Literal;
+import org.s1ck.gdl.model.predicates.expressions.Comparison;
+import org.s1ck.gdl.model.comparables.Literal;
 
 
 public abstract class PredicateTest {

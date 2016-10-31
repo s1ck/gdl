@@ -15,7 +15,7 @@
  * along with GDL.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.s1ck.gdl.model.predicates.cnf;
+package org.s1ck.gdl.model.cnf;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,13 +24,13 @@ import java.util.List;
  * Represents a collection conjunct OrPredicates
  * This can be used to represent a CNF
  */
-public class AndPredicate extends PredicateCollection<OrPredicate>{
+public class CNF extends PredicateCollection<CNFElement>{
 
-  public AndPredicate() {
+  public CNF() {
     this.predicates = new ArrayList<>();
   }
 
-  public AndPredicate(List<OrPredicate> predicates) {
+  public CNF(List<CNFElement> predicates) {
     this.predicates = predicates;
   }
 
@@ -39,7 +39,7 @@ public class AndPredicate extends PredicateCollection<OrPredicate>{
    * @param other a predicate in cnf
    * @return this
    */
-  public AndPredicate and(AndPredicate other) {
+  public CNF and(CNF other) {
     addPredicates(other.getPredicates());
     return this;
   }
@@ -50,15 +50,15 @@ public class AndPredicate extends PredicateCollection<OrPredicate>{
    * @param other a predicate in cnf
    * @return this
    */
-  public AndPredicate or(AndPredicate other) {
-    ArrayList<OrPredicate> newPredicates = new ArrayList<>();
-    for (OrPredicate p : predicates) {
-      for (OrPredicate q : other.getPredicates()) {
-        OrPredicate newOrPredicate = new OrPredicate();
-        newOrPredicate.addPredicates(p.getPredicates());
-        newOrPredicate.addPredicates(q.getPredicates());
+  public CNF or(CNF other) {
+    ArrayList<CNFElement> newPredicates = new ArrayList<>();
+    for (CNFElement p : predicates) {
+      for (CNFElement q : other.getPredicates()) {
+        CNFElement newCNFElement = new CNFElement();
+        newCNFElement.addPredicates(p.getPredicates());
+        newCNFElement.addPredicates(q.getPredicates());
 
-        newPredicates.add(newOrPredicate);
+        newPredicates.add(newCNFElement);
       }
     }
     predicates = newPredicates;

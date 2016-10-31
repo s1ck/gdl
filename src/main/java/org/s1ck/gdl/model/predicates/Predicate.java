@@ -18,9 +18,10 @@
 package org.s1ck.gdl.model.predicates;
 
 import org.s1ck.gdl.model.GraphElement;
-import org.s1ck.gdl.model.predicates.cnf.AndPredicate;
-import org.s1ck.gdl.model.predicates.comparables.Literal;
-import org.s1ck.gdl.model.predicates.comparables.PropertySelector;
+import org.s1ck.gdl.model.predicates.expressions.Comparison;
+import org.s1ck.gdl.model.cnf.CNF;
+import org.s1ck.gdl.model.comparables.Literal;
+import org.s1ck.gdl.model.comparables.PropertySelector;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -66,7 +67,7 @@ public interface Predicate {
     return predicates;
   }
 
-  public AndPredicate toCNF();
+  public CNF toCNF();
 
   public Predicate[] getArguments();
 }

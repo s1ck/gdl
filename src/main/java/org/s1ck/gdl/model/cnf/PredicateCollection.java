@@ -15,7 +15,7 @@
  * along with GDL.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.s1ck.gdl.model.predicates.cnf;
+package org.s1ck.gdl.model.cnf;
 
 import java.util.List;
 import static java.util.stream.Collectors.joining;

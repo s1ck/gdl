@@ -15,7 +15,7 @@
  * along with GDL.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.s1ck.gdl.model.predicates.comparables;
+package org.s1ck.gdl.model.comparables;
 
 import org.s1ck.gdl.model.GraphElement;
 

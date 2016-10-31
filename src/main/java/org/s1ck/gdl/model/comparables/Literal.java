@@ -15,33 +15,17 @@
  * along with GDL.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.s1ck.gdl.model.predicates;
+package org.s1ck.gdl.model.comparables;
 
-import org.s1ck.gdl.model.predicates.cnf.AndPredicate;
+public class Literal implements ComparableExpression {
 
-public class Xor implements Predicate {
+  private Object value;
 
-  // left hand side
-  private Predicate lhs;
-
-  // right hand side
-  private Predicate rhs;
-
-  public Xor(Predicate lhs, Predicate rhs) {
-    this.lhs = lhs;
-    this.rhs = rhs;
-  }
-
-  public Predicate[] getArguments() {
-    Predicate[] arguments = {lhs,rhs};
-    return arguments;
-  }
-
-  public AndPredicate toCNF() {
-    return new Or(new And(lhs,new Not(rhs)),new And(new Not(lhs),rhs)).toCNF();
+  public Literal(Object value) {
+    this.value = value;
   }
 
   public String toString() {
-    return "(" + lhs + " XOR " + rhs + ")";
+    return value.toString();
   }
 }

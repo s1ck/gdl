@@ -1,9 +1,11 @@
-package org.s1ck.gdl.predicates;
+package org.s1ck.gdl.predicates.booleans;
 
 import org.junit.Test;
-import org.s1ck.gdl.model.predicates.And;
-import org.s1ck.gdl.model.predicates.Comparison;
-import org.s1ck.gdl.model.predicates.cnf.AndPredicate;
+import org.s1ck.gdl.model.predicates.booleans.And;
+import org.s1ck.gdl.model.predicates.expressions.Comparison;
+import org.s1ck.gdl.model.cnf.CNF;
+import org.s1ck.gdl.predicates.PredicateTest;
+
 import static org.junit.Assert.assertEquals;
 
 public class AndTest extends PredicateTest {
@@ -14,7 +16,7 @@ public class AndTest extends PredicateTest {
     Comparison b = getComparison();
 
     And and = new And(a,b);
-    AndPredicate reference = a.toCNF().and(b.toCNF());
+    CNF reference = a.toCNF().and(b.toCNF());
 
     assertEquals(reference,and.toCNF());
   }

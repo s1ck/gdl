@@ -15,11 +15,12 @@
  * along with GDL.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.s1ck.gdl.model.predicates;
+package org.s1ck.gdl.model.predicates.expressions;
 
-import org.s1ck.gdl.model.predicates.cnf.AndPredicate;
-import org.s1ck.gdl.model.predicates.cnf.OrPredicate;
-import org.s1ck.gdl.model.predicates.comparables.ComparableExpression;
+import org.s1ck.gdl.model.predicates.Predicate;
+import org.s1ck.gdl.model.cnf.CNF;
+import org.s1ck.gdl.model.cnf.CNFElement;
+import org.s1ck.gdl.model.comparables.ComparableExpression;
 
 public class Comparison implements Predicate {
 
@@ -66,12 +67,12 @@ public class Comparison implements Predicate {
     return arguments;
   }
 
-  public AndPredicate toCNF() {
-    AndPredicate andPredicate = new AndPredicate();
-    OrPredicate orPredicate = new OrPredicate();
-    orPredicate.addPredicate(this);
-    andPredicate.addPredicate(orPredicate);
-    return andPredicate;
+  public CNF toCNF() {
+    CNF CNF = new CNF();
+    CNFElement CNFElement = new CNFElement();
+    CNFElement.addPredicate(this);
+    CNF.addPredicate(CNFElement);
+    return CNF;
   }
 
   public String toString() {

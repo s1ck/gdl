@@ -1,30 +1,30 @@
-package org.s1ck.gdl.predicates.cnf;
+package org.s1ck.gdl.cnf;
 
 import org.junit.Test;
-import org.s1ck.gdl.model.predicates.Comparison;
+import org.s1ck.gdl.model.predicates.expressions.Comparison;
 import org.s1ck.gdl.model.predicates.Predicate;
-import org.s1ck.gdl.model.predicates.cnf.AndPredicate;
-import org.s1ck.gdl.model.predicates.cnf.OrPredicate;
-import org.s1ck.gdl.model.predicates.comparables.Literal;
+import org.s1ck.gdl.model.cnf.CNF;
+import org.s1ck.gdl.model.cnf.CNFElement;
+import org.s1ck.gdl.model.comparables.Literal;
 import static org.junit.Assert.assertEquals;
 
 
 
 import java.util.ArrayList;
 
-public class AndPredicateTest {
+public class CNFTest {
   @Test
   public void andConjunctionTest() {
-    OrPredicate or1 = new OrPredicate();
-    OrPredicate or2 = new OrPredicate();
+    CNFElement or1 = new CNFElement();
+    CNFElement or2 = new CNFElement();
 
-    AndPredicate and1 = new AndPredicate();
+    CNF and1 = new CNF();
     and1.addPredicate(or1);
 
-    AndPredicate and2 = new AndPredicate();
+    CNF and2 = new CNF();
     and2.addPredicate(or2);
 
-    ArrayList<OrPredicate> reference = new ArrayList<>();
+    ArrayList<CNFElement> reference = new ArrayList<>();
     reference.add(or1);
     reference.add(or2);
 
@@ -38,41 +38,41 @@ public class AndPredicateTest {
     Predicate c = new Comparison(new Literal(3), Comparison.Comparator.GT, new Literal(7));
     Predicate d = new Comparison(new Literal(4), Comparison.Comparator.GT, new Literal(8));
 
-    OrPredicate or1 = new OrPredicate();
+    CNFElement or1 = new CNFElement();
     or1.addPredicate(a);
-    OrPredicate or2 = new OrPredicate();
+    CNFElement or2 = new CNFElement();
     or2.addPredicate(b);
-    OrPredicate or3 = new OrPredicate();
+    CNFElement or3 = new CNFElement();
     or3.addPredicate(c);
-    OrPredicate or4 = new OrPredicate();
+    CNFElement or4 = new CNFElement();
     or4.addPredicate(d);
 
     // Define a CNF of the Form [ [a], [b] ]
-    AndPredicate and1 = new AndPredicate();
+    CNF and1 = new CNF();
     and1.addPredicate(or1);
     and1.addPredicate(or2);
 
     // Define a CNF of the Form [ [c], [d] ]
-    AndPredicate and2 = new AndPredicate();
+    CNF and2 = new CNF();
     and2.addPredicate(or3);
     and2.addPredicate(or4);
 
 
-    OrPredicate refOr1 = new OrPredicate();
+    CNFElement refOr1 = new CNFElement();
     refOr1.addPredicate(a);
     refOr1.addPredicate(c);
-    OrPredicate refOr2 = new OrPredicate();
+    CNFElement refOr2 = new CNFElement();
     refOr2.addPredicate(a);
     refOr2.addPredicate(d);
-    OrPredicate refOr3 = new OrPredicate();
+    CNFElement refOr3 = new CNFElement();
     refOr3.addPredicate(b);
     refOr3.addPredicate(c);
-    OrPredicate refOr4 = new OrPredicate();
+    CNFElement refOr4 = new CNFElement();
     refOr4.addPredicate(b);
     refOr4.addPredicate(d);
 
     // Expected output is [ [a,c], [a,d], [b,c]. [b,d] ]
-    AndPredicate reference = new AndPredicate();
+    CNF reference = new CNF();
     reference.addPredicate(refOr1);
     reference.addPredicate(refOr2);
     reference.addPredicate(refOr3);

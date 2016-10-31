@@ -15,25 +15,34 @@
  * along with GDL.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.s1ck.gdl.model.predicates.cnf;
+package org.s1ck.gdl.model.predicates.booleans;
 
 import org.s1ck.gdl.model.predicates.Predicate;
-import java.util.ArrayList;
-import java.util.List;
+import org.s1ck.gdl.model.cnf.CNF;
 
-/**
- * Represents a collection disjunct predicates
- * This can be used to represent a CNF
- */
-public class OrPredicate extends PredicateCollection<Predicate>{
+public class Xor implements Predicate {
 
-  public OrPredicate() {
-    this.predicates = new ArrayList<>();
+  // left hand side
+  private Predicate lhs;
+
+  // right hand side
+  private Predicate rhs;
+
+  public Xor(Predicate lhs, Predicate rhs) {
+    this.lhs = lhs;
+    this.rhs = rhs;
   }
 
-  public OrPredicate(List<Predicate> predicates) {
-    this.predicates = predicates;
+  public Predicate[] getArguments() {
+    Predicate[] arguments = {lhs,rhs};
+    return arguments;
   }
 
-  public String operatorName() { return "OR"; }
+  public CNF toCNF() {
+    return new Or(new And(lhs,new Not(rhs)),new And(new Not(lhs),rhs)).toCNF();
+  }
+
+  public String toString() {
+    return "(" + lhs + " XOR " + rhs + ")";
+  }
 }

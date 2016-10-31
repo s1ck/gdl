@@ -1,9 +1,14 @@
-package org.s1ck.gdl.predicates;
+package org.s1ck.gdl.predicates.booleans;
 
 import org.junit.Test;
 import org.s1ck.gdl.model.predicates.*;
-import org.s1ck.gdl.model.predicates.cnf.AndPredicate;
-import org.s1ck.gdl.model.predicates.cnf.OrPredicate;
+import org.s1ck.gdl.model.predicates.booleans.And;
+import org.s1ck.gdl.model.predicates.booleans.Not;
+import org.s1ck.gdl.model.predicates.booleans.Or;
+import org.s1ck.gdl.model.predicates.booleans.Xor;
+import org.s1ck.gdl.model.cnf.CNF;
+import org.s1ck.gdl.model.cnf.CNFElement;
+import org.s1ck.gdl.predicates.PredicateTest;
 
 import static org.junit.Assert.assertEquals;
 
@@ -16,7 +21,7 @@ public class NotTest extends PredicateTest {
 
     Not not = new Not(nestedNot);
 
-    AndPredicate reference = a.toCNF();
+    CNF reference = a.toCNF();
 
     assertEquals(reference,not.toCNF());
   }
@@ -26,10 +31,10 @@ public class NotTest extends PredicateTest {
     Predicate a = getComparison();
     Not not = new Not(a);
 
-    OrPredicate orPredicate = new OrPredicate();
-    orPredicate.addPredicate(not);
-    AndPredicate reference = new AndPredicate();
-    reference.addPredicate(orPredicate);
+    CNFElement CNFElement = new CNFElement();
+    CNFElement.addPredicate(not);
+    CNF reference = new CNF();
+    reference.addPredicate(CNFElement);
 
     assertEquals(reference,not.toCNF());
   }
@@ -41,11 +46,11 @@ public class NotTest extends PredicateTest {
     And and = new And(a,b);
     Not not = new Not(and);
 
-    OrPredicate orPredicate = new OrPredicate();
-    orPredicate.addPredicate(new Not(a));
-    orPredicate.addPredicate(new Not(b));
-    AndPredicate reference = new AndPredicate();
-    reference.addPredicate(orPredicate);
+    CNFElement CNFElement = new CNFElement();
+    CNFElement.addPredicate(new Not(a));
+    CNFElement.addPredicate(new Not(b));
+    CNF reference = new CNF();
+    reference.addPredicate(CNFElement);
 
     assertEquals(reference.toString(),not.toCNF().toString());
   }
@@ -57,7 +62,7 @@ public class NotTest extends PredicateTest {
     Or or = new Or(a,b);
     Not not = new Not(or);
 
-    AndPredicate reference = new Not(a).toCNF().and(new Not(a).toCNF());
+    CNF reference = new Not(a).toCNF().and(new Not(a).toCNF());
     assertEquals(reference.toString(),not.toCNF().toString());
   }
 
@@ -68,7 +73,7 @@ public class NotTest extends PredicateTest {
     Xor xor = new Xor(a,b);
     Not not = new Not(xor);
 
-    AndPredicate reference = new Or(new And(a,b),new And(new Not(a),new Not(b))).toCNF();
+    CNF reference = new Or(new And(a,b),new And(new Not(a),new Not(b))).toCNF();
     assertEquals(reference.toString(),not.toCNF().toString());
   }
 }

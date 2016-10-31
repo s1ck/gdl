@@ -15,10 +15,12 @@
  * along with GDL.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.s1ck.gdl.model.predicates;
+package org.s1ck.gdl.model.predicates.booleans;
 
-import org.s1ck.gdl.model.predicates.cnf.AndPredicate;
-import org.s1ck.gdl.model.predicates.cnf.OrPredicate;
+import org.s1ck.gdl.model.predicates.Predicate;
+import org.s1ck.gdl.model.cnf.CNF;
+import org.s1ck.gdl.model.cnf.CNFElement;
+import org.s1ck.gdl.model.predicates.expressions.Comparison;
 
 public class Not implements Predicate {
 
@@ -33,13 +35,13 @@ public class Not implements Predicate {
     return arguments;
   }
 
-  public AndPredicate toCNF() {
+  public CNF toCNF() {
     if(expression.getClass() == Comparison.class) {
-      AndPredicate andPredicate = new AndPredicate();
-      OrPredicate orPredicate = new OrPredicate();
-      orPredicate.addPredicate(this);
-      andPredicate.addPredicate(orPredicate);
-      return andPredicate;
+      CNF CNF = new CNF();
+      CNFElement CNFElement = new CNFElement();
+      CNFElement.addPredicate(this);
+      CNF.addPredicate(CNFElement);
+      return CNF;
     } else if (expression.getClass() == Not.class) {
       return expression.getArguments()[0].toCNF();
     } else if (expression.getClass() == And.class) {

@@ -19,16 +19,16 @@ package org.s1ck.gdl;
 
 import org.antlr.v4.runtime.tree.TerminalNode;
 import org.s1ck.gdl.model.*;
-import org.s1ck.gdl.model.predicates.And;
-import org.s1ck.gdl.model.predicates.Comparison;
+import org.s1ck.gdl.model.predicates.booleans.And;
+import org.s1ck.gdl.model.predicates.expressions.Comparison;
 import org.s1ck.gdl.model.predicates.Predicate;
-import org.s1ck.gdl.model.predicates.Not;
-import org.s1ck.gdl.model.predicates.Or;
-import org.s1ck.gdl.model.predicates.Xor;
-import org.s1ck.gdl.model.predicates.cnf.AndPredicate;
-import org.s1ck.gdl.model.predicates.comparables.ComparableExpression;
-import org.s1ck.gdl.model.predicates.comparables.Literal;
-import org.s1ck.gdl.model.predicates.comparables.PropertySelector;
+import org.s1ck.gdl.model.predicates.booleans.Not;
+import org.s1ck.gdl.model.predicates.booleans.Or;
+import org.s1ck.gdl.model.predicates.booleans.Xor;
+import org.s1ck.gdl.model.cnf.CNF;
+import org.s1ck.gdl.model.comparables.ComparableExpression;
+import org.s1ck.gdl.model.comparables.Literal;
+import org.s1ck.gdl.model.comparables.PropertySelector;
 
 import java.util.*;
 
@@ -45,7 +45,7 @@ class GDLLoader extends GDLBaseListener {
   private final Set<Edge> edges;
 
   // stores the predicates tree for that query
-  private AndPredicate predicates;
+  private CNF predicates;
 
   private final String defaultGraphLabel;
   private final String defaultVertexLabel;
@@ -84,7 +84,7 @@ class GDLLoader extends GDLBaseListener {
     vertexCache = new HashMap<>();
     edgeCache   = new HashMap<>();
 
-    predicates = new AndPredicate();
+    predicates = new CNF();
 
     graphs    = new HashSet<>();
     vertices  = new HashSet<>();
@@ -152,7 +152,7 @@ class GDLLoader extends GDLBaseListener {
      *
      * @return predicates
      */
-  AndPredicate getPredicates() { return predicates; }
+  CNF getPredicates() { return predicates; }
   /**
    * Returns the graph cache that contains a mapping from variables used in the GDL script to
    * graph instances.
