@@ -47,7 +47,7 @@ public interface Predicate {
 
     if(element.getLabel() != null) {
       predicate = new Comparison(
-        new PropertySelector(element,"label"),
+        new PropertySelector(element.getVariable(),"label"),
         Comparison.Comparator.EQ,
         new Literal(element.getLabel()));
 
@@ -57,7 +57,7 @@ public interface Predicate {
     if(element.getProperties() != null) {
       for (Map.Entry<String, Object> entry : element.getProperties().entrySet()) {
         predicate = new Comparison(
-                new PropertySelector(element, entry.getKey()),
+                new PropertySelector(element.getVariable(), entry.getKey()),
                 Comparison.Comparator.EQ,
                 new Literal(entry.getValue())
         );
