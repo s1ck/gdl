@@ -18,4 +18,10 @@
 package org.s1ck.gdl.model.comparables;
 
 public interface ComparableExpression {
+
+  /**
+   * Returns the variable of the expression
+   * @return variable
+   */
+  public String variables();
 }

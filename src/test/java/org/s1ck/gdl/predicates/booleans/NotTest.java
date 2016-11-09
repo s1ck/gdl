@@ -1,6 +1,9 @@
 package org.s1ck.gdl.predicates.booleans;
 
 import org.junit.Test;
+import org.s1ck.gdl.model.comparables.ElementSelector;
+import org.s1ck.gdl.model.comparables.Literal;
+import org.s1ck.gdl.model.comparables.PropertySelector;
 import org.s1ck.gdl.model.predicates.*;
 import org.s1ck.gdl.model.predicates.booleans.And;
 import org.s1ck.gdl.model.predicates.booleans.Not;
@@ -8,7 +11,11 @@ import org.s1ck.gdl.model.predicates.booleans.Or;
 import org.s1ck.gdl.model.predicates.booleans.Xor;
 import org.s1ck.gdl.model.cnf.CNF;
 import org.s1ck.gdl.model.cnf.CNFElement;
+import org.s1ck.gdl.model.predicates.expressions.Comparison;
 import org.s1ck.gdl.predicates.PredicateTest;
+
+import java.util.HashSet;
+import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
 
@@ -75,5 +82,21 @@ public class NotTest extends PredicateTest {
 
     CNF reference = new Or(new And(a,b),new And(new Not(a),new Not(b))).toCNF();
     assertEquals(reference.toString(),not.toCNF().toString());
+  }
+
+  @Test
+  public void extractVariablesTest() {
+    Comparison a = new Comparison(
+            new PropertySelector("a","label"),
+            Comparison.Comparator.EQ,
+            new Literal("Person")
+    );
+
+    Not not = new Not(a);
+
+    Set<String> reference = new HashSet<>();
+    reference.add("a");
+
+    assertEquals(reference,not.variables());
   }
 }

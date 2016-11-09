@@ -22,6 +22,8 @@ import org.s1ck.gdl.model.cnf.CNF;
 import org.s1ck.gdl.model.cnf.CNFElement;
 import org.s1ck.gdl.model.predicates.expressions.Comparison;
 
+import java.util.Set;
+
 public class Not implements Predicate {
 
   private Predicate expression;
@@ -30,11 +32,13 @@ public class Not implements Predicate {
     this.expression = expression;
   }
 
+  @Override
   public Predicate[] getArguments() {
     Predicate[] arguments = {expression};
     return arguments;
   }
 
+  @Override
   public CNF toCNF() {
     if(expression.getClass() == Comparison.class) {
       CNF CNF = new CNF();
@@ -55,7 +59,13 @@ public class Not implements Predicate {
       return new Or(new And(otherArguments[0],otherArguments[1]),new And(new Not(otherArguments[0]),new Not(otherArguments[0]))).toCNF();
     }
   }
-  
+
+  @Override
+  public Set<String> variables() {
+    return expression.variables();
+  }
+
+  @Override
   public String toString() {
     return "( NOT " + expression + " )";
   }

@@ -19,7 +19,9 @@ package org.s1ck.gdl.model.cnf;
 
 import org.s1ck.gdl.model.predicates.Predicate;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Represents a collection disjunct predicates
@@ -35,5 +37,16 @@ public class CNFElement extends PredicateCollection<Predicate>{
     this.predicates = predicates;
   }
 
+  @Override
+  public Set<String> variables() {
+    Set<String> variables = new HashSet<>();
+    for(Predicate predicate : predicates) {
+      variables.addAll(predicate.variables());
+    }
+    return variables;
+  }
+
+  @Override
   public String operatorName() { return "OR"; }
+
 }

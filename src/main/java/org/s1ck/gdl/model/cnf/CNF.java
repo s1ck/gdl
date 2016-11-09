@@ -18,7 +18,9 @@
 package org.s1ck.gdl.model.cnf;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Represents a collection conjunct OrPredicates
@@ -66,5 +68,32 @@ public class CNF extends PredicateCollection<CNFElement>{
     return this;
   }
 
+  @Override
   public String operatorName() { return "AND"; }
+
+  /**
+   * Creates a new CNF containing only predicates concerning the specified variables
+   * @param variables variables
+   * @return sub cnf
+   */
+  public CNF getSubCNF(List<String> variables) {
+    CNF subCNF = new CNF();
+
+    for(CNFElement cnfElement : predicates) {
+      Set<String> elementVariables = cnfElement.variables();
+      if(elementVariables.containsAll(variables) && elementVariables.size() == variables.size()) {
+        subCNF.addPredicate(cnfElement);
+      }
+    }
+    return subCNF;
+  }
+
+  @Override
+  public Set<String> variables() {
+    Set<String> variables = new HashSet<>();
+    for(CNFElement cnfElement : predicates) {
+      variables.addAll(cnfElement.variables());
+    }
+    return variables;
+  }
 }

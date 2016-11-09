@@ -26,6 +26,7 @@ import org.s1ck.gdl.model.comparables.PropertySelector;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Represents a predicate defined on a query vertex or edge.
@@ -70,4 +71,6 @@ public interface Predicate {
   public CNF toCNF();
 
   public Predicate[] getArguments();
+
+  public Set<String> variables();
 }

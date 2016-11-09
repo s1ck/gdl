@@ -18,6 +18,8 @@
 package org.s1ck.gdl.model.cnf;
 
 import java.util.List;
+import java.util.Set;
+
 import static java.util.stream.Collectors.joining;
 
 /**
@@ -55,6 +57,12 @@ public abstract class PredicateCollection<P> {
   public void addPredicates(List<P> predicateList) {
     this.predicates.addAll(predicateList);
   }
+
+  /**
+   * Retrieves a set of all variables included in the predicate collection
+   * @return set of variables
+   */
+  public abstract Set<String> variables();
 
   /**
    * Stores the name of the operator predicates are connected with

@@ -22,6 +22,9 @@ import org.s1ck.gdl.model.cnf.CNF;
 import org.s1ck.gdl.model.cnf.CNFElement;
 import org.s1ck.gdl.model.comparables.ComparableExpression;
 
+import java.util.HashSet;
+import java.util.Set;
+
 public class Comparison implements Predicate {
 
   public enum Comparator {
@@ -62,11 +65,13 @@ public class Comparison implements Predicate {
     this.comparator = comparator;
   }
 
+  @Override
   public Predicate[] getArguments() {
     Predicate[] arguments = {};
     return arguments;
   }
 
+  @Override
   public CNF toCNF() {
     CNF CNF = new CNF();
     CNFElement CNFElement = new CNFElement();
@@ -75,6 +80,16 @@ public class Comparison implements Predicate {
     return CNF;
   }
 
+  @Override
+  public Set<String> variables() {
+    Set<String> variables = new HashSet<>();
+    if(lhs.variables() != null) variables.add(lhs.variables());
+    if(rhs.variables() != null) variables.add(rhs.variables());
+
+    return variables;
+  }
+
+  @Override
   public String toString() {
     return lhs + " " + comparator + " " + rhs;
   }

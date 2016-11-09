@@ -17,14 +17,26 @@
 
 package org.s1ck.gdl.model.comparables;
 
+/**
+ * Represents a literal like String, Integer, ...
+ */
 public class Literal implements ComparableExpression {
 
+  /**
+   * literal value
+   */
   private Object value;
 
   public Literal(Object value) {
     this.value = value;
   }
 
+  @Override
+  public String variables() {
+    return null;
+  }
+
+  @Override
   public String toString() {
     return value.toString();
   }

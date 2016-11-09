@@ -1,6 +1,8 @@
 package org.s1ck.gdl.cnf;
 
 import org.junit.Test;
+import org.s1ck.gdl.model.comparables.ElementSelector;
+import org.s1ck.gdl.model.comparables.PropertySelector;
 import org.s1ck.gdl.model.predicates.expressions.Comparison;
 import org.s1ck.gdl.model.predicates.Predicate;
 import org.s1ck.gdl.model.cnf.CNF;
@@ -11,6 +13,9 @@ import static org.junit.Assert.assertEquals;
 
 
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 public class CNFTest {
   @Test
@@ -79,5 +84,89 @@ public class CNFTest {
     reference.addPredicate(refOr4);
 
     assertEquals(reference.toString(), and1.or(and2).toString());
+  }
+
+  @Test
+  public void extractVariablesTest() {
+    Comparison a = new Comparison(
+            new ElementSelector("a"),
+            Comparison.Comparator.EQ,
+            new ElementSelector("b")
+    );
+
+
+    Comparison b = new Comparison(
+            new PropertySelector("a","label"),
+            Comparison.Comparator.EQ,
+            new Literal("Person")
+    );
+
+    List<CNFElement> cnfElements = new ArrayList<>();
+    CNFElement e1 = new CNFElement();
+    e1.addPredicate(a);
+    cnfElements.add(e1);
+
+    CNFElement e2 = new CNFElement();
+    e1.addPredicate(b);
+    cnfElements.add(e2);
+
+    CNF cnf = new CNF();
+    cnf.addPredicates(cnfElements);
+
+    Set<String> reference = new HashSet<>();
+    reference.add("a");
+    reference.add("b");
+
+    assertEquals(reference,cnf.variables());
+  }
+
+  @Test
+  public void createExistingSubCnfTest() {
+    Comparison a = new Comparison(
+            new ElementSelector("a"),
+            Comparison.Comparator.EQ,
+            new ElementSelector("b")
+    );
+
+
+    Comparison b = new Comparison(
+            new PropertySelector("a","label"),
+            Comparison.Comparator.EQ,
+            new Literal("Person")
+    );
+
+    Comparison c = new Comparison(
+            new PropertySelector("c","label"),
+            Comparison.Comparator.EQ,
+            new Literal("Person")
+    );
+
+    List<CNFElement> cnfElements = new ArrayList<>();
+    List<CNFElement> refCnfElements = new ArrayList<>();
+
+    CNFElement e1 = new CNFElement();
+    e1.addPredicate(a);
+    cnfElements.add(e1);
+    refCnfElements.add(e1);
+
+    CNFElement e2 = new CNFElement();
+    e2.addPredicate(b);
+    cnfElements.add(e2);
+
+    CNFElement e3 = new CNFElement();
+    e3.addPredicate(c);
+    cnfElements.add(e3);
+
+    CNF cnf = new CNF();
+    cnf.addPredicates(cnfElements);
+
+    CNF reference = new CNF();
+    reference.addPredicates(refCnfElements);
+
+    List<String> variables = new ArrayList<>();
+    variables.add("a");
+    variables.add("b");
+
+    assertEquals(reference,cnf.getSubCNF(variables));
   }
 }

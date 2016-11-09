@@ -17,20 +17,33 @@
 
 package org.s1ck.gdl.model.comparables;
 
-import org.s1ck.gdl.model.GraphElement;
-
+/**
+ * Selects a property of a variable
+ */
 public class PropertySelector implements ComparableExpression {
 
-  private GraphElement element;
+  /**
+   * Elements variable
+   */
+  private String variable;
 
+  /**
+   * Elements property name
+   */
   private String propertyName;
 
-  public PropertySelector(GraphElement element, String propertyName) {
-    this.element = element;
+  public PropertySelector(String variable, String propertyName) {
+    this.variable = variable;
     this.propertyName = propertyName;
   }
 
+  @Override
+  public String variables() {
+    return this.variable;
+  }
+
+  @Override
   public String toString() {
-    return element.getVariable() + "." + propertyName;
+    return variable + "." + propertyName;
   }
 }

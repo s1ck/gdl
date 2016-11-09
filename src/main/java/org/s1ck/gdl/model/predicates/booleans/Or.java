@@ -20,6 +20,8 @@ package org.s1ck.gdl.model.predicates.booleans;
 import org.s1ck.gdl.model.predicates.Predicate;
 import org.s1ck.gdl.model.cnf.CNF;
 
+import java.util.Set;
+
 public class Or implements Predicate {
 
   // left hand side
@@ -33,15 +35,26 @@ public class Or implements Predicate {
     this.rhs = rhs;
   }
 
+  @Override
   public Predicate[] getArguments() {
     Predicate[] arguments = {lhs,rhs};
     return arguments;
   }
 
+  @Override
   public CNF toCNF() {
     return lhs.toCNF().or(rhs.toCNF());
   }
 
+  @Override
+  public Set<String> variables() {
+    Set<String> variables = lhs.variables();
+    variables.addAll(rhs.variables());
+
+    return variables;
+  }
+
+  @Override
   public String toString() {
     return "(" + lhs + " OR " + rhs + ")";
   }
