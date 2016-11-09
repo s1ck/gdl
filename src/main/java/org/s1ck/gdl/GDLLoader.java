@@ -19,6 +19,7 @@ package org.s1ck.gdl;
 
 import org.antlr.v4.runtime.tree.TerminalNode;
 import org.s1ck.gdl.model.*;
+import org.s1ck.gdl.model.comparables.ElementSelector;
 import org.s1ck.gdl.model.predicates.booleans.And;
 import org.s1ck.gdl.model.predicates.expressions.Comparison;
 import org.s1ck.gdl.model.predicates.Predicate;
@@ -602,15 +603,27 @@ class GDLLoader extends GDLBaseListener {
    * @return parsed operator
    */
   private Comparison buildComparison(GDLParser.ComparisonExpressionContext ctx) {
-    ComparableExpression lhs = buildPropertySelector(ctx.propertyLookup(0));
-
-    ComparableExpression rhs = ctx.literal() != null ?
-      new Literal(getPropertyValue(ctx.literal()))
-      : buildPropertySelector(ctx.propertyLookup(1));
-
+    ComparableExpression lhs = extractComparableExpression(ctx.comparissonElement(0));
+    ComparableExpression rhs = extractComparableExpression(ctx.comparissonElement(1));
     Comparison.Comparator comp = Comparison.Comparator.fromString(ctx .ComparisonOP().getText());
 
     return new Comparison(lhs, comp, rhs);
+  }
+
+  /**
+   * Extracts a ComparableExpression from comparissonElement
+   *
+   * @param element comparissonElement
+   * @return extracted comparable expression
+   */
+  private ComparableExpression extractComparableExpression(GDLParser.ComparissonElementContext element) {
+    if(element.literal() != null) {
+      return new Literal(getPropertyValue(element.literal()));
+    } else if(element.propertyLookup() != null) {
+      return buildPropertySelector(element.propertyLookup());
+    } else {
+      return new ElementSelector(element.Identifier().getText());
+    }
   }
 
   /**
@@ -633,7 +646,7 @@ class GDLLoader extends GDLBaseListener {
     }
     else { return null; } //TODO raise reference error
 
-    return new PropertySelector(element,property);
+    return new PropertySelector(element.getVariable(),property);
   }
 
   // --------------------------------------------------------------------------------------------

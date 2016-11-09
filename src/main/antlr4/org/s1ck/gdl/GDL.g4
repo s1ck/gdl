@@ -101,9 +101,15 @@ atom : parenthesizedExpression
      | comparisonExpression
      ;
 
-comparisonExpression :
-     propertyLookup ComparisonOP (propertyLookup | literal)
-                            ;
+comparisonExpression
+    : comparissonElement ComparisonOP comparissonElement
+    ;
+
+comparissonElement
+    : Identifier
+    | propertyLookup
+    | literal
+    ;
 
 parenthesizedExpression : '(' expression ')' ;
 
