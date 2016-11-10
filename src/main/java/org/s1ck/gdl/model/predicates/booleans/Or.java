@@ -46,10 +46,14 @@ public class Or implements Predicate {
     return lhs.toCNF().or(rhs.toCNF());
   }
 
+  /**
+   * Returns a set of variables referenced by the predicates
+   * @return set of variables
+   */
   @Override
-  public Set<String> variables() {
-    Set<String> variables = lhs.variables();
-    variables.addAll(rhs.variables());
+  public Set<String> getVariables() {
+    Set<String> variables = lhs.getVariables();
+    variables.addAll(rhs.getVariables());
 
     return variables;
   }

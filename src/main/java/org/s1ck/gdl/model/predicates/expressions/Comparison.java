@@ -80,11 +80,15 @@ public class Comparison implements Predicate {
     return CNF;
   }
 
+  /**
+   * Returns a set of variables referenced by the predicates
+   * @return set of variables
+   */
   @Override
-  public Set<String> variables() {
+  public Set<String> getVariables() {
     Set<String> variables = new HashSet<>();
-    if(lhs.variables() != null) variables.add(lhs.variables());
-    if(rhs.variables() != null) variables.add(rhs.variables());
+    if(lhs.getVariable() != null) variables.add(lhs.getVariable());
+    if(rhs.getVariable() != null) variables.add(rhs.getVariable());
 
     return variables;
   }

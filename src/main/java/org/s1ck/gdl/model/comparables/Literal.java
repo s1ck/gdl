@@ -31,8 +31,12 @@ public class Literal implements ComparableExpression {
     this.value = value;
   }
 
+  /**
+   * Returns null since this does not reference a variable
+   * @return null
+   */
   @Override
-  public String variables() {
+  public String getVariable() {
     return null;
   }
 

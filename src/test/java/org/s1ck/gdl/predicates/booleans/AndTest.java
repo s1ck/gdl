@@ -47,6 +47,6 @@ public class AndTest extends PredicateTest {
     reference.add("a");
     reference.add("b");
 
-    assertEquals(reference,and.variables());
+    assertEquals(reference,and.getVariables());
   }
 }

@@ -37,11 +37,15 @@ public class CNFElement extends PredicateCollection<Predicate>{
     this.predicates = predicates;
   }
 
+  /**
+   * Returns a set of variables referenced by the predicates
+   * @return set of variables
+   */
   @Override
-  public Set<String> variables() {
+  public Set<String> getVariables() {
     Set<String> variables = new HashSet<>();
     for(Predicate predicate : predicates) {
-      variables.addAll(predicate.variables());
+      variables.addAll(predicate.getVariables());
     }
     return variables;
   }

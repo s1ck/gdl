@@ -60,9 +60,13 @@ public class Not implements Predicate {
     }
   }
 
+  /**
+   * Returns a set of variables referenced by the predicates
+   * @return set of variables
+   */
   @Override
-  public Set<String> variables() {
-    return expression.variables();
+  public Set<String> getVariables() {
+    return expression.getVariables();
   }
 
   @Override

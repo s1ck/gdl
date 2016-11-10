@@ -102,10 +102,10 @@ atom : parenthesizedExpression
      ;
 
 comparisonExpression
-    : comparissonElement ComparisonOP comparissonElement
+    : comparisonElement ComparisonOP comparisonElement
     ;
 
-comparissonElement
+comparisonElement
     : Identifier
     | propertyLookup
     | literal

@@ -32,8 +32,12 @@ public class ElementSelector implements ComparableExpression {
     this.variable = variable;
   }
 
+  /**
+   * Returns the variable which references the element
+   * @return variable name
+   */
   @Override
-  public String variables() {
+  public String getVariable() {
     return this.variable;
   }
 

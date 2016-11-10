@@ -72,15 +72,15 @@ public class CNF extends PredicateCollection<CNFElement>{
   public String operatorName() { return "AND"; }
 
   /**
-   * Creates a new CNF containing only predicates concerning the specified variables
-   * @param variables variables
+   * Creates a new CNF containing only predicates concerning the specified getVariable
+   * @param variables getVariable
    * @return sub cnf
    */
-  public CNF getSubCNF(List<String> variables) {
+  public CNF getSubCNF(Set<String> variables) {
     CNF subCNF = new CNF();
 
     for(CNFElement cnfElement : predicates) {
-      Set<String> elementVariables = cnfElement.variables();
+      Set<String> elementVariables = cnfElement.getVariables();
       if(elementVariables.containsAll(variables) && elementVariables.size() == variables.size()) {
         subCNF.addPredicate(cnfElement);
       }
@@ -88,11 +88,15 @@ public class CNF extends PredicateCollection<CNFElement>{
     return subCNF;
   }
 
+  /**
+   * Returns a set of variables referenced by the predicates
+   * @return set of variables
+   */
   @Override
-  public Set<String> variables() {
+  public Set<String> getVariables() {
     Set<String> variables = new HashSet<>();
     for(CNFElement cnfElement : predicates) {
-      variables.addAll(cnfElement.variables());
+      variables.addAll(cnfElement.getVariables());
     }
     return variables;
   }

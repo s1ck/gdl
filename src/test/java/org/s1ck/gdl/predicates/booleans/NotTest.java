@@ -1,7 +1,6 @@
 package org.s1ck.gdl.predicates.booleans;
 
 import org.junit.Test;
-import org.s1ck.gdl.model.comparables.ElementSelector;
 import org.s1ck.gdl.model.comparables.Literal;
 import org.s1ck.gdl.model.comparables.PropertySelector;
 import org.s1ck.gdl.model.predicates.*;
@@ -97,6 +96,6 @@ public class NotTest extends PredicateTest {
     Set<String> reference = new HashSet<>();
     reference.add("a");
 
-    assertEquals(reference,not.variables());
+    assertEquals(reference,not.getVariables());
   }
 }

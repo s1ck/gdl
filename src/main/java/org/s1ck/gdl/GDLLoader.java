@@ -603,8 +603,8 @@ class GDLLoader extends GDLBaseListener {
    * @return parsed operator
    */
   private Comparison buildComparison(GDLParser.ComparisonExpressionContext ctx) {
-    ComparableExpression lhs = extractComparableExpression(ctx.comparissonElement(0));
-    ComparableExpression rhs = extractComparableExpression(ctx.comparissonElement(1));
+    ComparableExpression lhs = extractComparableExpression(ctx.comparisonElement(0));
+    ComparableExpression rhs = extractComparableExpression(ctx.comparisonElement(1));
     Comparison.Comparator comp = Comparison.Comparator.fromString(ctx .ComparisonOP().getText());
 
     return new Comparison(lhs, comp, rhs);
@@ -616,7 +616,7 @@ class GDLLoader extends GDLBaseListener {
    * @param element comparissonElement
    * @return extracted comparable expression
    */
-  private ComparableExpression extractComparableExpression(GDLParser.ComparissonElementContext element) {
+  private ComparableExpression extractComparableExpression(GDLParser.ComparisonElementContext element) {
     if(element.literal() != null) {
       return new Literal(getPropertyValue(element.literal()));
     } else if(element.propertyLookup() != null) {

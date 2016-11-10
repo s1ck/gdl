@@ -23,5 +23,5 @@ public interface ComparableExpression {
    * Returns the variable of the expression
    * @return variable
    */
-  public String variables();
+  public String getVariable();
 }

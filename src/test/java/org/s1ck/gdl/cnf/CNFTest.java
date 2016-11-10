@@ -9,7 +9,7 @@ import org.s1ck.gdl.model.cnf.CNF;
 import org.s1ck.gdl.model.cnf.CNFElement;
 import org.s1ck.gdl.model.comparables.Literal;
 import static org.junit.Assert.assertEquals;
-
+import static org.junit.Assert.assertTrue;
 
 
 import java.util.ArrayList;
@@ -117,7 +117,7 @@ public class CNFTest {
     reference.add("a");
     reference.add("b");
 
-    assertEquals(reference,cnf.variables());
+    assertEquals(reference,cnf.getVariables());
   }
 
   @Test
@@ -127,7 +127,6 @@ public class CNFTest {
             Comparison.Comparator.EQ,
             new ElementSelector("b")
     );
-
 
     Comparison b = new Comparison(
             new PropertySelector("a","label"),
@@ -163,10 +162,13 @@ public class CNFTest {
     CNF reference = new CNF();
     reference.addPredicates(refCnfElements);
 
-    List<String> variables = new ArrayList<>();
+    Set<String> variables = new HashSet<>();
     variables.add("a");
     variables.add("b");
 
     assertEquals(reference,cnf.getSubCNF(variables));
+
+    variables.add("c");
+    assertTrue(cnf.getSubCNF(variables).getPredicates().isEmpty());
   }
 }

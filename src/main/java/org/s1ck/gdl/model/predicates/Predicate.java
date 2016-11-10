@@ -68,9 +68,21 @@ public interface Predicate {
     return predicates;
   }
 
+  /**
+   * Converts the Predicate into Conjunctive Normal Form
+   * @return
+   */
   public CNF toCNF();
 
+  /**
+   * Returns the predicates arguments
+   * @return
+   */
   public Predicate[] getArguments();
 
-  public Set<String> variables();
+  /**
+   * Returns the variables which are referenced by the predicate
+   * @return referenced variables
+   */
+  public Set<String> getVariables();
 }

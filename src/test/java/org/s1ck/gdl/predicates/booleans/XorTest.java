@@ -51,6 +51,6 @@ public class XorTest extends PredicateTest {
     reference.add("a");
     reference.add("b");
 
-    assertEquals(reference,xor.variables());
+    assertEquals(reference,xor.getVariables());
   }
 }

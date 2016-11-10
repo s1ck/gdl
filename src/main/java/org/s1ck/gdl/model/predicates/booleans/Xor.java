@@ -46,10 +46,14 @@ public class Xor implements Predicate {
     return new Or(new And(lhs,new Not(rhs)),new And(new Not(lhs),rhs)).toCNF();
   }
 
+  /**
+   * Returns a set of variables referenced by the predicates
+   * @return set of variables
+   */
   @Override
-  public Set<String> variables() {
-    Set<String> variables = lhs.variables();
-    variables.addAll(rhs.variables());
+  public Set<String> getVariables() {
+    Set<String> variables = lhs.getVariables();
+    variables.addAll(rhs.getVariables());
 
     return variables;
   }

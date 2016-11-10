@@ -49,6 +49,6 @@ public class OrTest extends PredicateTest {
     reference.add("a");
     reference.add("b");
 
-    assertEquals(reference,or.variables());
+    assertEquals(reference,or.getVariables());
   }
 }
