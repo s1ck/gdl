@@ -62,7 +62,6 @@ public class CNFTest {
     and2.addPredicate(or3);
     and2.addPredicate(or4);
 
-
     CNFElement refOr1 = new CNFElement();
     refOr1.addPredicate(a);
     refOr1.addPredicate(c);
@@ -93,7 +92,6 @@ public class CNFTest {
             Comparison.Comparator.EQ,
             new ElementSelector("b")
     );
-
 
     Comparison b = new Comparison(
             new PropertySelector("a","label"),

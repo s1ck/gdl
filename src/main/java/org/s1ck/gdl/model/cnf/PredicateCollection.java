@@ -59,8 +59,8 @@ public abstract class PredicateCollection<P> {
   }
 
   /**
-   * Retrieves a set of all getVariable included in the predicate collection
-   * @return set of getVariable
+   * Retrieves a set of all variables included in the predicate collection
+   * @return set of variables
    */
   public abstract Set<String> getVariables();
 

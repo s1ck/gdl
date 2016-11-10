@@ -72,8 +72,8 @@ public class CNF extends PredicateCollection<CNFElement>{
   public String operatorName() { return "AND"; }
 
   /**
-   * Creates a new CNF containing only predicates concerning the specified getVariable
-   * @param variables getVariable
+   * Creates a new CNF containing only predicates concerning the specified variables
+   * @param variables list of variables
    * @return sub cnf
    */
   public CNF getSubCNF(Set<String> variables) {

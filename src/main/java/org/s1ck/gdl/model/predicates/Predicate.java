@@ -70,13 +70,13 @@ public interface Predicate {
 
   /**
    * Converts the Predicate into Conjunctive Normal Form
-   * @return
+   * @return Predicate in CNF
    */
   public CNF toCNF();
 
   /**
    * Returns the predicates arguments
-   * @return
+   * @return The predicates arguments
    */
   public Predicate[] getArguments();
 
