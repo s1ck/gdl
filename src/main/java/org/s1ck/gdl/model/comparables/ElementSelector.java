@@ -18,32 +18,22 @@
 package org.s1ck.gdl.model.comparables;
 
 /**
- * Selects a property of a variable
+ * Used to compare elements (by id)
  */
-public class PropertySelector implements ComparableExpression {
+public class ElementSelector implements ComparableExpression {
 
   /**
-   * Elements variable
+   * Variable which identifies the element
    */
   private String variable;
 
   /**
-   * Elements property name
-   */
-  private String propertyName;
-
-  public PropertySelector(String variable, String propertyName) {
-    this.variable = variable;
-    this.propertyName = propertyName;
-  }
-
-  /**
-   * Returns the property name
+   * Creates a new element selector
    *
-   * @return the property name
+   * @param variable the variables that represents the element
    */
-  public String getPropertyName() {
-    return propertyName;
+  public ElementSelector(String variable) {
+    this.variable = variable;
   }
 
   /**
@@ -57,7 +47,7 @@ public class PropertySelector implements ComparableExpression {
 
   @Override
   public String toString() {
-    return variable + "." + propertyName;
+    return variable;
   }
 
   @Override
@@ -65,17 +55,14 @@ public class PropertySelector implements ComparableExpression {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
 
-    PropertySelector that = (PropertySelector) o;
+    ElementSelector that = (ElementSelector) o;
 
-    if (variable != null ? !variable.equals(that.variable) : that.variable != null) return false;
-    return propertyName != null ? propertyName.equals(that.propertyName) : that.propertyName == null;
+    return variable != null ? variable.equals(that.variable) : that.variable == null;
 
   }
 
   @Override
   public int hashCode() {
-    int result = variable != null ? variable.hashCode() : 0;
-    result = 31 * result + (propertyName != null ? propertyName.hashCode() : 0);
-    return result;
+    return variable != null ? variable.hashCode() : 0;
   }
 }

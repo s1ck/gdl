@@ -18,19 +18,22 @@
 package org.s1ck.gdl;
 
 import org.antlr.v4.runtime.tree.TerminalNode;
+import org.s1ck.gdl.exceptions.InvalidReferenceException;
 import org.s1ck.gdl.model.*;
+import org.s1ck.gdl.model.comparables.ElementSelector;
 import org.s1ck.gdl.model.predicates.booleans.And;
 import org.s1ck.gdl.model.predicates.expressions.Comparison;
 import org.s1ck.gdl.model.predicates.Predicate;
 import org.s1ck.gdl.model.predicates.booleans.Not;
 import org.s1ck.gdl.model.predicates.booleans.Or;
 import org.s1ck.gdl.model.predicates.booleans.Xor;
-import org.s1ck.gdl.model.cnf.CNF;
 import org.s1ck.gdl.model.comparables.ComparableExpression;
 import org.s1ck.gdl.model.comparables.Literal;
 import org.s1ck.gdl.model.comparables.PropertySelector;
+import org.s1ck.gdl.utils.Comparator;
 
 import java.util.*;
+
 
 class GDLLoader extends GDLBaseListener {
 
@@ -45,7 +48,7 @@ class GDLLoader extends GDLBaseListener {
   private final Set<Edge> edges;
 
   // stores the predicates tree for that query
-  private CNF predicates;
+  private Predicate predicates;
 
   private final String defaultGraphLabel;
   private final String defaultVertexLabel;
@@ -83,8 +86,6 @@ class GDLLoader extends GDLBaseListener {
     graphCache  = new HashMap<>();
     vertexCache = new HashMap<>();
     edgeCache   = new HashMap<>();
-
-    predicates = new CNF();
 
     graphs    = new HashSet<>();
     vertices  = new HashSet<>();
@@ -148,11 +149,11 @@ class GDLLoader extends GDLBaseListener {
   }
 
     /**
-     * Returns the predicates defined by the query represented in CNF
+     * Returns the predicates defined by the query
      *
      * @return predicates
      */
-  CNF getPredicates() { return predicates; }
+  Predicate getPredicates() { return predicates; }
   /**
    * Returns the graph cache that contains a mapping from variables used in the GDL script to
    * graph instances.
@@ -247,12 +248,14 @@ class GDLLoader extends GDLBaseListener {
       v = vertexCache.get(variable);
     } else {
       v = initNewVertex(vertexContext);
-      v.setVariable(variable);
-      vertices.add(v);
 
-      if (variable != null) {
-        vertexCache.put(variable, v);
+      if(variable==null) {
+        variable = "__vertex" + v.getId() + "__";
       }
+      v.setVariable(variable);
+
+      vertices.add(v);
+      vertexCache.put(variable, v);
     }
     updateGraphElement(v);
     setLastSeenVertex(v);
@@ -369,12 +372,14 @@ class GDLLoader extends GDLBaseListener {
       e = edgeCache.get(variable);
     } else {
       e = initNewEdge(edgeBodyContext, isIncoming);
-      e.setVariable(variable);
-      edges.add(e);
 
-      if (variable != null) {
-        edgeCache.put(variable, e);
+      if(variable==null) {
+        variable = "__edge" + e.getId() + "__";
       }
+      e.setVariable(variable);
+
+      edges.add(e);
+      edgeCache.put(variable, e);
     }
     updateGraphElement(e);
     setLastSeenEdge(e);
@@ -602,15 +607,27 @@ class GDLLoader extends GDLBaseListener {
    * @return parsed operator
    */
   private Comparison buildComparison(GDLParser.ComparisonExpressionContext ctx) {
-    ComparableExpression lhs = buildPropertySelector(ctx.propertyLookup(0));
-
-    ComparableExpression rhs = ctx.literal() != null ?
-      new Literal(getPropertyValue(ctx.literal()))
-      : buildPropertySelector(ctx.propertyLookup(1));
-
-    Comparison.Comparator comp = Comparison.Comparator.fromString(ctx .ComparisonOP().getText());
+    ComparableExpression lhs = extractComparableExpression(ctx.comparisonElement(0));
+    ComparableExpression rhs = extractComparableExpression(ctx.comparisonElement(1));
+    Comparator comp = Comparator.fromString(ctx .ComparisonOP().getText());
 
     return new Comparison(lhs, comp, rhs);
+  }
+
+  /**
+   * Extracts a ComparableExpression from comparissonElement
+   *
+   * @param element comparissonElement
+   * @return extracted comparable expression
+   */
+  private ComparableExpression extractComparableExpression(GDLParser.ComparisonElementContext element) {
+    if(element.literal() != null) {
+      return new Literal(getPropertyValue(element.literal()));
+    } else if(element.propertyLookup() != null) {
+      return buildPropertySelector(element.propertyLookup());
+    } else {
+      return new ElementSelector(element.Identifier().getText());
+    }
   }
 
   /**
@@ -631,9 +648,9 @@ class GDLLoader extends GDLBaseListener {
     else if(edgeCache.containsKey(identifier)) {
       element = edgeCache.get(identifier);
     }
-    else { return null; } //TODO raise reference error
+    else { throw new InvalidReferenceException(identifier);}
 
-    return new PropertySelector(element,property);
+    return new PropertySelector(element.getVariable(),property);
   }
 
   // --------------------------------------------------------------------------------------------
@@ -686,8 +703,14 @@ class GDLLoader extends GDLBaseListener {
    * @param newPredicates predicates to be added
    */
   private void addPredicates(List<Predicate> newPredicates) {
+
+
     for(Predicate newPredicate : newPredicates) {
-      this.predicates.and(newPredicate.toCNF());
+      if(this.predicates == null) {
+        this.predicates = newPredicate;
+      } else {
+        this.predicates = new And(this.predicates, newPredicate);
+      }
     }
   }
 

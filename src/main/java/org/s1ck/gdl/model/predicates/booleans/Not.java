@@ -18,9 +18,8 @@
 package org.s1ck.gdl.model.predicates.booleans;
 
 import org.s1ck.gdl.model.predicates.Predicate;
-import org.s1ck.gdl.model.cnf.CNF;
-import org.s1ck.gdl.model.cnf.CNFElement;
-import org.s1ck.gdl.model.predicates.expressions.Comparison;
+
+import java.util.Set;
 
 public class Not implements Predicate {
 
@@ -30,32 +29,22 @@ public class Not implements Predicate {
     this.expression = expression;
   }
 
+  @Override
   public Predicate[] getArguments() {
     Predicate[] arguments = {expression};
     return arguments;
   }
 
-  public CNF toCNF() {
-    if(expression.getClass() == Comparison.class) {
-      CNF CNF = new CNF();
-      CNFElement CNFElement = new CNFElement();
-      CNFElement.addPredicate(this);
-      CNF.addPredicate(CNFElement);
-      return CNF;
-    } else if (expression.getClass() == Not.class) {
-      return expression.getArguments()[0].toCNF();
-    } else if (expression.getClass() == And.class) {
-      Predicate[] otherArguments = expression.getArguments();
-      return new Or(new Not(otherArguments[0]),new Not(otherArguments[0])).toCNF();
-    } else if (expression.getClass() == Or.class) {
-      Predicate[] otherArguments = expression.getArguments();
-      return new And(new Not(otherArguments[0]),new Not(otherArguments[0])).toCNF();
-    } else {
-      Predicate[] otherArguments = expression.getArguments();
-      return new Or(new And(otherArguments[0],otherArguments[1]),new And(new Not(otherArguments[0]),new Not(otherArguments[0]))).toCNF();
-    }
+  /**
+   * Returns a set of variables referenced by the predicates
+   * @return set of variables
+   */
+  @Override
+  public Set<String> getVariables() {
+    return expression.getVariables();
   }
-  
+
+  @Override
   public String toString() {
     return "( NOT " + expression + " )";
   }

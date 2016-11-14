@@ -15,25 +15,20 @@
  * along with GDL.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.s1ck.gdl.model.cnf;
 
-import org.s1ck.gdl.model.predicates.Predicate;
-import java.util.ArrayList;
-import java.util.List;
+package org.s1ck.gdl.exceptions;
 
 /**
- * Represents a collection disjunct predicates
- * This can be used to represent a CNF
+ * Raised when referencing a variable in a predicate and the variable was not defined;
  */
-public class CNFElement extends PredicateCollection<Predicate>{
+public class InvalidReferenceException extends RuntimeException {
 
-  public CNFElement() {
-    this.predicates = new ArrayList<>();
+  /**
+   * Creates a new exception
+   *
+   * @param variable the variable which could not be resolved
+   */
+  public InvalidReferenceException(String variable) {
+    super("Predicate references variable '" + variable + "' which was not defined");
   }
-
-  public CNFElement(List<Predicate> predicates) {
-    this.predicates = predicates;
-  }
-
-  public String operatorName() { return "OR"; }
 }

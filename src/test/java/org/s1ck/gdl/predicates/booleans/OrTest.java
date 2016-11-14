@@ -1,25 +1,40 @@
 package org.s1ck.gdl.predicates.booleans;
 
 import org.junit.Test;
+import org.s1ck.gdl.model.comparables.ElementSelector;
+import org.s1ck.gdl.model.comparables.Literal;
+import org.s1ck.gdl.model.comparables.PropertySelector;
 import org.s1ck.gdl.model.predicates.booleans.Or;
-import org.s1ck.gdl.model.predicates.Predicate;
-import org.s1ck.gdl.model.cnf.CNF;
-import org.s1ck.gdl.predicates.PredicateTest;
+import org.s1ck.gdl.model.predicates.expressions.Comparison;
+import org.s1ck.gdl.utils.Comparator;
+
+import java.util.HashSet;
+import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
 
-public class OrTest extends PredicateTest {
+public class OrTest {
 
   @Test
-  public void convertToCnfTest() {
-    Predicate a = getComparison();
-    Predicate b = getComparison();
+  public void extractVariablesTest() {
+    Comparison a = new Comparison(
+            new ElementSelector("a"),
+            Comparator.EQ,
+            new ElementSelector("b")
+    );
+
+    Comparison b = new Comparison(
+            new PropertySelector("a","label"),
+            Comparator.EQ,
+            new Literal("Person")
+    );
 
     Or or = new Or(a,b);
 
-    CNF reference = a.toCNF().or(b.toCNF());
+    Set<String> reference = new HashSet<>();
+    reference.add("a");
+    reference.add("b");
 
-    assertEquals(reference,or.toCNF());
+    assertEquals(reference,or.getVariables());
   }
-
 }

@@ -18,7 +18,8 @@
 package org.s1ck.gdl.model.predicates.booleans;
 
 import org.s1ck.gdl.model.predicates.Predicate;
-import org.s1ck.gdl.model.cnf.CNF;
+
+import java.util.Set;
 
 public class Xor implements Predicate {
 
@@ -33,15 +34,25 @@ public class Xor implements Predicate {
     this.rhs = rhs;
   }
 
+  @Override
   public Predicate[] getArguments() {
     Predicate[] arguments = {lhs,rhs};
     return arguments;
   }
 
-  public CNF toCNF() {
-    return new Or(new And(lhs,new Not(rhs)),new And(new Not(lhs),rhs)).toCNF();
+  /**
+   * Returns a set of variables referenced by the predicates
+   * @return set of variables
+   */
+  @Override
+  public Set<String> getVariables() {
+    Set<String> variables = lhs.getVariables();
+    variables.addAll(rhs.getVariables());
+
+    return variables;
   }
 
+  @Override
   public String toString() {
     return "(" + lhs + " XOR " + rhs + ")";
   }

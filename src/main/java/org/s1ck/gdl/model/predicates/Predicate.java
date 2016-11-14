@@ -19,13 +19,14 @@ package org.s1ck.gdl.model.predicates;
 
 import org.s1ck.gdl.model.GraphElement;
 import org.s1ck.gdl.model.predicates.expressions.Comparison;
-import org.s1ck.gdl.model.cnf.CNF;
 import org.s1ck.gdl.model.comparables.Literal;
 import org.s1ck.gdl.model.comparables.PropertySelector;
+import org.s1ck.gdl.utils.Comparator;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Represents a predicate defined on a query vertex or edge.
@@ -44,10 +45,10 @@ public interface Predicate {
 
     Predicate predicate;
 
-    if(element.getLabel() != null) {
+    if(element.getLabel() != null && !element.getLabel().equals("")) {
       predicate = new Comparison(
-        new PropertySelector(element,"label"),
-        Comparison.Comparator.EQ,
+        new PropertySelector(element.getVariable(),"__label__"),
+        Comparator.EQ,
         new Literal(element.getLabel()));
 
       predicates.add(predicate);
@@ -56,8 +57,8 @@ public interface Predicate {
     if(element.getProperties() != null) {
       for (Map.Entry<String, Object> entry : element.getProperties().entrySet()) {
         predicate = new Comparison(
-                new PropertySelector(element, entry.getKey()),
-                Comparison.Comparator.EQ,
+                new PropertySelector(element.getVariable(), entry.getKey()),
+                Comparator.EQ,
                 new Literal(entry.getValue())
         );
 
@@ -67,7 +68,15 @@ public interface Predicate {
     return predicates;
   }
 
-  public CNF toCNF();
-
+  /**
+   * Returns the predicates arguments
+   * @return The predicates arguments
+   */
   public Predicate[] getArguments();
+
+  /**
+   * Returns the variables which are referenced by the predicate
+   * @return referenced variables
+   */
+  public Set<String> getVariables();
 }
