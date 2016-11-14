@@ -18,7 +18,6 @@
 package org.s1ck.gdl.model.predicates.booleans;
 
 import org.s1ck.gdl.model.predicates.Predicate;
-import org.s1ck.gdl.model.cnf.CNF;
 
 import java.util.Set;
 
@@ -39,11 +38,6 @@ public class Xor implements Predicate {
   public Predicate[] getArguments() {
     Predicate[] arguments = {lhs,rhs};
     return arguments;
-  }
-
-  @Override
-  public CNF toCNF() {
-    return new Or(new And(lhs,new Not(rhs)),new And(new Not(lhs),rhs)).toCNF();
   }
 
   /**

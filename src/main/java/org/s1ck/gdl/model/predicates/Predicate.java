@@ -19,9 +19,9 @@ package org.s1ck.gdl.model.predicates;
 
 import org.s1ck.gdl.model.GraphElement;
 import org.s1ck.gdl.model.predicates.expressions.Comparison;
-import org.s1ck.gdl.model.cnf.CNF;
 import org.s1ck.gdl.model.comparables.Literal;
 import org.s1ck.gdl.model.comparables.PropertySelector;
+import org.s1ck.gdl.utils.Comparator;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -45,10 +45,10 @@ public interface Predicate {
 
     Predicate predicate;
 
-    if(element.getLabel() != null) {
+    if(element.getLabel() != null && !element.getLabel().equals("")) {
       predicate = new Comparison(
-        new PropertySelector(element.getVariable(),"label"),
-        Comparison.Comparator.EQ,
+        new PropertySelector(element.getVariable(),"__label__"),
+        Comparator.EQ,
         new Literal(element.getLabel()));
 
       predicates.add(predicate);
@@ -58,7 +58,7 @@ public interface Predicate {
       for (Map.Entry<String, Object> entry : element.getProperties().entrySet()) {
         predicate = new Comparison(
                 new PropertySelector(element.getVariable(), entry.getKey()),
-                Comparison.Comparator.EQ,
+                Comparator.EQ,
                 new Literal(entry.getValue())
         );
 
@@ -67,12 +67,6 @@ public interface Predicate {
     }
     return predicates;
   }
-
-  /**
-   * Converts the Predicate into Conjunctive Normal Form
-   * @return Predicate in CNF
-   */
-  public CNF toCNF();
 
   /**
    * Returns the predicates arguments

@@ -4,6 +4,7 @@ import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.junit.Test;
+import org.s1ck.gdl.exceptions.InvalidReferenceException;
 import org.s1ck.gdl.model.Edge;
 import org.s1ck.gdl.model.Element;
 import org.s1ck.gdl.model.Graph;
@@ -31,7 +32,7 @@ public class GDLLoaderTest {
     GDLLoader loader = getLoaderFromGDLString("()");
 
     validateCollectionSizes(loader, 0, 1, 0);
-    validateCacheSizes(loader, 0, 0, 0);
+    validateCacheSizes(loader, 0, 1, 0);
 
     Optional<Vertex> vertex = loader.getVertices().stream().findFirst();
     assertTrue(vertex.isPresent());
@@ -85,7 +86,7 @@ public class GDLLoaderTest {
   public void readEdgeTest() {
     GDLLoader loader = getLoaderFromGDLString("()-->()");
     validateCollectionSizes(loader, 0, 2, 1);
-    validateCacheSizes(loader, 0, 0, 0);
+    validateCacheSizes(loader, 0, 2, 1);
 
     Optional<Edge> edge = loader.getEdges().stream().findFirst();
     assertTrue(edge.isPresent());
@@ -232,14 +233,14 @@ public class GDLLoaderTest {
   public void readSimpleGraphTest() {
     GDLLoader loader = getLoaderFromGDLString("[()]");
     validateCollectionSizes(loader, 1, 1, 0);
-    validateCacheSizes(loader, 0, 0, 0);
+    validateCacheSizes(loader, 0, 1, 0);
   }
 
   @Test
   public void readGraphWithVariableTest() {
     GDLLoader loader = getLoaderFromGDLString("g[()]");
     validateCollectionSizes(loader, 1, 1, 0);
-    validateCacheSizes(loader, 1, 0, 0);
+    validateCacheSizes(loader, 1, 1, 0);
     assertTrue("graph not cached", loader.getGraphCache().containsKey("g"));
     Graph g = loader.getGraphCache().get("g");
     assertNotNull("graph was null", g);
@@ -250,7 +251,7 @@ public class GDLLoaderTest {
   public void readGraphWithLabelTest() {
     GDLLoader loader = getLoaderFromGDLString("g:Label[()]");
     validateCollectionSizes(loader, 1, 1, 0);
-    validateCacheSizes(loader, 1, 0, 0);
+    validateCacheSizes(loader, 1, 1, 0);
     Graph g = loader.getGraphCache().get("g");
     assertEquals("graph has wrong label", "Label", g.getLabel());
   }
@@ -266,7 +267,7 @@ public class GDLLoaderTest {
   public void readGraphWithPropertiesTest() {
     GDLLoader loader = getLoaderFromGDLString(String.format("g%s[()]", PROPERTIES_STRING));
     validateCollectionSizes(loader, 1, 1, 0);
-    validateCacheSizes(loader, 1, 0, 0);
+    validateCacheSizes(loader, 1, 1, 0);
     validateProperties(loader.getGraphCache().get("g"));
   }
 
@@ -274,7 +275,7 @@ public class GDLLoaderTest {
   public void readGraphWithPropertiesOnly() {
     GDLLoader loader = getLoaderFromGDLString(String.format("%s[()]", PROPERTIES_STRING));
     validateCollectionSizes(loader, 1, 1, 0);
-    validateCacheSizes(loader, 0, 0, 0);
+    validateCacheSizes(loader, 0, 1, 0);
     validateProperties(loader.getGraphs().iterator().next());
   }
 
@@ -290,7 +291,7 @@ public class GDLLoaderTest {
   public void readFragmentedGraphTest() {
     GDLLoader loader = getLoaderFromGDLString("g[()],g[()]");
     validateCollectionSizes(loader, 1, 2, 0);
-    validateCacheSizes(loader, 1, 0, 0);
+    validateCacheSizes(loader, 1, 2, 0);
   }
 
   // --------------------------------------------------------------------------------------------
@@ -331,7 +332,8 @@ public class GDLLoaderTest {
     validateCollectionSizes(loader, 0, 2, 1);
 
     assertEquals("wrong filter extracted",
-      "((alice.age > 50) AND (alice.label = DefaultVertex) AND (bob.label = DefaultVertex) AND (r.label = DefaultEdge))",
+      "(((alice.age > 50 AND alice.__label__ = DefaultVertex)" +
+        " AND bob.__label__ = DefaultVertex) AND r.__label__ = DefaultEdge)",
       loader.getPredicates().toString());
   }
 
@@ -343,8 +345,10 @@ public class GDLLoaderTest {
     GDLLoader loader = getLoaderFromGDLString(query);
     validateCollectionSizes(loader, 0, 2, 1);
 
-    assertEquals("wrong filter extracted",
-            "((( NOT alice.age > 50 )) AND (alice.label = DefaultVertex) AND (bob.label = DefaultVertex) AND (r.label = DefaultEdge))",
+    assertEquals("(((( NOT alice.age > 50 )" +
+                     " AND alice.__label__ = DefaultVertex)" +
+                     " AND bob.__label__ = DefaultVertex)" +
+                     " AND r.__label__ = DefaultEdge)",
             loader.getPredicates().toString());
   }
 
@@ -358,8 +362,9 @@ public class GDLLoaderTest {
     validateCollectionSizes(loader, 0, 2, 1);
 
     assertEquals("wrong filter extracted",
-      "((alice.age > bob.age OR alice.age < 30) AND (alice.age > bob.age OR bob.name = Bob) AND (alice.id != bob.id) " +
-      "AND (alice.label = DefaultVertex) AND (bob.label = DefaultVertex) AND (r.label = DefaultEdge))",
+      "(((((alice.age > bob.age OR (alice.age < 30 AND bob.name = Bob))" +
+          " AND alice.id != bob.id) AND alice.__label__ = DefaultVertex)" +
+          " AND bob.__label__ = DefaultVertex) AND r.__label__ = DefaultEdge)",
       loader.getPredicates().toString());
   }
 
@@ -371,7 +376,7 @@ public class GDLLoaderTest {
     validateCollectionSizes(loader, 0, 2, 1);
 
     assertEquals("wrong filter extracted",
-      "((alice.label = DefaultVertex) AND (alice.age = 50) AND (bob.label = User) AND (r.label = knows))",
+      "(((alice.__label__ = DefaultVertex AND alice.age = 50) AND bob.__label__ = User) AND r.__label__ = knows)",
       loader.getPredicates().toString());
   }
 
@@ -386,10 +391,33 @@ public class GDLLoaderTest {
     Vertex p = loader.getVertexCache().get("p");
 
     assertEquals("filters do not match",
-      "((p.age >= other.age) AND (p.label = Person) AND (other.label = Person) AND (e1.label = likes) AND (e1.love = true))",
+      "((((p.age >= other.age" +
+         " AND p.__label__ = Person)" +
+         " AND other.__label__ = Person)" +
+         " AND e1.__label__ = likes)" +
+         " AND e1.love = true)",
       loader.getPredicates().toString());
 
     assertEquals("vertex p has wrong label","Person",p.getLabel());
+  }
+
+  @Test
+  public void testLabelPredicatesWithBlankDefaultLabels() {
+    String query = "MATCH (a:Vertex)-[e1:edge]->(b)-[]->()";
+
+    GDLHandler handler = new GDLHandler.Builder()
+            .setDefaultGraphLabel("")
+            .setDefaultVertexLabel("")
+            .setDefaultEdgeLabel("")
+            .buildFromString(query);
+
+    String expected = "(a.__label__ = Vertex AND e1.__label__ = edge)";
+    assertEquals(expected, handler.getPredicates().toString());
+  }
+
+  @Test(expected=InvalidReferenceException.class)
+  public void testThrowExceptionOnInvalidVariableReference() {
+    getLoaderFromGDLString("MATCH (a) where b.age = 42");
   }
 
   // --------------------------------------------------------------------------------------------
@@ -449,7 +477,7 @@ public class GDLLoaderTest {
     GDLLoader loader = getLoaderFromGDLString(
       "g[(a)-->(b)],g[(a)-[e]->(b)],g[(a)-[f]->(b)],h[(a)-[f]->(b)]");
     validateCollectionSizes(loader, 2, 2, 3);
-    validateCacheSizes(loader, 2, 2, 2);
+    validateCacheSizes(loader, 2, 2, 3);
 
     Graph g = loader.getGraphCache().get("g");
     Graph h = loader.getGraphCache().get("h");

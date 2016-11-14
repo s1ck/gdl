@@ -38,6 +38,15 @@ public class PropertySelector implements ComparableExpression {
   }
 
   /**
+   * Returns the property name
+   *
+   * @return the property name
+   */
+  public String getPropertyName() {
+    return propertyName;
+  }
+
+  /**
    * Returns the variable which references the element
    * @return variable name
    */
@@ -49,5 +58,24 @@ public class PropertySelector implements ComparableExpression {
   @Override
   public String toString() {
     return variable + "." + propertyName;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+
+    PropertySelector that = (PropertySelector) o;
+
+    if (variable != null ? !variable.equals(that.variable) : that.variable != null) return false;
+    return propertyName != null ? propertyName.equals(that.propertyName) : that.propertyName == null;
+
+  }
+
+  @Override
+  public int hashCode() {
+    int result = variable != null ? variable.hashCode() : 0;
+    result = 31 * result + (propertyName != null ? propertyName.hashCode() : 0);
+    return result;
   }
 }

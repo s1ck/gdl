@@ -27,8 +27,17 @@ public class Literal implements ComparableExpression {
    */
   private Object value;
 
+  /**
+   * Creates a new Literal
+   *
+   * @param value literal value
+   */
   public Literal(Object value) {
     this.value = value;
+  }
+
+  public Object getValue() {
+    return value;
   }
 
   /**
@@ -43,5 +52,21 @@ public class Literal implements ComparableExpression {
   @Override
   public String toString() {
     return value.toString();
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+
+    Literal literal = (Literal) o;
+
+    return value != null ? value.equals(literal.value) : literal.value == null;
+
+  }
+
+  @Override
+  public int hashCode() {
+    return value != null ? value.hashCode() : 0;
   }
 }

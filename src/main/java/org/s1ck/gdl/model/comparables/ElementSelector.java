@@ -15,7 +15,6 @@
  * along with GDL.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
 package org.s1ck.gdl.model.comparables;
 
 /**
@@ -28,6 +27,11 @@ public class ElementSelector implements ComparableExpression {
    */
   private String variable;
 
+  /**
+   * Creates a new element selector
+   *
+   * @param variable the variables that represents the element
+   */
   public ElementSelector(String variable) {
     this.variable = variable;
   }
@@ -44,5 +48,21 @@ public class ElementSelector implements ComparableExpression {
   @Override
   public String toString() {
     return variable;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+
+    ElementSelector that = (ElementSelector) o;
+
+    return variable != null ? variable.equals(that.variable) : that.variable == null;
+
+  }
+
+  @Override
+  public int hashCode() {
+    return variable != null ? variable.hashCode() : 0;
   }
 }

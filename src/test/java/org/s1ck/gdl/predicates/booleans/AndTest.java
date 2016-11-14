@@ -6,38 +6,25 @@ import org.s1ck.gdl.model.comparables.Literal;
 import org.s1ck.gdl.model.comparables.PropertySelector;
 import org.s1ck.gdl.model.predicates.booleans.And;
 import org.s1ck.gdl.model.predicates.expressions.Comparison;
-import org.s1ck.gdl.model.cnf.CNF;
-import org.s1ck.gdl.predicates.PredicateTest;
+import org.s1ck.gdl.utils.Comparator;
 
 import java.util.HashSet;
 import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
 
-public class AndTest extends PredicateTest {
-
-  @Test
-  public void convertToCnfTest() {
-    Comparison a = getComparison();
-    Comparison b = getComparison();
-
-    And and = new And(a,b);
-    CNF reference = a.toCNF().and(b.toCNF());
-
-    assertEquals(reference,and.toCNF());
-  }
-
+public class AndTest{
   @Test
   public void extractVariablesTest() {
     Comparison a = new Comparison(
             new ElementSelector("a"),
-            Comparison.Comparator.EQ,
+            Comparator.EQ,
             new ElementSelector("b")
     );
 
     Comparison b = new Comparison(
             new PropertySelector("a","label"),
-            Comparison.Comparator.EQ,
+            Comparator.EQ,
             new Literal("Person")
     );
 

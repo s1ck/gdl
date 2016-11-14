@@ -18,47 +18,35 @@
 package org.s1ck.gdl.model.predicates.expressions;
 
 import org.s1ck.gdl.model.predicates.Predicate;
-import org.s1ck.gdl.model.cnf.CNF;
-import org.s1ck.gdl.model.cnf.CNFElement;
 import org.s1ck.gdl.model.comparables.ComparableExpression;
+import org.s1ck.gdl.utils.Comparator;
 
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * Represents a comparison of two values
+ */
 public class Comparison implements Predicate {
-
-  public enum Comparator {
-    EQ, NEQ, GT, LT, GTE, LTE;
-
-    public static Comparator fromString(String str) {
-      switch (str) {
-        case "=":   return EQ;
-        case "!=":  return NEQ;
-        case ">":   return GT;
-        case "<":   return LT;
-        case ">=":  return GTE;
-        case "<=":  return LTE;
-        default:    return null;
-      }
-    }
-
-    public String toString() {
-      switch (this) {
-        case EQ:   return "=";
-        case NEQ:  return "!=";
-        case GT:   return ">";
-        case LT:   return "<";
-        case GTE:  return ">=";
-        case LTE:  return "<=";
-        default:   return null;
-      }
-    }
-  }
-
+  /**
+   * Left hand side value
+   */
   private ComparableExpression lhs;
+  /**
+   * Right hand side value
+   */
   private ComparableExpression rhs;
+  /**
+   * The comparator used to compare a the values
+   */
   private Comparator comparator;
 
+  /**
+   * Creates a new comparison operator
+   * @param lhs left hand side value
+   * @param comparator comparator
+   * @param rhs right hand side value
+   */
   public Comparison(ComparableExpression lhs, Comparator comparator, ComparableExpression rhs) {
     this.lhs = lhs;
     this.rhs = rhs;
@@ -71,13 +59,21 @@ public class Comparison implements Predicate {
     return arguments;
   }
 
-  @Override
-  public CNF toCNF() {
-    CNF CNF = new CNF();
-    CNFElement CNFElement = new CNFElement();
-    CNFElement.addPredicate(this);
-    CNF.addPredicate(CNFElement);
-    return CNF;
+  /**
+   * Returns the comparator
+   * @return the comparator
+   */
+  public Comparator getComparator() {
+    return comparator;
+  }
+
+  /**
+   * Returns the left and right hand side values
+   * @return lhs and rhs values
+   */
+  public ComparableExpression[] getComparableExpressions() {
+    ComparableExpression[] list = {lhs, rhs};
+    return list;
   }
 
   /**
@@ -96,5 +92,26 @@ public class Comparison implements Predicate {
   @Override
   public String toString() {
     return lhs + " " + comparator + " " + rhs;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+
+    Comparison that = (Comparison) o;
+
+    if (lhs != null ? !lhs.equals(that.lhs) : that.lhs != null) return false;
+    if (rhs != null ? !rhs.equals(that.rhs) : that.rhs != null) return false;
+    return comparator == that.comparator;
+
+  }
+
+  @Override
+  public int hashCode() {
+    int result = lhs != null ? lhs.hashCode() : 0;
+    result = 31 * result + (rhs != null ? rhs.hashCode() : 0);
+    result = 31 * result + (comparator != null ? comparator.hashCode() : 0);
+    return result;
   }
 }

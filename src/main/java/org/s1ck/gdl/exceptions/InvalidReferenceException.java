@@ -15,12 +15,20 @@
  * along with GDL.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.s1ck.gdl.model.comparables;
 
-public interface ComparableExpression {
+package org.s1ck.gdl.exceptions;
+
+/**
+ * Raised when referencing a variable in a predicate and the variable was not defined;
+ */
+public class InvalidReferenceException extends RuntimeException {
+
   /**
-   * Returns the variable of the expression
-   * @return variable
+   * Creates a new exception
+   *
+   * @param variable the variable which could not be resolved
    */
-  public String getVariable();
+  public InvalidReferenceException(String variable) {
+    super("Predicate references variable '" + variable + "' which was not defined");
+  }
 }
