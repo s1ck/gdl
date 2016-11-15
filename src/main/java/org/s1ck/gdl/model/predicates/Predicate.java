@@ -23,6 +23,7 @@ import org.s1ck.gdl.model.comparables.Literal;
 import org.s1ck.gdl.model.comparables.PropertySelector;
 import org.s1ck.gdl.utils.Comparator;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -31,7 +32,7 @@ import java.util.Set;
 /**
  * Represents a predicate defined on a query vertex or edge.
  */
-public interface Predicate {
+public interface Predicate extends Serializable{
 
   /**
    * Builds predicates from label and property definitions embedded at an
