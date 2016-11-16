@@ -17,7 +17,9 @@
 
 package org.s1ck.gdl.model.comparables;
 
-public interface ComparableExpression {
+import java.io.Serializable;
+
+public interface ComparableExpression extends Serializable{
   /**
    * Returns the variable of the expression
    * @return variable
