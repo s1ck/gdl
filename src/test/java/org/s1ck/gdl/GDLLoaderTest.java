@@ -32,7 +32,7 @@ public class GDLLoaderTest {
     GDLLoader loader = getLoaderFromGDLString("()");
 
     validateCollectionSizes(loader, 0, 1, 0);
-    validateCacheSizes(loader, 0, 1, 0);
+    validateCacheSizes(loader, 0, 0, 0);
 
     Optional<Vertex> vertex = loader.getVertices().stream().findFirst();
     assertTrue(vertex.isPresent());
@@ -86,7 +86,7 @@ public class GDLLoaderTest {
   public void readEdgeTest() {
     GDLLoader loader = getLoaderFromGDLString("()-->()");
     validateCollectionSizes(loader, 0, 2, 1);
-    validateCacheSizes(loader, 0, 2, 1);
+    validateCacheSizes(loader, 0, 0, 0);
 
     Optional<Edge> edge = loader.getEdges().stream().findFirst();
     assertTrue(edge.isPresent());
@@ -233,14 +233,14 @@ public class GDLLoaderTest {
   public void readSimpleGraphTest() {
     GDLLoader loader = getLoaderFromGDLString("[()]");
     validateCollectionSizes(loader, 1, 1, 0);
-    validateCacheSizes(loader, 0, 1, 0);
+    validateCacheSizes(loader, 0, 0, 0);
   }
 
   @Test
   public void readGraphWithVariableTest() {
     GDLLoader loader = getLoaderFromGDLString("g[()]");
     validateCollectionSizes(loader, 1, 1, 0);
-    validateCacheSizes(loader, 1, 1, 0);
+    validateCacheSizes(loader, 1, 0, 0);
     assertTrue("graph not cached", loader.getGraphCache().containsKey("g"));
     Graph g = loader.getGraphCache().get("g");
     assertNotNull("graph was null", g);
@@ -251,7 +251,7 @@ public class GDLLoaderTest {
   public void readGraphWithLabelTest() {
     GDLLoader loader = getLoaderFromGDLString("g:Label[()]");
     validateCollectionSizes(loader, 1, 1, 0);
-    validateCacheSizes(loader, 1, 1, 0);
+    validateCacheSizes(loader, 1, 0, 0);
     Graph g = loader.getGraphCache().get("g");
     assertEquals("graph has wrong label", "Label", g.getLabel());
   }
@@ -267,7 +267,7 @@ public class GDLLoaderTest {
   public void readGraphWithPropertiesTest() {
     GDLLoader loader = getLoaderFromGDLString(String.format("g%s[()]", PROPERTIES_STRING));
     validateCollectionSizes(loader, 1, 1, 0);
-    validateCacheSizes(loader, 1, 1, 0);
+    validateCacheSizes(loader, 1, 0, 0);
     validateProperties(loader.getGraphCache().get("g"));
   }
 
@@ -275,7 +275,7 @@ public class GDLLoaderTest {
   public void readGraphWithPropertiesOnly() {
     GDLLoader loader = getLoaderFromGDLString(String.format("%s[()]", PROPERTIES_STRING));
     validateCollectionSizes(loader, 1, 1, 0);
-    validateCacheSizes(loader, 0, 1, 0);
+    validateCacheSizes(loader, 0, 0, 0);
     validateProperties(loader.getGraphs().iterator().next());
   }
 
@@ -291,7 +291,7 @@ public class GDLLoaderTest {
   public void readFragmentedGraphTest() {
     GDLLoader loader = getLoaderFromGDLString("g[()],g[()]");
     validateCollectionSizes(loader, 1, 2, 0);
-    validateCacheSizes(loader, 1, 2, 0);
+    validateCacheSizes(loader, 1, 0, 0);
   }
 
   // --------------------------------------------------------------------------------------------
@@ -477,7 +477,7 @@ public class GDLLoaderTest {
     GDLLoader loader = getLoaderFromGDLString(
       "g[(a)-->(b)],g[(a)-[e]->(b)],g[(a)-[f]->(b)],h[(a)-[f]->(b)]");
     validateCollectionSizes(loader, 2, 2, 3);
-    validateCacheSizes(loader, 2, 2, 3);
+    validateCacheSizes(loader, 2, 2, 2);
 
     Graph g = loader.getGraphCache().get("g");
     Graph h = loader.getGraphCache().get("h");

@@ -71,6 +71,10 @@ class GDLLoader extends GDLBaseListener {
   // used to keep track of filter that are yet to be handled
   private Deque<Predicate> currentPredicates;
 
+  // used to generate variable names if none is given
+  private static final String ANONYMOUS_VERTEX_VARIABLE = "__v%d";
+  private static final String ANONYMOUS_EDGE_VARIABLE = "__e%d";
+
   /**
    * Initializes a new GDL Loader.
    *
@@ -249,13 +253,13 @@ class GDLLoader extends GDLBaseListener {
     } else {
       v = initNewVertex(vertexContext);
 
-      if(variable==null) {
-        variable = "__vertex" + v.getId() + "__";
+      if (variable != null) {
+        vertexCache.put(variable, v);
+      } else {
+        variable = String.format(ANONYMOUS_VERTEX_VARIABLE, v.getId());
       }
       v.setVariable(variable);
-
       vertices.add(v);
-      vertexCache.put(variable, v);
     }
     updateGraphElement(v);
     setLastSeenVertex(v);
@@ -373,13 +377,13 @@ class GDLLoader extends GDLBaseListener {
     } else {
       e = initNewEdge(edgeBodyContext, isIncoming);
 
-      if(variable==null) {
-        variable = "__edge" + e.getId() + "__";
+      if (variable != null) {
+        edgeCache.put(variable, e);
+      } else {
+        variable = String.format(ANONYMOUS_EDGE_VARIABLE, e.getId());
       }
       e.setVariable(variable);
-
       edges.add(e);
-      edgeCache.put(variable, e);
     }
     updateGraphElement(e);
     setLastSeenEdge(e);
