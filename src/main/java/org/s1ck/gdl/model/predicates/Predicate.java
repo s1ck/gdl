@@ -32,7 +32,7 @@ import java.util.Set;
 /**
  * Represents a predicate defined on a query vertex or edge.
  */
-public interface Predicate extends Serializable{
+public interface Predicate extends Serializable {
 
   /**
    * Builds predicates from label and property definitions embedded at an
@@ -41,12 +41,12 @@ public interface Predicate extends Serializable{
    * @param element the element to extract from
    * @return extracted predicates
    */
-  static List<Predicate> fromGraphElement(GraphElement element) {
+  static List<Predicate> fromGraphElement(GraphElement element, String defaultLabel) {
     ArrayList<Predicate> predicates = new ArrayList<>();
 
     Predicate predicate;
 
-    if(element.getLabel() != null && !element.getLabel().equals("")) {
+    if(element.getLabel() != null && !element.getLabel().equals(defaultLabel)) {
       predicate = new Comparison(
         new PropertySelector(element.getVariable(),"__label__"),
         Comparator.EQ,
@@ -71,13 +71,15 @@ public interface Predicate extends Serializable{
 
   /**
    * Returns the predicates arguments
+   *
    * @return The predicates arguments
    */
-  public Predicate[] getArguments();
+  Predicate[] getArguments();
 
   /**
    * Returns the variables which are referenced by the predicate
+   *
    * @return referenced variables
    */
-  public Set<String> getVariables();
+  Set<String> getVariables();
 }

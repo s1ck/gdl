@@ -153,7 +153,7 @@ class GDLLoader extends GDLBaseListener {
   }
 
     /**
-     * Returns the predicates defined by the query
+     * Returns the predicates defined by the query or {@code null} if no predicates are declared.
      *
      * @return predicates
      */
@@ -229,10 +229,10 @@ class GDLLoader extends GDLBaseListener {
   @Override
   public void exitQuery(GDLParser.QueryContext ctx) {
     for(Vertex v : vertices) {
-      addPredicates(Predicate.fromGraphElement(v));
+      addPredicates(Predicate.fromGraphElement(v, getDefaultVertexLabel()));
     }
     for(Edge e : edges) {
-      addPredicates(Predicate.fromGraphElement(e));
+      addPredicates(Predicate.fromGraphElement(e, getDefaultEdgeLabel()));
     }
   }
 
@@ -707,8 +707,6 @@ class GDLLoader extends GDLBaseListener {
    * @param newPredicates predicates to be added
    */
   private void addPredicates(List<Predicate> newPredicates) {
-
-
     for(Predicate newPredicate : newPredicates) {
       if(this.predicates == null) {
         this.predicates = newPredicate;

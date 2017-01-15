@@ -36,8 +36,7 @@ public class Xor implements Predicate {
 
   @Override
   public Predicate[] getArguments() {
-    Predicate[] arguments = {lhs,rhs};
-    return arguments;
+    return new Predicate[] { lhs, rhs };
   }
 
   /**
@@ -54,6 +53,6 @@ public class Xor implements Predicate {
 
   @Override
   public String toString() {
-    return "(" + lhs + " XOR " + rhs + ")";
+    return String.format("(%s XOR %s)", lhs, rhs);
   }
 }

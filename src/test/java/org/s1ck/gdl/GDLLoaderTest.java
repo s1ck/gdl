@@ -324,6 +324,16 @@ public class GDLLoaderTest {
   // --------------------------------------------------------------------------------------------
 
   @Test
+  public void testNonPredicateMatch() throws Exception {
+    String query = "MATCH (n)-[e]->(m)";
+
+    GDLLoader loader = getLoaderFromGDLString(query);
+    validateCollectionSizes(loader, 0, 2, 1);
+
+    assertNull(loader.getPredicates());
+  }
+
+  @Test
   public void testSimpleWhereClause() {
     String query = "MATCH (alice)-[r]->(bob)" +
       "WHERE alice.age > 50";
@@ -331,40 +341,29 @@ public class GDLLoaderTest {
     GDLLoader loader = getLoaderFromGDLString(query);
     validateCollectionSizes(loader, 0, 2, 1);
 
-    assertEquals("wrong filter extracted",
-      "(((alice.age > 50 AND alice.__label__ = DefaultVertex)" +
-        " AND bob.__label__ = DefaultVertex) AND r.__label__ = DefaultEdge)",
-      loader.getPredicates().toString());
+    assertEquals("alice.age > 50", loader.getPredicates().toString());
   }
 
   @Test
   public void testNotClause() {
     String query = "MATCH (alice)-[r]->(bob)" +
-            "WHERE Not alice.age > 50";
+      "WHERE NOT alice.age > 50";
 
     GDLLoader loader = getLoaderFromGDLString(query);
     validateCollectionSizes(loader, 0, 2, 1);
 
-    assertEquals("(((( NOT alice.age > 50 )" +
-                     " AND alice.__label__ = DefaultVertex)" +
-                     " AND bob.__label__ = DefaultVertex)" +
-                     " AND r.__label__ = DefaultEdge)",
-            loader.getPredicates().toString());
+    assertEquals("(NOT alice.age > 50)", loader.getPredicates().toString());
   }
 
   @Test
   public void testComplexWhereClause() {
     String query = "MATCH (alice)-[r]->(bob)" +
-      "WHERE (alice.age > bob.age OR (alice.age < 30 AND bob.name = \"Bob\")) " +
-      "AND alice.id != bob.id";
+      "WHERE (alice.age > bob.age OR (alice.age < 30 AND bob.name = \"Bob\")) AND alice.id != bob.id";
 
     GDLLoader loader = getLoaderFromGDLString(query);
     validateCollectionSizes(loader, 0, 2, 1);
 
-    assertEquals("wrong filter extracted",
-      "(((((alice.age > bob.age OR (alice.age < 30 AND bob.name = Bob))" +
-          " AND alice.id != bob.id) AND alice.__label__ = DefaultVertex)" +
-          " AND bob.__label__ = DefaultVertex) AND r.__label__ = DefaultEdge)",
+    assertEquals("((alice.age > bob.age OR (alice.age < 30 AND bob.name = Bob)) AND alice.id != bob.id)",
       loader.getPredicates().toString());
   }
 
@@ -375,8 +374,7 @@ public class GDLLoaderTest {
     GDLLoader loader = getLoaderFromGDLString(query);
     validateCollectionSizes(loader, 0, 2, 1);
 
-    assertEquals("wrong filter extracted",
-      "(((alice.__label__ = DefaultVertex AND alice.age = 50) AND bob.__label__ = User) AND r.__label__ = knows)",
+    assertEquals("((alice.age = 50 AND bob.__label__ = User) AND r.__label__ = knows)",
       loader.getPredicates().toString());
   }
 
@@ -390,29 +388,14 @@ public class GDLLoaderTest {
 
     Vertex p = loader.getVertexCache().get("p");
 
-    assertEquals("filters do not match",
-      "((((p.age >= other.age" +
-         " AND p.__label__ = Person)" +
-         " AND other.__label__ = Person)" +
-         " AND e1.__label__ = likes)" +
-         " AND e1.love = true)",
+    assertEquals("((((p.age >= other.age" +
+        " AND p.__label__ = Person)" +
+        " AND other.__label__ = Person)" +
+        " AND e1.__label__ = likes)" +
+        " AND e1.love = true)",
       loader.getPredicates().toString());
 
     assertEquals("vertex p has wrong label","Person",p.getLabel());
-  }
-
-  @Test
-  public void testLabelPredicatesWithBlankDefaultLabels() {
-    String query = "MATCH (a:Vertex)-[e1:edge]->(b)-[]->()";
-
-    GDLHandler handler = new GDLHandler.Builder()
-            .setDefaultGraphLabel("")
-            .setDefaultVertexLabel("")
-            .setDefaultEdgeLabel("")
-            .buildFromString(query);
-
-    String expected = "(a.__label__ = Vertex AND e1.__label__ = edge)";
-    assertEquals(expected, handler.getPredicates().toString());
   }
 
   @Test(expected=InvalidReferenceException.class)
