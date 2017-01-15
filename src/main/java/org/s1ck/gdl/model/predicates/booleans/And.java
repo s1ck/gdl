@@ -36,8 +36,7 @@ public class And implements Predicate {
 
   @Override
   public Predicate[] getArguments() {
-    Predicate[] arguments = {lhs,rhs};
-    return arguments;
+    return new Predicate[] { lhs, rhs };
   }
 
   /**
@@ -54,6 +53,6 @@ public class And implements Predicate {
 
   @Override
   public String toString() {
-    return "(" + lhs + " AND " + rhs + ")";
+    return String.format("(%s AND %s)", lhs, rhs);
   }
 }

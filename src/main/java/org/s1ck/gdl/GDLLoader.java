@@ -34,7 +34,6 @@ import org.s1ck.gdl.utils.Comparator;
 
 import java.util.*;
 
-
 class GDLLoader extends GDLBaseListener {
 
   // used to cache elements which are used with variables
@@ -153,11 +152,13 @@ class GDLLoader extends GDLBaseListener {
   }
 
     /**
-     * Returns the predicates defined by the query
+     * Returns the predicates defined by the query.
      *
      * @return predicates
      */
-  Predicate getPredicates() { return predicates; }
+  Optional<Predicate> getPredicates() {
+    return predicates != null ? Optional.of(predicates) : Optional.empty();
+  }
   /**
    * Returns the graph cache that contains a mapping from variables used in the GDL script to
    * graph instances.
@@ -229,10 +230,10 @@ class GDLLoader extends GDLBaseListener {
   @Override
   public void exitQuery(GDLParser.QueryContext ctx) {
     for(Vertex v : vertices) {
-      addPredicates(Predicate.fromGraphElement(v));
+      addPredicates(Predicate.fromGraphElement(v, getDefaultVertexLabel()));
     }
     for(Edge e : edges) {
-      addPredicates(Predicate.fromGraphElement(e));
+      addPredicates(Predicate.fromGraphElement(e, getDefaultEdgeLabel()));
     }
   }
 
@@ -707,8 +708,6 @@ class GDLLoader extends GDLBaseListener {
    * @param newPredicates predicates to be added
    */
   private void addPredicates(List<Predicate> newPredicates) {
-
-
     for(Predicate newPredicate : newPredicates) {
       if(this.predicates == null) {
         this.predicates = newPredicate;

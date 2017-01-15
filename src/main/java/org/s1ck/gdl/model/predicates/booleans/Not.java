@@ -46,6 +46,6 @@ public class Not implements Predicate {
 
   @Override
   public String toString() {
-    return "( NOT " + expression + " )";
+    return String.format("(NOT %s)", expression);
   }
 }
