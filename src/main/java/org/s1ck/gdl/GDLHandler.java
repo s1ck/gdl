@@ -30,6 +30,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * Helper class that wraps ANTLR initialization logic.
@@ -97,7 +98,7 @@ public class GDLHandler {
    *
    * @return predicates
    */
-  public Predicate getPredicates() { return loader.getPredicates(); }
+  public Optional<Predicate> getPredicates() { return loader.getPredicates(); }
 
   /**
    * Returns the graph cache that contains a mapping from variables used in the GDL script to

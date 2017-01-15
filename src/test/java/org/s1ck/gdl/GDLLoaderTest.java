@@ -21,6 +21,7 @@ import java.util.Optional;
 
 import static org.junit.Assert.*;
 
+@SuppressWarnings("OptionalGetWithoutIsPresent")
 public class GDLLoaderTest {
 
   // --------------------------------------------------------------------------------------------
@@ -330,7 +331,7 @@ public class GDLLoaderTest {
     GDLLoader loader = getLoaderFromGDLString(query);
     validateCollectionSizes(loader, 0, 2, 1);
 
-    assertNull(loader.getPredicates());
+    assertFalse(loader.getPredicates().isPresent());
   }
 
   @Test
@@ -341,7 +342,7 @@ public class GDLLoaderTest {
     GDLLoader loader = getLoaderFromGDLString(query);
     validateCollectionSizes(loader, 0, 2, 1);
 
-    assertEquals("alice.age > 50", loader.getPredicates().toString());
+    assertEquals("alice.age > 50", loader.getPredicates().get().toString());
   }
 
   @Test
@@ -352,7 +353,7 @@ public class GDLLoaderTest {
     GDLLoader loader = getLoaderFromGDLString(query);
     validateCollectionSizes(loader, 0, 2, 1);
 
-    assertEquals("(NOT alice.age > 50)", loader.getPredicates().toString());
+    assertEquals("(NOT alice.age > 50)", loader.getPredicates().get().toString());
   }
 
   @Test
@@ -364,7 +365,7 @@ public class GDLLoaderTest {
     validateCollectionSizes(loader, 0, 2, 1);
 
     assertEquals("((alice.age > bob.age OR (alice.age < 30 AND bob.name = Bob)) AND alice.id != bob.id)",
-      loader.getPredicates().toString());
+      loader.getPredicates().get().toString());
   }
 
   @Test
@@ -375,7 +376,7 @@ public class GDLLoaderTest {
     validateCollectionSizes(loader, 0, 2, 1);
 
     assertEquals("((alice.age = 50 AND bob.__label__ = User) AND r.__label__ = knows)",
-      loader.getPredicates().toString());
+      loader.getPredicates().get().toString());
   }
 
   @Test
@@ -393,9 +394,9 @@ public class GDLLoaderTest {
         " AND other.__label__ = Person)" +
         " AND e1.__label__ = likes)" +
         " AND e1.love = true)",
-      loader.getPredicates().toString());
+      loader.getPredicates().get().toString());
 
-    assertEquals("vertex p has wrong label","Person",p.getLabel());
+    assertEquals("vertex p has wrong label","Person", p.getLabel());
   }
 
   @Test(expected=InvalidReferenceException.class)
