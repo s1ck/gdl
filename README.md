@@ -162,7 +162,10 @@ g2:Community {title : "Hadoop", memberCount : 31}[
 ```
 
 ### Query Expressions
-Besides defining a graph it is also possible to formulate a query with patterns and predicates
+
+As part of his thesis, [Max](https://github.com/DarthMax) extended the grammar to support `MATCH .. WHERE ..`
+statements analogous to Cypher. Besides defining a graph it is now also possible to formulate a query including 
+patterns, variable length paths and predicates:
 
 ```
 MATCH (alice:Person)-[:knows]->(bob:Person)-[:knows*2..2]->(eve:Person)
@@ -213,6 +216,15 @@ for (Vertex v : handler.getVertices()) {
 Graph g = handler.getGraphCache().get("g");
 Vertex alice = handler.getVertexCache().get("alice");
 Edge e = handler.getEdgeCache().get("e1");
+```
+
+Read predicates from a Cypher query:
+
+```java
+GDLHandler handler = new GDLHandler.Builder().buildFromString("MATCH (a:Person)-[e:knows]->(b:Person) WHERE a.age > b.age");
+
+// prints (((a.age > b.age AND a.__label__ = Person) AND b.__label__ = Person) AND e.__label__ = knows)
+handler.getPredicates().ifPresent(System.out::println);
 ```
 
 Create a database from an `InputStream` or an input file:
