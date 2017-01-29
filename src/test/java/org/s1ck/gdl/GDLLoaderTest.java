@@ -33,7 +33,9 @@ public class GDLLoaderTest {
     GDLLoader loader = getLoaderFromGDLString("()");
 
     validateCollectionSizes(loader, 0, 1, 0);
-    validateCacheSizes(loader, 0, 0, 0);
+    validateCacheSizes(loader,
+      0, 0, 0,
+      0, 1, 0);
 
     Optional<Vertex> vertex = loader.getVertices().stream().findFirst();
     assertTrue(vertex.isPresent());
@@ -45,7 +47,9 @@ public class GDLLoaderTest {
     GDLLoader loader = getLoaderFromGDLString("(var)");
 
     validateCollectionSizes(loader, 0, 1, 0);
-    validateCacheSizes(loader, 0, 1, 0);
+    validateCacheSizes(loader,
+      0, 1, 0,
+      0, 0, 0);
     assertTrue("vertex not cached", loader.getVertexCache().containsKey("var"));
     assertNotNull("vertex was null", loader.getVertexCache().get("var"));
   }
@@ -87,7 +91,9 @@ public class GDLLoaderTest {
   public void readEdgeTest() {
     GDLLoader loader = getLoaderFromGDLString("()-->()");
     validateCollectionSizes(loader, 0, 2, 1);
-    validateCacheSizes(loader, 0, 0, 0);
+    validateCacheSizes(loader,
+      0, 0, 0,
+      0, 2, 1);
 
     Optional<Edge> edge = loader.getEdges().stream().findFirst();
     assertTrue(edge.isPresent());
@@ -98,7 +104,9 @@ public class GDLLoaderTest {
   public void readOutgoingEdgeWithVariablesTest() {
     GDLLoader loader = getLoaderFromGDLString("(v1)-[e1]->(v2)");
     validateCollectionSizes(loader, 0, 2, 1);
-    validateCacheSizes(loader, 0, 2, 1);
+    validateCacheSizes(loader,
+      0, 2, 1,
+      0, 0, 0);
 
     assertTrue("edge not cached", loader.getEdgeCache().containsKey("e1"));
     Edge e1 = loader.getEdgeCache().get("e1");
@@ -223,7 +231,9 @@ public class GDLLoaderTest {
   public void readEmptyGraphTest() {
     GDLLoader loader = getLoaderFromGDLString("[]");
     validateCollectionSizes(loader, 1, 0, 0);
-    validateCacheSizes(loader, 0, 0, 0);
+    validateCacheSizes(loader,
+      0, 0, 0,
+      1, 0, 0);
 
     Optional<Graph> graph = loader.getGraphs().stream().findFirst();
     assertTrue(graph.isPresent());
@@ -234,14 +244,18 @@ public class GDLLoaderTest {
   public void readSimpleGraphTest() {
     GDLLoader loader = getLoaderFromGDLString("[()]");
     validateCollectionSizes(loader, 1, 1, 0);
-    validateCacheSizes(loader, 0, 0, 0);
+    validateCacheSizes(loader,
+      0, 0, 0,
+      1, 1, 0);
   }
 
   @Test
   public void readGraphWithVariableTest() {
     GDLLoader loader = getLoaderFromGDLString("g[()]");
     validateCollectionSizes(loader, 1, 1, 0);
-    validateCacheSizes(loader, 1, 0, 0);
+    validateCacheSizes(loader,
+      1, 0, 0,
+      0, 1, 0);
     assertTrue("graph not cached", loader.getGraphCache().containsKey("g"));
     Graph g = loader.getGraphCache().get("g");
     assertNotNull("graph was null", g);
@@ -252,7 +266,9 @@ public class GDLLoaderTest {
   public void readGraphWithLabelTest() {
     GDLLoader loader = getLoaderFromGDLString("g:Label[()]");
     validateCollectionSizes(loader, 1, 1, 0);
-    validateCacheSizes(loader, 1, 0, 0);
+    validateCacheSizes(loader,
+      1, 0, 0,
+      0, 1, 0);
     Graph g = loader.getGraphCache().get("g");
     assertEquals("graph has wrong label", "Label", g.getLabel());
   }
@@ -268,7 +284,9 @@ public class GDLLoaderTest {
   public void readGraphWithPropertiesTest() {
     GDLLoader loader = getLoaderFromGDLString(String.format("g%s[()]", PROPERTIES_STRING));
     validateCollectionSizes(loader, 1, 1, 0);
-    validateCacheSizes(loader, 1, 0, 0);
+    validateCacheSizes(loader,
+      1, 0, 0,
+      0, 1, 0);
     validateProperties(loader.getGraphCache().get("g"));
   }
 
@@ -276,7 +294,9 @@ public class GDLLoaderTest {
   public void readGraphWithPropertiesOnly() {
     GDLLoader loader = getLoaderFromGDLString(String.format("%s[()]", PROPERTIES_STRING));
     validateCollectionSizes(loader, 1, 1, 0);
-    validateCacheSizes(loader, 0, 0, 0);
+    validateCacheSizes(loader,
+      0, 0, 0,
+      1, 1, 0);
     validateProperties(loader.getGraphs().iterator().next());
   }
 
@@ -292,7 +312,8 @@ public class GDLLoaderTest {
   public void readFragmentedGraphTest() {
     GDLLoader loader = getLoaderFromGDLString("g[()],g[()]");
     validateCollectionSizes(loader, 1, 2, 0);
-    validateCacheSizes(loader, 1, 0, 0);
+    validateCacheSizes(loader, 1, 0, 0,
+      0, 2, 0);
   }
 
   // --------------------------------------------------------------------------------------------
@@ -303,7 +324,9 @@ public class GDLLoaderTest {
   public void pathTest() {
     GDLLoader loader = getLoaderFromGDLString("(v1)-[e1]->(v2)<-[e2]-(v3)");
     validateCollectionSizes(loader, 0, 3, 2);
-    validateCacheSizes(loader, 0, 3, 2);
+    validateCacheSizes(loader,
+      0, 3, 2,
+      0, 0, 0);
     Vertex v1 = loader.getVertexCache().get("v1");
     Vertex v2 = loader.getVertexCache().get("v2");
     Vertex v3 = loader.getVertexCache().get("v3");
@@ -412,7 +435,9 @@ public class GDLLoaderTest {
   public void testGraphWithContentTest() {
     GDLLoader loader = getLoaderFromGDLString("g[(alice)-[r]->(bob),(alice)-[s]->(eve)]");
     validateCollectionSizes(loader, 1, 3, 2);
-    validateCacheSizes(loader, 1, 3, 2);
+    validateCacheSizes(loader,
+      1, 3, 2,
+      0, 0 ,0);
     Graph g = loader.getGraphCache().get("g");
     List<GraphElement> graphElements = Arrays.asList(
       loader.getVertexCache().get("alice"),
@@ -431,7 +456,9 @@ public class GDLLoaderTest {
   public void testGraphsWithOverlappingContent() {
     GDLLoader loader = getLoaderFromGDLString("g1[(alice)-[r]->(bob)],g2[(alice)-[s]->(bob)]");
     validateCollectionSizes(loader, 2, 2, 2);
-    validateCacheSizes(loader, 2, 2, 2);
+    validateCacheSizes(loader,
+      2, 2, 2,
+      0, 0 , 0);
     Graph g1 = loader.getGraphCache().get("g1");
     Graph g2 = loader.getGraphCache().get("g2");
 
@@ -461,7 +488,9 @@ public class GDLLoaderTest {
     GDLLoader loader = getLoaderFromGDLString(
       "g[(a)-->(b)],g[(a)-[e]->(b)],g[(a)-[f]->(b)],h[(a)-[f]->(b)]");
     validateCollectionSizes(loader, 2, 2, 3);
-    validateCacheSizes(loader, 2, 2, 2);
+    validateCacheSizes(loader,
+      2, 2, 2,
+      0, 0, 1);
 
     Graph g = loader.getGraphCache().get("g");
     Graph h = loader.getGraphCache().get("h");
@@ -491,7 +520,9 @@ public class GDLLoaderTest {
   public void readNullValueTest() {
     GDLLoader loader = getLoaderFromGDLString("(v{name:NULL})");
     validateCollectionSizes(loader, 0, 1, 0);
-    validateCacheSizes(loader, 0, 1, 0);
+    validateCacheSizes(loader,
+      0, 1, 0,
+      0, 0, 0);
     Vertex a = loader.getVertexCache().get("v");
     assertTrue("missing property at vertex", a.getProperties().containsKey("name"));
     assertNull("property value was not null", a.getProperties().get("name"));
@@ -501,14 +532,18 @@ public class GDLLoaderTest {
   public void readEmptyGDLTest() {
     GDLLoader loader = getLoaderFromGDLString("");
     validateCollectionSizes(loader, 0, 0, 0);
-    validateCacheSizes(loader, 0, 0, 0);
+    validateCacheSizes(loader,
+      0, 0, 0,
+      0, 0, 0);
   }
 
   @Test
   public void loopTest() {
     GDLLoader loader = getLoaderFromGDLString("(v)-[e]->(v)");
     validateCollectionSizes(loader, 0, 1, 1);
-    validateCacheSizes(loader, 0, 1, 1);
+    validateCacheSizes(loader,
+      0, 1, 1,
+      0, 0, 0);
     Vertex v = loader.getVertexCache().get("v");
     Edge e = loader.getEdgeCache().get("e");
     assertEquals("wrong source vertex identifier", (Long) v.getId(), e.getSourceVertexId());
@@ -519,7 +554,9 @@ public class GDLLoaderTest {
   public void cycleTest() {
     GDLLoader loader = getLoaderFromGDLString("(v1)-[e1]->(v2)<-[e2]-(v1)");
     validateCollectionSizes(loader, 0, 2, 2);
-    validateCacheSizes(loader, 0, 2, 2);
+    validateCacheSizes(loader,
+      0, 2, 2,
+      0, 0, 0);
     Vertex v1 = loader.getVertexCache().get("v1");
     Vertex v2 = loader.getVertexCache().get("v2");
     Edge e1 = loader.getEdgeCache().get("e1");
@@ -683,14 +720,42 @@ public class GDLLoaderTest {
   }
 
   private void validateCacheSizes(GDLLoader loader,
-    int expectedGraphCacheSize,
-    int expectedVertexCacheSize,
-    int expectedEdgeCacheSize) {
-    assertEquals("wrong number of cached graphs",
-      expectedGraphCacheSize, loader.getGraphCache().size());
-    assertEquals("wrong number of cached vertices",
-      expectedVertexCacheSize, loader.getVertexCache().size());
-    assertEquals("wrong number of cached edges",
-      expectedEdgeCacheSize, loader.getEdgeCache().size());
+    int expectedUserGraphCacheSize, int expectedUserVertexCacheSize, int expectedUserEdgeCacheSize,
+    int expectedAutoGraphCacheSize, int expectedAutoVertexCacheSize, int expectedAutoEdgeCacheSize) {
+
+    // default (user-defined)
+    assertEquals("wrong number of cached user-defined graphs",
+      expectedUserGraphCacheSize, loader.getGraphCache().size());
+    assertEquals("wrong number of cached user-defined vertices",
+      expectedUserVertexCacheSize, loader.getVertexCache().size());
+    assertEquals("wrong number of cached user-defined edges",
+      expectedUserEdgeCacheSize, loader.getEdgeCache().size());
+
+    // user-defined
+    assertEquals("wrong number of cached user-defined graphs",
+      expectedUserGraphCacheSize, loader.getGraphCache(true, false).size());
+    assertEquals("wrong number of cached user-defined vertices",
+      expectedUserVertexCacheSize, loader.getVertexCache(true, false).size());
+    assertEquals("wrong number of cached user-defined edges",
+      expectedUserEdgeCacheSize, loader.getEdgeCache(true, false).size());
+
+    // auto-generated
+    assertEquals("wrong number of cached auto-defined graphs",
+      expectedAutoGraphCacheSize, loader.getGraphCache(false, true).size());
+    assertEquals("wrong number of cached auto-defined vertices",
+      expectedAutoVertexCacheSize, loader.getVertexCache(false, true).size());
+    assertEquals("wrong number of cached auto-defined edges",
+      expectedAutoEdgeCacheSize, loader.getEdgeCache(false, true).size());
+
+    // all
+    assertEquals("wrong number of cached auto-defined graphs",
+      expectedUserGraphCacheSize + expectedAutoGraphCacheSize,
+      loader.getGraphCache(true, true).size());
+    assertEquals("wrong number of cached auto-defined vertices",
+      expectedUserVertexCacheSize + expectedAutoVertexCacheSize,
+      loader.getVertexCache(true, true).size());
+    assertEquals("wrong number of cached auto-defined edges",
+      expectedUserEdgeCacheSize + expectedAutoEdgeCacheSize,
+      loader.getEdgeCache(true, true).size());
   }
 }
