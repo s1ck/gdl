@@ -28,6 +28,8 @@ public class Edge extends GraphElement {
 
   public Edge() {
     super();
+    lowerBound = 1;
+    upperBound = 1;
   }
 
   public Long getSourceVertexId() {
