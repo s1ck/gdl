@@ -527,6 +527,7 @@ class GDLLoader extends GDLBaseListener {
     } else {
       e.setLabel(defaultEdgeLabel);
     }
+
     return e;
   }
 

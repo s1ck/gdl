@@ -97,6 +97,7 @@ public class GDLLoaderTest {
 
     Optional<Edge> edge = loader.getEdges().stream().findFirst();
     assertTrue(edge.isPresent());
+    assertFalse("edge should not have variable length", edge.get().hasVariableLength());
     assertEquals("edge has wrong label", loader.getDefaultEdgeLabel(), edge.get().getLabel());
   }
 
@@ -111,6 +112,7 @@ public class GDLLoaderTest {
     assertTrue("edge not cached", loader.getEdgeCache().containsKey("e1"));
     Edge e1 = loader.getEdgeCache().get("e1");
     assertNotNull("e was null", e1);
+    assertFalse("edge should not have variable length", e1.hasVariableLength());
     assertEquals(loader.getDefaultEdgeLabel(), e1.getLabel());
     Vertex v1 = loader.getVertexCache().get("v1");
     Vertex v2 = loader.getVertexCache().get("v2");
@@ -128,6 +130,8 @@ public class GDLLoaderTest {
     assertTrue("edge not cached", loader.getEdgeCache().containsKey("e1"));
     Edge e1 = loader.getEdgeCache().get("e1");
     assertNotNull("e was null", e1);
+    assertFalse("edge should not have variable length", e1.hasVariableLength());
+
     Vertex v1 = loader.getVertexCache().get("v1");
     Vertex v2 = loader.getVertexCache().get("v2");
 
@@ -145,15 +149,14 @@ public class GDLLoaderTest {
   @Test
   public void readEdgeWithLabelTest() {
     GDLLoader loader = getLoaderFromGDLString("()-[e:knows]->()");
-
     Edge e = loader.getEdgeCache().get("e");
+    assertFalse("edge should not have variable length", e.hasVariableLength());
     assertEquals("edge has wrong label", "knows", e.getLabel());
   }
 
   @Test
   public void readEdgeWithCamelCaseLabelTest() {
     GDLLoader loader = getLoaderFromGDLString("()-[e:hasInterest]->()");
-
     Edge e = loader.getEdgeCache().get("e");
     assertEquals("edge has wrong label", "hasInterest", e.getLabel());
   }
@@ -161,14 +164,12 @@ public class GDLLoaderTest {
   @Test
   public void readEdgeWithPropertiesTest() {
     GDLLoader loader = getLoaderFromGDLString(String.format("()-[e %s]->()", PROPERTIES_STRING));
-
     validateProperties(loader.getEdgeCache().get("e"));
   }
 
   @Test
   public void readEdgeWithVariablesTest() {
     GDLLoader loader = getLoaderFromGDLString("()-[e]->()");
-
     Edge e = loader.getEdges().iterator().next();
     assertEquals("edge has wrong variable", "e", e.getVariable());
   }
@@ -178,7 +179,7 @@ public class GDLLoaderTest {
     GDLLoader loader = getLoaderFromGDLString("()-[e]->()");
     Edge e = loader.getEdgeCache().get("e");
 
-    assertEquals("edge should not have variable length", false, e.hasVariableLength());
+    assertFalse("edge should not have variable length", e.hasVariableLength());
     assertEquals("wrong lower bound", 1, e.getLowerBound());
     assertEquals("wrong upper bound", 1, e.getUpperBound());
   }
@@ -188,7 +189,7 @@ public class GDLLoaderTest {
     GDLLoader loader = getLoaderFromGDLString("()-[e*2]->()");
     Edge e = loader.getEdgeCache().get("e");
 
-    assertEquals("edge should have variable length", true, e.hasVariableLength());
+    assertTrue("edge should have variable length", e.hasVariableLength());
     assertEquals("wrong lower bound", 2, e.getLowerBound());
     assertEquals("wrong lower bound", 0, e.getUpperBound());
   }
@@ -198,7 +199,7 @@ public class GDLLoaderTest {
     GDLLoader loader = getLoaderFromGDLString("()-[e*..5]->()");
     Edge e = loader.getEdgeCache().get("e");
 
-    assertEquals("edge should have variable length", true, e.hasVariableLength());
+    assertTrue("edge should have variable length", e.hasVariableLength());
     assertEquals("wrong lower bound", 0, e.getLowerBound());
     assertEquals("wrong lower bound", 5, e.getUpperBound());
   }
@@ -208,7 +209,7 @@ public class GDLLoaderTest {
     GDLLoader loader = getLoaderFromGDLString("()-[e*3..5]->()");
     Edge e = loader.getEdgeCache().get("e");
 
-    assertEquals("edge should have variable length", true, e.hasVariableLength());
+    assertTrue("edge should have variable length", e.hasVariableLength());
     assertEquals("wrong lower bound", 3, e.getLowerBound());
     assertEquals("wrong lower bound", 5, e.getUpperBound());
   }
@@ -218,7 +219,7 @@ public class GDLLoaderTest {
     GDLLoader loader = getLoaderFromGDLString("()-[e*]->()");
     Edge e = loader.getEdgeCache().get("e");
 
-    assertEquals("edge should have variable length", true, e.hasVariableLength());
+    assertTrue("edge should have variable length", e.hasVariableLength());
     assertEquals("wrong lower bound", 0, e.getLowerBound());
     assertEquals("wrong lower bound", 0, e.getUpperBound());
   }
