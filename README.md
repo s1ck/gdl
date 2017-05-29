@@ -244,4 +244,4 @@ handler.append("g[(alice)-[:knows]->(eve)]");
 
 ## License
 
-Licensed under the [GNU General Public License, v3](http://www.gnu.org/licenses/gpl-3.0.html).
+Licensed under the [Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0).
