@@ -16,9 +16,11 @@
 
 package org.s1ck.gdl;
 
+import org.antlr.v4.runtime.ANTLRErrorStrategy;
 import org.antlr.v4.runtime.ANTLRFileStream;
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.DefaultErrorStrategy;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.s1ck.gdl.model.Edge;
 import org.s1ck.gdl.model.Graph;
@@ -29,6 +31,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -183,6 +186,11 @@ public class GDLHandler {
     private String edgeLabel = "__EDGE";
 
     /**
+     * Strategy for handling parser errors.
+     */
+    private ANTLRErrorStrategy errorStrategy = new DefaultErrorStrategy();
+
+    /**
      * Default graph label is used if none is set in the GDL script.
      *
      * @param graphLabel graph label (must not be {@code null}).
@@ -212,6 +220,17 @@ public class GDLHandler {
      */
     public Builder setDefaultEdgeLabel(String edgeLabel) {
       this.edgeLabel = edgeLabel;
+      return this;
+    }
+
+    /**
+     * Set the error handler strategy for ANTLR. If not set, {@link DefaultErrorStrategy} is used.
+     *
+     * @param errorStrategy ANTLR error strategy
+     * @return builder
+     */
+    public Builder setErrorStrategy(ANTLRErrorStrategy errorStrategy) {
+      this.errorStrategy = errorStrategy;
       return this;
     }
 
@@ -265,9 +284,13 @@ public class GDLHandler {
       if (edgeLabel == null) {
         throw new IllegalArgumentException("Edge label must not be null.");
       }
+      if (errorStrategy == null) {
+        throw new IllegalArgumentException("Error handler must not be null.");
+      }
 
       GDLLexer lexer = new GDLLexer(antlrInputStream);
       GDLParser parser = new GDLParser(new CommonTokenStream(lexer));
+      parser.setErrorHandler(errorStrategy);
 
       GDLLoader loader = new GDLLoader(graphLabel, vertexLabel, edgeLabel);
       new ParseTreeWalker().walk(loader, parser.database());
