@@ -589,7 +589,7 @@ class GDLLoader extends GDLBaseListener {
       }
       return properties;
     }
-    return null;
+    return Collections.emptyMap();
   }
 
   /**
