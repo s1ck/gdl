@@ -601,7 +601,7 @@ class GDLLoader extends GDLBaseListener {
   private Object getPropertyValue(GDLParser.LiteralContext literalContext) {
     String text;
     if (literalContext.StringLiteral() != null) {
-      return literalContext.StringLiteral().getText().replaceAll("^.|.$", "");
+      return parseString(literalContext.StringLiteral().getText());
     } else if (literalContext.BooleanLiteral() != null) {
       return Boolean.parseBoolean(literalContext.BooleanLiteral().getText());
     } else if (literalContext.IntegerLiteral() != null) {
@@ -871,4 +871,17 @@ class GDLLoader extends GDLBaseListener {
   private int terminalNodeToInt(TerminalNode node) {
     return Integer.parseInt(node.getText());
   }
+
+  /**
+   * Parses a String literal from the input string. Unescapes " and '
+   *
+   * @param in the raw input string
+   * @return the parsed string
+   */
+  private String parseString(String in) {
+    return in.replaceAll("^.|.$", "")
+             .replaceAll("\\\\\"","\"")
+             .replaceAll("\\\\\'","'");
+  }
+
 }

@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static org.junit.Assert.*;
@@ -81,6 +82,26 @@ public class GDLLoaderTest {
 
     Vertex v = loader.getVertices().iterator().next();
     assertEquals("vertex has wrong variable", "var", v.getVariable());
+  }
+
+  @Test
+  public void readVertexWithDifferentStringRepresentations() {
+    GDLLoader loader = getLoaderFromGDLString("" +
+      "({" +
+      "  foo: \"foo\"," +
+      "  bar: 'bar'," +
+      "  baz: \"\\\"baz\\\"\"," +
+      "  foobar: '\\'foobar\\''" +
+      "})"
+    );
+    
+    Vertex v = loader.getVertices().iterator().next();
+    Map<String, Object> properties = v.getProperties();
+
+    assertEquals("foo", properties.get("foo"));
+    assertEquals("bar", properties.get("bar"));
+    assertEquals("\"baz\"", properties.get("baz"));
+    assertEquals("'foobar'", properties.get("foobar"));
   }
 
   // --------------------------------------------------------------------------------------------
