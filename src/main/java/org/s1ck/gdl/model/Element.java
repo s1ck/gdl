@@ -16,14 +16,16 @@
 
 package org.s1ck.gdl.model;
 
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class Element {
 
   private Long id;
 
-  private String label;
+  private List<String> labels;
 
   private Map<String, Object> properties;
 
@@ -42,11 +44,19 @@ public class Element {
   }
 
   public String getLabel() {
-    return label;
+    return this.labels.get(0);
   }
 
   public void setLabel(String label) {
-    this.label = label;
+    this.labels = Collections.singletonList(label);
+  }
+
+  public List<String> getLabels() {
+    return this.labels;
+  }
+
+  public void setLabels(List<String> labels) {
+    this.labels = labels;
   }
 
   public String getVariable() {

@@ -39,7 +39,8 @@ public class GDLLoaderTest {
 
     Optional<Vertex> vertex = loader.getVertices().stream().findFirst();
     assertTrue(vertex.isPresent());
-    assertEquals(loader.getDefaultVertexLabel(), vertex.get().getLabel());
+    assertEquals(1, vertex.get().getLabels().size());
+    assertEquals(loader.getDefaultVertexLabel(), vertex.get().getLabels().get(0));
   }
 
   @Test
@@ -58,7 +59,18 @@ public class GDLLoaderTest {
   public void readVertexWithLabelTest() {
     GDLLoader loader = getLoaderFromGDLString("(var:Label)");
     Vertex v = loader.getVertexCache().get("var");
-    assertEquals("vertex has wrong label", "Label", v.getLabel());
+    assertEquals("vertex has wrong label", "Label", v.getLabels().get(0));
+  }
+
+  @Test
+  public void readVertexWithMultipleLabelsTest() {
+    GDLLoader loader = getLoaderFromGDLString("(var:Label1:Label2:Label3)");
+    Vertex v = loader.getVertexCache().get("var");
+    assertEquals(
+      "vertex has wrong label",
+      Arrays.asList("Label1", "Label2", "Label3"), v
+      .getLabels()
+    );
   }
 
   @Test
@@ -151,6 +163,7 @@ public class GDLLoaderTest {
     GDLLoader loader = getLoaderFromGDLString("()-[e:knows]->()");
     Edge e = loader.getEdgeCache().get("e");
     assertFalse("edge should not have variable length", e.hasVariableLength());
+    assertEquals("edge has the wrong number of labels", 1, e.getLabels().size());
     assertEquals("edge has wrong label", "knows", e.getLabel());
   }
 
@@ -159,6 +172,11 @@ public class GDLLoaderTest {
     GDLLoader loader = getLoaderFromGDLString("()-[e:hasInterest]->()");
     Edge e = loader.getEdgeCache().get("e");
     assertEquals("edge has wrong label", "hasInterest", e.getLabel());
+  }
+
+  @Test(expected = RuntimeException.class)
+  public void readEdgeWithMultipleLabelsTest() {
+    getLoaderFromGDLString("()-[e:hasInterest:foobar]->()");
   }
 
   @Test
@@ -238,7 +256,8 @@ public class GDLLoaderTest {
 
     Optional<Graph> graph = loader.getGraphs().stream().findFirst();
     assertTrue(graph.isPresent());
-    assertEquals(loader.getDefaultGraphLabel(), graph.get().getLabel());
+    assertEquals(1, graph.get().getLabels().size());
+    assertEquals(loader.getDefaultGraphLabel(), graph.get().getLabels().get(0));
   }
 
   @Test
@@ -271,6 +290,7 @@ public class GDLLoaderTest {
       1, 0, 0,
       0, 1, 0);
     Graph g = loader.getGraphCache().get("g");
+    assertEquals("graph has the wrong number of labels", 1, g.getLabels().size());
     assertEquals("graph has wrong label", "Label", g.getLabel());
   }
 
@@ -279,6 +299,17 @@ public class GDLLoaderTest {
     GDLLoader loader = getLoaderFromGDLString("g:LabelParty[()]");
     Graph g = loader.getGraphCache().get("g");
     assertEquals("graph has wrong label", "LabelParty", g.getLabel());
+  }
+
+  @Test
+  public void readGraphWithMultipleLabelsTest() {
+    GDLLoader loader = getLoaderFromGDLString("g:Label1:Label2[()]");
+    Graph g = loader.getGraphCache().get("g");
+    assertEquals(
+      "graph has wrong label",
+      Arrays.asList("Label1", "Label2"),
+      g.getLabels()
+    );
   }
 
   @Test

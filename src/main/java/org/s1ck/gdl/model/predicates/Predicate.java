@@ -45,6 +45,7 @@ public interface Predicate extends Serializable {
 
     Predicate predicate;
 
+    //TODO respect multiple labels
     if(element.getLabel() != null && !element.getLabel().equals(defaultLabel)) {
       predicate = new Comparison(
         new PropertySelector(element.getVariable(),"__label__"),
