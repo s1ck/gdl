@@ -16,6 +16,7 @@
 
 package org.s1ck.gdl;
 
+import org.antlr.v4.runtime.RuleContext;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import org.s1ck.gdl.exceptions.InvalidReferenceException;
 import org.s1ck.gdl.model.*;
@@ -32,6 +33,7 @@ import org.s1ck.gdl.model.comparables.PropertySelector;
 import org.s1ck.gdl.utils.Comparator;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 class GDLLoader extends GDLBaseListener {
 
@@ -479,8 +481,8 @@ class GDLLoader extends GDLBaseListener {
   private Graph initNewGraph(GDLParser.GraphContext graphContext) {
     Graph g = new Graph();
     g.setId(getNewGraphId());
-    String label = getLabel(graphContext.header());
-    g.setLabel(label != null ? label : defaultGraphLabel);
+    List<String> labels = getLabels(graphContext.header());
+    g.setLabels(labels.isEmpty() ? Collections.singletonList(defaultGraphLabel) : labels);
     g.setProperties(getProperties(graphContext.properties()));
 
     return g;
@@ -495,8 +497,8 @@ class GDLLoader extends GDLBaseListener {
   private Vertex initNewVertex(GDLParser.VertexContext vertexContext) {
     Vertex v = new Vertex();
     v.setId(getNewVertexId());
-    String label = getLabel(vertexContext.header());
-    v.setLabel(label != null ? label : defaultVertexLabel);
+    List<String> labels = getLabels(vertexContext.header());
+    v.setLabels(labels.isEmpty() ? Collections.singletonList(defaultVertexLabel): labels);
     v.setProperties(getProperties(vertexContext.properties()));
 
     return v;
@@ -517,8 +519,8 @@ class GDLLoader extends GDLBaseListener {
     e.setTargetVertexId(getTargetVertexId(isIncoming));
 
     if (hasBody) {
-      String label = getLabel(edgeBodyContext.header());
-      e.setLabel(label != null ? label : defaultEdgeLabel);
+      List<String> labels = getLabels(edgeBodyContext.header());
+      e.setLabels(labels.isEmpty() ? Collections.singletonList(defaultEdgeLabel) : labels);
       e.setProperties(getProperties(edgeBodyContext.properties()));
       int[] range = parseEdgeLengthContext(edgeBodyContext.edgeLength());
       e.setLowerBound(range[0]);
@@ -563,14 +565,19 @@ class GDLLoader extends GDLBaseListener {
   }
 
   /**
-   * Returns the element label from a given header context.
+   * Returns the element labels from a given header context.
    *
    * @param header header context
-   * @return element label or {@code null} if context was null
+   * @return element labels or {@code null} if context was null
    */
-  private String getLabel(GDLParser.HeaderContext header) {
+  private List<String> getLabels(GDLParser.HeaderContext header) {
     if (header != null && header.label() != null) {
-      return header.label().getText().substring(1);
+      return header
+        .label()
+        .stream()
+        .map(RuleContext::getText)
+        .map(x -> x.substring(1))
+        .collect(Collectors.toList());
     }
     return null;
   }

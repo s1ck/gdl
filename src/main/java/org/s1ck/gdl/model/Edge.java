@@ -16,6 +16,8 @@
 
 package org.s1ck.gdl.model;
 
+import java.util.List;
+
 public class Edge extends GraphElement {
   private Long sourceVertexId;
 

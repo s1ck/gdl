@@ -65,7 +65,7 @@ edgeLength
     ;
 
 header
-    : Identifier? label?
+    : Identifier? label*
     ;
 
 properties
