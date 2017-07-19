@@ -174,9 +174,16 @@ public class GDLLoaderTest {
     assertEquals("edge has wrong label", "hasInterest", e.getLabel());
   }
 
-  @Test(expected = RuntimeException.class)
+  @Test
   public void readEdgeWithMultipleLabelsTest() {
-    getLoaderFromGDLString("()-[e:hasInterest:foobar]->()");
+    GDLLoader loader = getLoaderFromGDLString("()-[e:hasInterest:foobar]->()");
+    Edge e = loader.getEdgeCache().get("e");
+    assertEquals(
+      "edge has wrong label",
+      Arrays.asList("hasInterest", "foobar"), e.getLabels()
+    );
+
+    assertEquals("hasInterest", e.getLabel());
   }
 
   @Test

@@ -70,14 +70,6 @@ public class Edge extends GraphElement {
   }
 
   @Override
-  public void setLabels(List<String> labels) {
-    if(labels.size() > 1) {
-      throw new RuntimeException("Edges can only have one label");
-    }
-    super.setLabels(labels);
-  }
-
-  @Override
   public String toString() {
     String out = "Edge{" +
       "id=" + getId() +
