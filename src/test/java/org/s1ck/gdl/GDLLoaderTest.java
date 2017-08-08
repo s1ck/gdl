@@ -82,6 +82,13 @@ public class GDLLoaderTest {
   }
 
   @Test
+  public void readVertexWithSnakeCaseLabelTest() {
+    GDLLoader loader = getLoaderFromGDLString("(var:Blog_Post)");
+    Vertex v = loader.getVertexCache().get("var");
+    assertEquals("vertex has wrong label", "Blog_Post", v.getLabel());
+  }
+
+  @Test
   public void readVertexWithPropertiesTest() {
     GDLLoader loader = getLoaderFromGDLString(String.format("(var %s)", PROPERTIES_STRING));
 
@@ -193,6 +200,13 @@ public class GDLLoaderTest {
     GDLLoader loader = getLoaderFromGDLString("()-[e:hasInterest]->()");
     Edge e = loader.getEdgeCache().get("e");
     assertEquals("edge has wrong label", "hasInterest", e.getLabel());
+  }
+
+  @Test
+  public void readEdgeWithSnakeCaseLabelTest() {
+    GDLLoader loader = getLoaderFromGDLString("()-[e:HAS_INTEREST]->()");
+    Edge e = loader.getEdgeCache().get("e");
+    assertEquals("edge has wrong label", "HAS_INTEREST", e.getLabel());
   }
 
   @Test

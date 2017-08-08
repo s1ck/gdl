@@ -77,7 +77,7 @@ property
     ;
 
 label
-    : Colon (Characters | Identifier)
+    : Colon Identifier
     ;
 
 where
@@ -188,14 +188,7 @@ FloatTypeSuffix
     :   [fFdD]
     ;
 
-//-------------------------------
-// Identifier
-//-------------------------------
 
-
-Identifier
-    : (UnderScore | LowerCaseLetter) (UnderScore | Character)*   // e.g. _temp, _0, t_T, g0, alice, birthTown
-    ;
 
 //-------------------------------
 // Comparison
@@ -233,6 +226,14 @@ ComparisonOP
 
 Null
     : 'NULL'
+    ;
+
+//-------------------------------
+// Identifier
+//-------------------------------
+
+Identifier
+    : (UnderScore | LowerCaseLetter | UpperCaseLetter) (UnderScore | Character)*   // e.g. _temp, _0, t_T, g0, alice, birthTown
     ;
 
 Characters
@@ -280,7 +281,6 @@ fragment
 UnderScore
     : '_'
     ;
-
 
 Colon
     : ':'
