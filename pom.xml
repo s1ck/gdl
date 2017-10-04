@@ -36,11 +36,11 @@
 
     <distributionManagement>
         <snapshotRepository>
-            <id>release_artifacts</id>
+            <id>release_artifacts_gdl</id>
             <url>https://oss.sonatype.org/content/repositories/snapshots</url>
         </snapshotRepository>
         <repository>
-            <id>release_artifacts</id>
+            <id>release_artifacts_gdl</id>
             <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
         </repository>
     </distributionManagement>
