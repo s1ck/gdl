@@ -182,24 +182,10 @@ OR (alice.age > eve.age)
 Add dependency to your maven project:
 
 ```
-<repositories>
-  <repository>
-    <id>dbleipzig</id>
-    <name>Database Group Leipzig University</name>
-    <url>https://wdiserv1.informatik.uni-leipzig.de:443/archiva/repository/dbleipzig/</url>
-    <releases>
-      <enabled>true</enabled>
-    </releases>
-    <snapshots>
-      <enabled>true</enabled>
-    </snapshots>
-   </repository>
-</repositories>
-
 <dependency>
-  <groupId>org.s1ck</groupId>
-  <artifactId>gdl</artifactId>
-  <version>0.3.0-SNAPSHOT</version>
+    <groupId>com.github.s1ck</groupId>
+    <artifactId>gdl</artifactId>
+    <version>0.3</version>
 </dependency>
 ```
 
