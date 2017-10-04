@@ -85,7 +85,7 @@
                         <version>${plugin.maven-gpg.version}</version>
                         <executions>
                             <execution>
-                                <id>sign-artifacts</id>
+                                <id>sign_artifacts_gdl</id>
                                 <phase>verify</phase>
                                 <goals>
                                     <goal>sign</goal>
@@ -125,7 +125,7 @@
                         <version>${plugin.maven-nexus-staging.version}</version>
                         <extensions>true</extensions>
                         <configuration>
-                            <serverId>release-artifacts</serverId>
+                            <serverId>release_artifacts_gdl</serverId>
                             <nexusUrl>https://oss.sonatype.org/</nexusUrl>
                             <autoReleaseAfterClose>false</autoReleaseAfterClose>
                         </configuration>
@@ -206,7 +206,7 @@
                 <version>${plugin.maven-gpg.version}</version>
                 <executions>
                     <execution>
-                        <id>sign_artifacts</id>
+                        <id>sign_artifacts_gdl</id>
                         <phase>deploy</phase>
                         <goals>
                             <goal>sign</goal>
@@ -220,7 +220,7 @@
                 <version>${plugin.maven-nexus-staging.version}</version>
                 <extensions>true</extensions>
                 <configuration>
-                    <serverId>release_artifacts</serverId>
+                    <serverId>release_artifacts_gdl</serverId>
                     <nexusUrl>https://oss.sonatype.org/</nexusUrl>
                     <autoReleaseAfterClose>false</autoReleaseAfterClose>
                 </configuration>
