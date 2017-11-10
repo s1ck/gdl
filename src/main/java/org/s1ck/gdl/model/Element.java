@@ -44,7 +44,7 @@ public class Element {
   }
 
   public String getLabel() {
-    return this.labels.get(0);
+    return (labels.size() > 0) ? labels.get(0) : null;
   }
 
   public void setLabel(String label) {

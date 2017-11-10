@@ -55,6 +55,10 @@ class GDLLoader extends GDLBaseListener {
   // stores the predicates tree for that query
   private Predicate predicates;
 
+  private final boolean useDefaultGraphLabel;
+  private final boolean useDefaultVertexLabel;
+  private final boolean useDefaultEdgeLabel;
+
   private final String defaultGraphLabel;
   private final String defaultVertexLabel;
   private final String defaultEdgeLabel;
@@ -89,6 +93,27 @@ class GDLLoader extends GDLBaseListener {
    * @param defaultEdgeLabel    edge label to be used if no label is given in the GDL script
    */
   GDLLoader(String defaultGraphLabel, String defaultVertexLabel, String defaultEdgeLabel) {
+    this(defaultGraphLabel, defaultVertexLabel, defaultEdgeLabel,
+      true, true, true);
+  }
+
+  /**
+   * Initializes a new GDL Loader.
+   *
+   * @param defaultGraphLabel     graph label to be used if no label is given in the GDL script
+   * @param defaultVertexLabel    vertex label to be used if no label is given in the GDL script
+   * @param defaultEdgeLabel      edge label to be used if no label is given in the GDL script
+   * @param useDefaultGraphLabel  enable default graph label
+   * @param useDefaultVertexLabel enable default vertex label
+   * @param useDefaultEdgeLabel   enable default edge label
+   */
+  GDLLoader(String defaultGraphLabel, String defaultVertexLabel, String defaultEdgeLabel,
+    boolean useDefaultGraphLabel, boolean useDefaultVertexLabel, boolean useDefaultEdgeLabel) {
+
+    this.useDefaultGraphLabel = useDefaultGraphLabel;
+    this.useDefaultVertexLabel = useDefaultVertexLabel;
+    this.useDefaultEdgeLabel = useDefaultEdgeLabel;
+
     this.defaultGraphLabel  = defaultGraphLabel;
     this.defaultVertexLabel = defaultVertexLabel;
     this.defaultEdgeLabel   = defaultEdgeLabel;
@@ -482,7 +507,9 @@ class GDLLoader extends GDLBaseListener {
     Graph g = new Graph();
     g.setId(getNewGraphId());
     List<String> labels = getLabels(graphContext.header());
-    g.setLabels(labels.isEmpty() ? Collections.singletonList(defaultGraphLabel) : labels);
+    g.setLabels(labels.isEmpty() ?
+      useDefaultGraphLabel ? Collections.singletonList(defaultGraphLabel) : Collections.emptyList()
+      : labels);
     g.setProperties(getProperties(graphContext.properties()));
 
     return g;
@@ -498,7 +525,9 @@ class GDLLoader extends GDLBaseListener {
     Vertex v = new Vertex();
     v.setId(getNewVertexId());
     List<String> labels = getLabels(vertexContext.header());
-    v.setLabels(labels.isEmpty() ? Collections.singletonList(defaultVertexLabel): labels);
+    v.setLabels(labels.isEmpty() ?
+      useDefaultVertexLabel ? Collections.singletonList(defaultVertexLabel) : Collections.emptyList()
+      : labels);
     v.setProperties(getProperties(vertexContext.properties()));
 
     return v;
@@ -520,13 +549,19 @@ class GDLLoader extends GDLBaseListener {
 
     if (hasBody) {
       List<String> labels = getLabels(edgeBodyContext.header());
-      e.setLabels(labels.isEmpty() ? Collections.singletonList(defaultEdgeLabel) : labels);
+      e.setLabels(labels.isEmpty() ?
+        useDefaultEdgeLabel ? Collections.singletonList(defaultEdgeLabel) : Collections.emptyList()
+        : labels);
       e.setProperties(getProperties(edgeBodyContext.properties()));
       int[] range = parseEdgeLengthContext(edgeBodyContext.edgeLength());
       e.setLowerBound(range[0]);
       e.setUpperBound(range[1]);
     } else {
-      e.setLabel(defaultEdgeLabel);
+      if (useDefaultEdgeLabel) {
+        e.setLabel(defaultEdgeLabel);
+      } else {
+        e.setLabel(null);
+      }
     }
 
     return e;

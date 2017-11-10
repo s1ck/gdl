@@ -7,6 +7,7 @@ import org.s1ck.gdl.model.Vertex;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Collections;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -50,8 +51,31 @@ public class GDLHandlerTest {
     Edge e = handler.getEdgeCache().get("e");
 
     assertEquals("Graph has wrong label", "G", g.getLabel());
+    assertEquals("Graph has wrong labels", Collections.singletonList("G"), g.getLabels());
     assertEquals("Vertex has wrong label", "V", v.getLabel());
+    assertEquals("Vertex has wrong labels", Collections.singletonList("V"), v.getLabels());
     assertEquals("Edge has wrong label", "E", e.getLabel());
+    assertEquals("Edge has wrong labels", Collections.singletonList("E"), e.getLabels());
+  }
+
+  @Test
+  public void initWithDisabledDefaultLabelsTest() {
+    GDLHandler handler = new GDLHandler.Builder()
+      .disableDefaultGraphLabel()
+      .disableDefaultVertexLabel()
+      .disableDefaultEdgeLabel()
+      .buildFromString("g[(u)-[e]->(v)]");
+
+    Graph g = handler.getGraphCache().get("g");
+    Vertex v = handler.getVertexCache().get("u");
+    Edge e = handler.getEdgeCache().get("e");
+
+    assertEquals("Graph has wrong label", null, g.getLabel());
+    assertEquals("Graph has wrong labels", Collections.emptyList(), g.getLabels());
+    assertEquals("Vertex has wrong label", null, v.getLabel());
+    assertEquals("Vertex has wrong labels", Collections.emptyList(), v.getLabels());
+    assertEquals("Edge has wrong label", null, e.getLabel());
+    assertEquals("Edge has wrong labels", Collections.emptyList(), e.getLabels());
   }
 
   @Test

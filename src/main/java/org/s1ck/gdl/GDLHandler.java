@@ -31,7 +31,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -186,6 +185,21 @@ public class GDLHandler {
     private String edgeLabel = "__EDGE";
 
     /**
+     * Flag to indicate if the default graph label shall be used if none is present.
+     */
+    private boolean useDefaultGraphLabel = true;
+
+    /**
+     * Flag to indicate if the default vertex label shall be used if none is present.
+     */
+    private boolean useDefaultVertexLabel = true;
+
+    /**
+     * Flag to indicate if the default edge label shall be used if none is present.
+     */
+    private boolean useDefaultEdgeLabel = true;
+
+    /**
      * Strategy for handling parser errors.
      */
     private ANTLRErrorStrategy errorStrategy = new DefaultErrorStrategy();
@@ -220,6 +234,66 @@ public class GDLHandler {
      */
     public Builder setDefaultEdgeLabel(String edgeLabel) {
       this.edgeLabel = edgeLabel;
+      return this;
+    }
+
+    /**
+     * Enable default graph label.
+     *
+     * @return builder
+     */
+    public Builder enableDefaultGraphLabel() {
+      this.useDefaultGraphLabel = true;
+      return this;
+    }
+
+    /**
+     * Disable default graph label.
+     *
+     * @return builder
+     */
+    public Builder disableDefaultGraphLabel() {
+      this.useDefaultGraphLabel = false;
+      return this;
+    }
+
+    /**
+     * Enable default vertex label.
+     *
+     * @return builder
+     */
+    public Builder enableDefaultVertexLabel() {
+      this.useDefaultVertexLabel = true;
+      return this;
+    }
+
+    /**
+     * Disable default vertex label.
+     *
+     * @return builder
+     */
+    public Builder disableDefaultVertexLabel() {
+      this.useDefaultVertexLabel = false;
+      return this;
+    }
+
+    /**
+     * Enable default edge label.
+     *
+     * @return builder
+     */
+    public Builder enableDefaultEdgeLabel() {
+      this.useDefaultEdgeLabel = true;
+      return this;
+    }
+
+    /**
+     * Disable default edge label.
+     *
+     * @return builder
+     */
+    public Builder disableDefaultEdgeLabel() {
+      this.useDefaultEdgeLabel = false;
       return this;
     }
 
@@ -292,7 +366,8 @@ public class GDLHandler {
       GDLParser parser = new GDLParser(new CommonTokenStream(lexer));
       parser.setErrorHandler(errorStrategy);
 
-      GDLLoader loader = new GDLLoader(graphLabel, vertexLabel, edgeLabel);
+      GDLLoader loader = new GDLLoader(graphLabel, vertexLabel, edgeLabel,
+        useDefaultGraphLabel, useDefaultVertexLabel, useDefaultEdgeLabel);
       new ParseTreeWalker().walk(loader, parser.database());
       return new GDLHandler(loader);
     }
