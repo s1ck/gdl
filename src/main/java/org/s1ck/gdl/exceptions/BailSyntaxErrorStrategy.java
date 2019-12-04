@@ -43,7 +43,8 @@ import org.antlr.v4.runtime.misc.ParseCancellationException;
  * addition to the BailErrorStrategy also prints out the first syntax mismatch
  */
 public class BailSyntaxErrorStrategy extends DefaultErrorStrategy {
-  /** Instead of recovering from exception {@code e}, re-throw it wrapped
+  /**
+   *  Instead of recovering from exception {@code e}, re-throw it wrapped
    *  in a {@link ParseCancellationException} so it is not caught by the
    *  rule function catches.  Use {@link Exception#getCause()} to get the
    *  original {@link RecognitionException}. To print the syntax error the
@@ -60,7 +61,8 @@ public class BailSyntaxErrorStrategy extends DefaultErrorStrategy {
     throw new ParseCancellationException(e);
   }
 
-  /** Make sure we don't attempt to recover inline; if the parser
+  /**
+   *  Make sure we don't attempt to recover inline; if the parser
    *  successfully recovers, it won't throw an exception.
    *  Again, the {@link DefaultErrorStrategy#recoverInline(Parser)} gets executed
    *  to print the wrong syntax
