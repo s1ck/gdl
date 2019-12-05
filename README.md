@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/s1ck/gdl.svg?branch=master)](https://travis-ci.org/s1ck/gdl)
+[![Build Status](https://github.com/s1ck/gdl/workflows/Java%20CI/badge.svg)](https://github.com/s1ck/gdl/actions?workflow=Java+CI)
 
 ## GDL - Graph Definition Language
 
