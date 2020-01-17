@@ -39,7 +39,7 @@ import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.misc.ParseCancellationException;
 
 /**
- * This ErrorStrategy throws an exception if the syntax is not matching the expected GDL language, but, in
+ * This ErrorStrategy throws an exception if the syntax is not matching the expected GDL language, but in
  * addition to the BailErrorStrategy also prints out the first syntax mismatch
  */
 public class BailSyntaxErrorStrategy extends DefaultErrorStrategy {
@@ -49,7 +49,7 @@ public class BailSyntaxErrorStrategy extends DefaultErrorStrategy {
    *  rule function catches.  Use {@link Exception#getCause()} to get the
    *  original {@link RecognitionException}. To print the syntax error the
    *  {@link DefaultErrorStrategy#recover(Parser, RecognitionException)} method
-   *  get executed
+   *  gets executed.
    */
   @Override
   public void recover(Parser recognizer, RecognitionException e) {
@@ -57,7 +57,6 @@ public class BailSyntaxErrorStrategy extends DefaultErrorStrategy {
     for (ParserRuleContext context = recognizer.getContext(); context != null; context = context.getParent()) {
       context.exception = e;
     }
-
     throw new ParseCancellationException(e);
   }
 
@@ -68,19 +67,18 @@ public class BailSyntaxErrorStrategy extends DefaultErrorStrategy {
    *  to print the wrong syntax
    */
   @Override
-  public Token recoverInline(Parser recognizer)
-    throws RecognitionException
-  {
+  public Token recoverInline(Parser recognizer) throws RecognitionException {
     super.recoverInline(recognizer);
     InputMismatchException e = new InputMismatchException(recognizer);
     for (ParserRuleContext context = recognizer.getContext(); context != null; context = context.getParent()) {
       context.exception = e;
     }
-
     throw new ParseCancellationException(e);
   }
 
-  /** Make sure we don't attempt to recover from problems in subrules. */
+  /**
+   * Make sure we don't attempt to recover from problems in subrules.
+   */
   @Override
   public void sync(Parser recognizer) { }
 }
