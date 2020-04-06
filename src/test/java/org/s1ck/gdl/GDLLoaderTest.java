@@ -760,6 +760,7 @@ public class GDLLoaderTest {
     PROPERTIES_LIST.add(new PropertyTriple<>("k37", "-3.14F", -3.14F));
     PROPERTIES_LIST.add(new PropertyTriple<>("k38", "-3.14d", -3.14d));
     PROPERTIES_LIST.add(new PropertyTriple<>("k39", "-3.14D", -3.14D));
+    PROPERTIES_LIST.add(new PropertyTriple<>("k40", "NaN", Double.NaN));
 
     Iterator<PropertyTriple<?>> iterator = PROPERTIES_LIST.iterator();
     StringBuilder sb = new StringBuilder();

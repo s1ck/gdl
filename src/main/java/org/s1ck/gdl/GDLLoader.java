@@ -660,6 +660,8 @@ class GDLLoader extends GDLBaseListener {
         return Double.parseDouble(text.substring(0, text.length() - 1));
       }
       return Float.parseFloat(text);
+    } else if (literalContext.NaN() != null) {
+      return Double.NaN;
     }
     return null;
   }
