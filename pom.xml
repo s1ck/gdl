@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.github.s1ck</groupId>
-    <artifactId>gdl</artifactId>
+    <artifactId>gdl-ext</artifactId>
     <version>0.3.2</version>
 
     <name>GDL - Graph Definition Language</name>
