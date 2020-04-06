@@ -121,6 +121,7 @@ literal
     | BooleanLiteral
     | IntegerLiteral
     | FloatingPointLiteral
+    | NaN
     | Null
     ;
 
@@ -224,10 +225,13 @@ ComparisonOP
 // General fragments
 //-------------------------------
 
+NaN
+    : 'NaN'
+    ;
+
 Null
     : 'NULL'
     ;
-
 //-------------------------------
 // Identifier
 //-------------------------------
