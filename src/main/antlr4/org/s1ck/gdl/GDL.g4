@@ -136,30 +136,27 @@ literal
 // time-related 
 //________________________
 timeFunc
-    : intervall '.' intervallFunc             #intvFunc
-    | timePoint '.' stampFunc                 #stmpFunc
+    : interval '.' intervalFunc             #intvF
+    | timePoint '.' stampFunc                 #stmpF
     ;
 
-intervall : intervallAtom               #intvAtom
-            | complexIntervall          #cmplxIntv
-            ;
-
-intervallAtom
-    : intervallSelector
+interval
+    : intervalSelector
     | intervalFromStamps
     ;
 
-intervallSelector
-    : Identifier '.' Interval
+
+intervalSelector
+    : Identifier '.' IntervalConst
     ;
 
 intervalFromStamps
-    : 'Interval('('['|'(') timePoint (')'|']') ')'
+    : 'Interval([' timePoint ',' timePoint '])'
     ;
 
 // TODO: change (only placeholder yet)
 complexIntervall
-    : Identifier '.' Interval
+    : Identifier '.' IntervalConst
     ;
 
 // TODO: add functions that yield timePoint
@@ -178,12 +175,12 @@ timeSelector
     : Identifier '.' TimeProp
     ;
 
-intervallFunc
-            : overlapsIntervallOperator #intvOverl
-            | asOfOperator              #intvAsOf
+intervalFunc
+            : overlapsIntervallOperator
+            | asOfOperator
             ;
 overlapsIntervallOperator
-    : 'overlaps' '(' intervall ')'
+    : 'overlaps(' interval ')'
     ;
 
 asOfOperator
@@ -305,7 +302,7 @@ TimeProp
     | 'val_to'
     ;
 
-Interval
+IntervalConst
     : 'tx'
     | 'val'
     ;

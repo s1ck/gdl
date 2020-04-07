@@ -4,10 +4,6 @@ package org.s1ck.gdl.model.comparables.time;
  * Represents a MAX(p1,...,pn) term, where p1...pn are TimePoints
  */
 public class MaxTimePoint extends TimeTerm{
-    /**
-     * Operator name
-     */
-    private final static String operator = "MAX";
 
     /**
      * Creates a MAX(args[0],...,args[args.length-1]) term
@@ -15,7 +11,10 @@ public class MaxTimePoint extends TimeTerm{
      */
     public MaxTimePoint(TimePoint...args){
         super(args);
+        operator = "MAX";
     }
+
+
 
 
     @Override

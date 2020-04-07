@@ -4,10 +4,6 @@ package org.s1ck.gdl.model.comparables.time;
  * Represents a MAX(p1,...,pn) term, where p1...pn are TimePoints
  */
 public class MinTimePoint extends TimeTerm {
-    /**
-     * Operator name
-     */
-    private final static String operator = "MIN";
 
     /**
      * Creates a MIN(args[0],...,args[args.length-1]) term
@@ -15,6 +11,7 @@ public class MinTimePoint extends TimeTerm {
      */
     public MinTimePoint(TimePoint...args){
         super(args);
+        operator = "MIN";
     }
 
     @Override

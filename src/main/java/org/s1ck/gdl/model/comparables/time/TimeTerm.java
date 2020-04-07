@@ -11,14 +11,14 @@ import java.util.Collections;
 public abstract class TimeTerm extends TimePoint {
 
     /**
-     * Operator name (e.g. "MIN", "MAX",...)
-     */
-    private final static String operator="";
-
-    /**
      * List of arguments (i.g. more than one)
      */
-    ArrayList<TimePoint> args;
+    protected ArrayList<TimePoint> args;
+
+    /**
+     * String representation of the operator, e.g. "MIN", "MAX", ...
+     */
+    protected String operator = "";
 
     /**
      * Initialize a complex expression by its arguments (TimePoints)
@@ -27,14 +27,6 @@ public abstract class TimeTerm extends TimePoint {
     protected TimeTerm(TimePoint...args){
         this.args = new ArrayList<>();
         Collections.addAll(this.args, args);
-    }
-
-    /**
-     * Get the operator name
-     * @return operator name
-     */
-    public String getOperator() {
-        return operator;
     }
 
     /**
@@ -63,6 +55,14 @@ public abstract class TimeTerm extends TimePoint {
             vars.addAll(tp.getVariables());
         }
         return vars;
+    }
+
+    /**
+     * String representation of the operator (e.g. "MIN", "MAX",...)
+     * @return operator string
+     */
+    public String getOperator(){
+        return operator;
     }
 
     @Override
