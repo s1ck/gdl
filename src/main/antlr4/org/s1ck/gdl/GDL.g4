@@ -98,23 +98,28 @@ expression2 : atom ;
 
 atom : parenthesizedExpression
      | comparisonExpression
+     | timeFunc
      ;
 
 comparisonExpression
     : comparisonElement ComparisonOP comparisonElement
     ;
 
+
 comparisonElement
     : Identifier
     | propertyLookup
-    | literal
+    | literal 
+    | timeSelector
     ;
 
 parenthesizedExpression : '(' expression ')' ;
 
+
 propertyLookup
     : Identifier '.' Identifier
     ;
+
 
 literal
     : StringLiteral
@@ -123,7 +128,77 @@ literal
     | FloatingPointLiteral
     | NaN
     | Null
+    | timeLiteral
     ;
+    
+    
+//------------------------
+// time-related 
+//________________________
+timeFunc
+    : intervall '.' intervallFunc             #intvFunc
+    | timePoint '.' stampFunc                 #stmpFunc
+    ;
+
+intervall : intervallAtom               #intvAtom
+            | complexIntervall          #cmplxIntv
+            ;
+
+intervallAtom
+    : intervallSelector
+    | intervalFromStamps
+    ;
+
+intervallSelector
+    : Identifier '.' Interval
+    ;
+
+intervalFromStamps
+    : 'Interval('('['|'(') timePoint (')'|']') ')'
+    ;
+
+// TODO: change (only placeholder yet)
+complexIntervall
+    : Identifier '.' Interval
+    ;
+
+// TODO: add functions that yield timePoint
+timePoint
+    : timeLiteral
+    | timeSelector
+    ;
+
+timeLiteral
+    : Datetime
+    | Date
+    | Time
+    | IntegerLiteral;
+
+timeSelector
+    : Identifier '.' TimeProp
+    ;
+
+intervallFunc
+            : overlapsIntervallOperator #intvOverl
+            | asOfOperator              #intvAsOf
+            ;
+overlapsIntervallOperator
+    : 'overlaps' '(' intervall ')'
+    ;
+
+asOfOperator
+    : 'asOf' '(' timePoint ')'
+    ;
+
+stampFunc
+    : beforePointOperator
+    | asOfOperator
+    ;
+
+beforePointOperator
+    : 'before' '(' timePoint ')'
+    ;
+
 
 //-------------------------------
 // String Literal
@@ -220,6 +295,32 @@ ComparisonOP
     | '<='
     ;
 
+//_______________________________
+// Time lexing 
+//_______________________________
+TimeProp
+    : 'tx_from'
+    | 'tx_to'
+    | 'val_from'
+    | 'val_to'
+    ;
+
+Interval
+    : 'tx'
+    | 'val'
+    ;
+
+Datetime
+    :  Digit Digit Digit Digit '-' Digit Digit '-' Digit Digit 'T'Time
+    ;
+
+Date
+    : Digit Digit Digit Digit '-' Digit Digit('-' Digit Digit)?
+    ;
+
+Time
+    : Digit Digit ':' Digit Digit (':' Digit Digit)?
+    ;
 
 //-------------------------------
 // General fragments
