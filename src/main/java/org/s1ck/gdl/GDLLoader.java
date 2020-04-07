@@ -21,6 +21,7 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 import org.s1ck.gdl.exceptions.InvalidReferenceException;
 import org.s1ck.gdl.model.*;
 import org.s1ck.gdl.model.comparables.ElementSelector;
+import org.s1ck.gdl.model.comparables.time.*;
 import org.s1ck.gdl.model.predicates.booleans.And;
 import org.s1ck.gdl.model.predicates.expressions.Comparison;
 import org.s1ck.gdl.model.predicates.Predicate;
@@ -41,6 +42,9 @@ class GDLLoader extends GDLBaseListener {
   private final Map<String, Graph> userGraphCache;
   private final Map<String, Vertex> userVertexCache;
   private final Map<String, Edge> userEdgeCache;
+
+  // used to map graphs to their elements
+  private Map<Long, ArrayList<GraphElement>> graphElements;
 
   // used to cache elements which are assigned to auto-generated variables
   private final Map<String, Graph> autoGraphCache;
@@ -121,6 +125,8 @@ class GDLLoader extends GDLBaseListener {
     userGraphCache = new HashMap<>();
     userVertexCache = new HashMap<>();
     userEdgeCache = new HashMap<>();
+
+    graphElements = new HashMap<>();
 
     autoGraphCache = new HashMap<>();
     autoVertexCache = new HashMap<>();
@@ -386,6 +392,163 @@ class GDLLoader extends GDLBaseListener {
   }
 
   /**
+   * Builds a {@code Predicate} from the given Intervall-Function (caller is a interval)
+   * interval functions are e.g. asOf(x), between(x,y)....
+   *
+   * @param ctx interval function context
+   */
+  @Override
+  public void enterIntvF(GDLParser.IntvFContext ctx){
+    currentPredicates.add(buildIntervalFunction(ctx));
+  }
+
+  /**
+   * Converts an interval function into a (complex) predicate
+   * For example, i.between(x,y) would be translated to a predicate ((i.from<= y) AND (i.to>x))
+   * @param ctx interval function context
+   * @return complex predicate that encodes the interval function. Atoms are time stamp comparisons
+   */
+  private Predicate buildIntervalFunction(GDLParser.IntvFContext ctx) {
+    TimePoint[] intv = buildIntervall(ctx.interval());
+    TimePoint from = intv[0];
+    TimePoint to = intv[1];
+    return createIntervalPredicates(from, to, ctx.intervalFunc());
+  }
+
+
+  private Predicate createIntervalPredicates(TimePoint from, TimePoint to, GDLParser.IntervalFuncContext intervalFunc) {
+    if(intervalFunc.overlapsIntervallOperator()!=null){
+      return createOverlapsPredicates(from, to, intervalFunc.overlapsIntervallOperator());
+    }
+    else if(intervalFunc.asOfOperator()!=null){
+      return createAsOfPredicates(from, to, intervalFunc.asOfOperator());
+    }
+    return null;
+  }
+
+  private Predicate createOverlapsPredicates(TimePoint from, TimePoint to, GDLParser.OverlapsIntervallOperatorContext ctx) {
+    TimePoint[] arg = buildIntervall(ctx.interval());
+    TimePoint arg_from = arg[0];
+    TimePoint arg_to = arg[1];
+    TimePoint mx = new MaxTimePoint(from, arg_from);
+    TimePoint mn = new MinTimePoint(to, arg_to);
+    // TODO unzip comparison
+    return new Comparison(mx, Comparator.LT, mn);
+  }
+
+  private Predicate createAsOfPredicates(TimePoint from, TimePoint to, GDLParser.AsOfOperatorContext ctx){
+    TimePoint x = buildTimePoint(ctx.timePoint());
+    return new And(new Comparison(from, Comparator.LTE, x), new Comparison(to, Comparator.GTE, x));
+  }
+
+
+  private TimePoint[] buildIntervall(GDLParser.IntervalContext ctx) {
+    if (ctx.intervalSelector()!=null){
+      GDLParser.IntervalSelectorContext selector = ctx.intervalSelector();
+      // throws exception, if variable invalid
+      String var = resolveIdentifier(selector.Identifier().getText());
+      String intId = selector.IntervalConst().getText();
+      TimePoint from = new TimeSelector(var, intId+"_from");
+      TimePoint to = new TimeSelector(var, intId+"_to");
+      return new TimePoint[]{from, to};
+    }
+    else if(ctx.intervalFromStamps()!=null){
+      GDLParser.IntervalFromStampsContext fs = ctx.intervalFromStamps();
+      TimePoint from = buildTimePoint(fs.timePoint(0));
+      TimePoint to = buildTimePoint(fs.timePoint(1));
+      return new TimePoint[]{from,to};
+    }
+    return null;
+  }
+
+  /**
+   * Builds a {@code Predicate} from the given TimeStamp-Function (caller is a timestamp)
+   * time stamp functions are e.g. asOf(x), before(x),...
+   *
+   * @param ctx stamp function context
+   */
+  @Override
+  public void enterStmpF(GDLParser.StmpFContext ctx){
+    currentPredicates.add(buildStampFunction(ctx));
+  }
+
+  /**
+   * Converts a time stamp function into a (potentially complex) {@code Predicate}
+   * For example, i.asOf(x) would be translated to a {@code Predicate} i<=x
+   *
+   * @param ctx time stamp function context
+   * @return (potentially complex) {@code Predicate} that encodes the time stamp function. Atoms are time stamp comparisons
+   */
+  private Predicate buildStampFunction(GDLParser.StmpFContext ctx) {
+    TimePoint tp = buildTimePoint(ctx.timePoint());
+    return createStampPredicates(tp, ctx.stampFunc());
+  }
+
+  /**
+   * Returns time stamp {@code Predicate} given the caller (a time stamp) and its context
+   *
+   * @param tp the caller
+   * @param stampFunc context including the operator (e.g. asOf, before,...) and its argument(s)
+   * @return (potentially complex) {@code Predicate} that encodes the time stamp function. Atoms are time stamp comparisons
+   */
+  private Predicate createStampPredicates(TimePoint tp, GDLParser.StampFuncContext stampFunc) {
+    if(stampFunc.asOfOperator()!=null){
+      return createAsOfPredicates(tp, stampFunc.asOfOperator());
+    }
+    else if(stampFunc.beforePointOperator()!=null){
+      return createBeforePredicates(tp, stampFunc.beforePointOperator());
+    }
+    return null;
+  }
+
+
+  /**
+   * Creates an asOf-{@code Predicate} given the caller (a timestamp) and its context
+   *
+   * @param from the caller
+   * @param ctx its context including the argument
+   * @return a {@code Predicate} encoding the asOf function: from<=x
+   */
+  private Predicate createAsOfPredicates(TimePoint from, GDLParser.AsOfOperatorContext ctx) {
+    TimePoint x = buildTimePoint(ctx.timePoint());
+    // TODO hier schon Abschätzung reinbringen?
+    return new Comparison(from, Comparator.LTE, x);
+  }
+
+  /**
+   * Creates a before {@code Predicate} given the caller (a timestamp) and its context
+   *
+   * @param from the caller
+   * @param ctx its context including the argument
+   * @return a {@code Predicate} encoding the before function: from<x
+   */
+  private Predicate createBeforePredicates(TimePoint from, GDLParser.BeforePointOperatorContext ctx){
+    TimePoint x = buildTimePoint(ctx.timePoint());
+    return new Comparison(from, Comparator.LT, x);
+  }
+
+  /**
+   * Builds a {@code TimePoint} (can be {@code TimeLiteral}, {@code TimeSelector}, {@code MIN},...) given its context
+   *
+   * @param ctx timepoint context
+   * @return the {@code TimePoint} described by the context
+   */
+  private TimePoint buildTimePoint(GDLParser.TimePointContext ctx) {
+    if (ctx.timeLiteral() != null){
+      return new TimeLiteral(ctx.getText());
+    }
+    else if (ctx.timeSelector()!=null){
+      GDLParser.TimeSelectorContext ts = ctx.timeSelector();
+      // checks whether ID is even there (is a vertex or edge) and returns its variable
+      String var = resolveIdentifier(ts.Identifier().getText());
+      String field = ts.TimeProp().getText();
+      return new TimeSelector(var, field);
+    }
+    return null;
+  }
+
+
+  /**
    * Called when we leave an NotExpression.
    *
    * Checks if the expression is preceded by a Not and adds the filter in that case.
@@ -579,6 +742,10 @@ class GDLLoader extends GDLBaseListener {
   private void updateGraphElement(GraphElement graphElement) {
     if (inGraph) {
       graphElement.addToGraph(getNextGraphId());
+      if(! graphElements.containsKey(getNextGraphId())){
+        graphElements.put(getNextGraphId(), new ArrayList<>());
+      }
+      graphElements.get(getNextGraphId()).add(graphElement);
     }
   }
 
@@ -736,11 +903,13 @@ class GDLLoader extends GDLBaseListener {
    * @return parsed property selector expression
    */
   private PropertySelector buildPropertySelector(GDLParser.PropertyLookupContext ctx) {
-    GraphElement element;
-
-    String identifier = ctx.Identifier(0).getText();
+    String identifier = resolveIdentifier(ctx.Identifier(0).getText());
     String property = ctx.Identifier(1).getText();
+    return new PropertySelector(identifier,property);
+  }
 
+  private String resolveIdentifier(String identifier){
+    GraphElement element;
     if(userVertexCache.containsKey(identifier)) {
       element = userVertexCache.get(identifier);
     }
@@ -748,8 +917,7 @@ class GDLLoader extends GDLBaseListener {
       element = userEdgeCache.get(identifier);
     }
     else { throw new InvalidReferenceException(identifier);}
-
-    return new PropertySelector(element.getVariable(),property);
+    return element.getVariable();
   }
 
   // --------------------------------------------------------------------------------------------
