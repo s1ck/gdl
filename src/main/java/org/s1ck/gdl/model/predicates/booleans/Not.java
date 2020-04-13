@@ -44,7 +44,29 @@ public class Not implements Predicate {
   }
 
   @Override
+  public Predicate unfoldTemporalComparisonsLeft(){
+    return new Not(expression.unfoldTemporalComparisonsLeft());
+  }
+
+  @Override
+  public Predicate switchSides(){
+    return new Not(expression.switchSides());
+  }
+
+  @Override
   public String toString() {
     return String.format("(NOT %s)", expression);
+  }
+
+  @Override
+  public boolean equals(Object o){
+    if(o==null){
+      return false;
+    }
+    if(!this.getClass().equals(o.getClass())){
+      return false;
+    }
+    Not that = (Not)o;
+    return that.expression.equals(this.expression);
   }
 }

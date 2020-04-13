@@ -16,6 +16,7 @@
 
 package org.s1ck.gdl.model.predicates.expressions;
 
+import org.s1ck.gdl.model.comparables.time.TimePoint;
 import org.s1ck.gdl.model.predicates.Predicate;
 import org.s1ck.gdl.model.comparables.ComparableExpression;
 import org.s1ck.gdl.utils.Comparator;
@@ -73,6 +74,49 @@ public class Comparison implements Predicate {
   public ComparableExpression[] getComparableExpressions() {
     ComparableExpression[] list = {lhs, rhs};
     return list;
+  }
+
+  /**
+   * Comparisons can be temporal or not (TimePoints can only be compared to TimePoints, enforced by the grammar)
+   * Method returns whether the comparison is temporal
+   * @return whether the comparison is temporal
+   */
+  public boolean isTemporal(){
+    //time data can only be compared to time data, thus it suffices to check whether lhs a TimePoint
+    return lhs instanceof TimePoint;
+  }
+
+  @Override
+  public Predicate unfoldTemporalComparisonsLeft(){
+    if (!isTemporal()){
+      return this;
+    }
+    return ((TimePoint)lhs).unfoldComparison(comparator, (TimePoint)rhs);
+  }
+
+  @Override
+  public Comparison switchSides(){
+    Comparator newComp = null;
+    if(comparator == Comparator.EQ){
+      newComp = Comparator.EQ;
+    }
+    else if(comparator == Comparator.NEQ){
+      newComp = Comparator.NEQ;
+    }
+    else if(comparator == Comparator.GT){
+      newComp = Comparator.LT;
+    }
+    else if(comparator == Comparator.GTE){
+      newComp = Comparator.LTE;
+    }
+    else if(comparator == Comparator.LT){
+      newComp = Comparator.GT;
+    }
+    //LTE
+    else{
+      newComp = Comparator.GTE;
+    }
+    return new Comparison(rhs, newComp, lhs);
   }
 
   /**
