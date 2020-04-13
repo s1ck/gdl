@@ -51,7 +51,29 @@ public class Or implements Predicate {
   }
 
   @Override
+  public Predicate unfoldTemporalComparisonsLeft(){
+    return new Or(lhs.unfoldTemporalComparisonsLeft(), rhs.unfoldTemporalComparisonsLeft());
+  }
+
+  @Override
+  public Predicate switchSides(){
+    return new Or(lhs.switchSides(), rhs.switchSides());
+  }
+
+  @Override
   public String toString() {
     return String.format("(%s OR %s)", lhs, rhs);
+  }
+
+  @Override
+  public boolean equals(Object o){
+    if(o==null){
+      return false;
+    }
+    if(!this.getClass().equals(o.getClass())){
+      return false;
+    }
+    Or that = (Or)o;
+    return (that.lhs.equals(this.lhs) && that.rhs.equals(this.rhs));
   }
 }

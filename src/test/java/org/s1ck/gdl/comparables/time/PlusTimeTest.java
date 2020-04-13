@@ -2,6 +2,9 @@ package org.s1ck.gdl.comparables.time;
 
 import org.junit.Test;
 import org.s1ck.gdl.model.comparables.time.*;
+import org.s1ck.gdl.model.comparables.time.util.TimeConstant;
+import org.s1ck.gdl.model.predicates.expressions.Comparison;
+import org.s1ck.gdl.utils.Comparator;
 
 import static org.junit.Assert.assertEquals;
 
@@ -10,11 +13,10 @@ public class PlusTimeTest {
     @Test
     public void simplePlusTest(){
         TimeLiteral l1 = new TimeLiteral("2017-01-12T08:00");
-        TimeLiteral l2 = new TimeLiteral("2005-08-12T17:21:43");
-        TimeLiteral l3 = new TimeLiteral("2019-04-05");
+        TimeConstant c = new TimeConstant(1000);
 
-        PlusTimePoint p = new PlusTimePoint(l1,l2,l3);
-        long sum = l1.getMilliseconds() + l2.getMilliseconds() + l3.getMilliseconds();
+        PlusTimePoint p = new PlusTimePoint(l1,c);
+        long sum = l1.getMilliseconds() + c.getMillis();
         assertEquals(p.evaluate(), sum);
         assertEquals(p.getLowerBound(), p.evaluate());
         assertEquals(p.getUpperBound(), p.evaluate());
@@ -23,16 +25,13 @@ public class PlusTimeTest {
     }
 
     @Test
-    public void mixedPlusTest(){
-        TimeLiteral l1 = new TimeLiteral("2017-01-12T08:00");
-        TimeLiteral l2 = new TimeLiteral("2005-08-12T17:21:43");
-        TimeLiteral l3 = new TimeLiteral("2019-04-05");
-        TimeSelector s1 = new TimeSelector("p", TimeSelector.TimeField.VAL_FROM);
+    public void selectorPlusTest(){
+        TimeSelector s = new TimeSelector("p", TimeSelector.TimeField.VAL_FROM);
+        TimeConstant c = new TimeConstant(1234);
+        PlusTimePoint p = new PlusTimePoint(s,c);
 
-        PlusTimePoint p = new PlusTimePoint(l1, s1, l2,l3);
-        long sum = l1.getMilliseconds() + l2.getMilliseconds() + l3.getMilliseconds();
-        assertEquals(p.evaluate(), -1);
-        assertEquals(p.getLowerBound(), sum);
+        assertEquals(p.evaluate(), TimePoint.UNDEFINED);
+        assertEquals(p.getLowerBound(), 1234);
         assertEquals(p.getUpperBound(), Long.MAX_VALUE);
 
         assertEquals(p.getVariables().size(),1);
@@ -40,29 +39,67 @@ public class PlusTimeTest {
     }
 
     @Test
-    public void selectorPlusTest(){
-        TimeSelector s1 = new TimeSelector("p", TimeSelector.TimeField.VAL_TO);
-        TimeSelector s2 = new TimeSelector("q", TimeSelector.TimeField.TX_FROM);
-        PlusTimePoint p = new PlusTimePoint(s1, s2);
-        assertEquals(p.evaluate(), -1);
-        assertEquals(p.getLowerBound(), 0);
-        assertEquals(p.getUpperBound(), Long.MAX_VALUE);
-
-    }
-
-    @Test
-    public void minMaxPlusTest(){
+    public void maxPlusTest(){
         TimeLiteral l1 = new TimeLiteral("2017-01-12");
         TimeLiteral l2 = new TimeLiteral("2017-01-12T08:00");
         MaxTimePoint mx1 = new MaxTimePoint(l1,l2);
-        TimeLiteral l3 = new TimeLiteral("2019-04-05");
-        TimeLiteral l4 = new TimeLiteral("2019-04-05T01:02:31");
-        MinTimePoint mn1 = new MinTimePoint(l3,l4);
+        TimeConstant c = new TimeConstant(1);
 
-        PlusTimePoint p = new PlusTimePoint(mx1, mn1);
-        long sum = l2.getMilliseconds()+l3.getMilliseconds();
-        assertEquals(p.evaluate(), sum);
+        PlusTimePoint p = new PlusTimePoint(mx1, c);
+        assertEquals(p.evaluate(), l2.getMilliseconds()+1);
         assertEquals(p.evaluate(), p.getLowerBound());
         assertEquals(p.evaluate(), p.getUpperBound());
+
+        // now with undetermined maximum
+        TimeSelector s1 = new TimeSelector("x", "tx_to");
+        MaxTimePoint mx2 = new MaxTimePoint(l1, s1);
+        PlusTimePoint p2 = new PlusTimePoint(mx2, c);
+        assertEquals(p2.evaluate(), TimePoint.UNDEFINED);
+        assertEquals(p2.getLowerBound(), l1.getMilliseconds()+c.getMillis());
+        assertEquals(p2.getUpperBound(), Long.MAX_VALUE);
+    }
+
+    @Test
+    public void minPlusTest(){
+        TimeLiteral l1 = new TimeLiteral("2017-01-12");
+        TimeLiteral l2 = new TimeLiteral("2017-01-12T08:00");
+        MinTimePoint mn1 = new MinTimePoint(l1,l2);
+        TimeConstant c = new TimeConstant(1);
+
+        PlusTimePoint p = new PlusTimePoint(mn1, c);
+        assertEquals(p.evaluate(), l1.getMilliseconds()+1);
+        assertEquals(p.evaluate(), p.getLowerBound());
+        assertEquals(p.evaluate(), p.getUpperBound());
+
+        // now with undetermined minimum
+        TimeSelector s1 = new TimeSelector("x", "tx_to");
+        MinTimePoint mn2 = new MinTimePoint(l1, s1);
+        PlusTimePoint p2 = new PlusTimePoint(mn2, c);
+        assertEquals(p2.evaluate(), TimePoint.UNDEFINED);
+        assertEquals(p2.getLowerBound(), c.getMillis());
+        assertEquals(p2.getUpperBound(), l1.getMilliseconds()+c.getMillis());
+    }
+
+    @Test
+    public void unfoldPredicateTest(){
+        TimeLiteral lit = new TimeLiteral("2020-04-10T12:00:00");
+        TimeConstant c = new TimeConstant(1000);
+        PlusTimePoint plus = new PlusTimePoint(lit, c);
+        TimeSelector s = new TimeSelector("x", TimeSelector.TimeField.VAL_TO);
+        //expected values
+        Comparison cEq = new Comparison(plus, Comparator.EQ, s);
+        Comparison cNeq = new Comparison(plus, Comparator.NEQ, s);
+        Comparison cGt = new Comparison(plus, Comparator.GT, s);
+        Comparison cGte = new Comparison(plus, Comparator.GTE, s);
+        Comparison cLt = new Comparison(plus, Comparator.LT, s);
+        Comparison cLte = new Comparison(plus, Comparator.LTE, s);
+
+        assertEquals(plus.unfoldComparison(Comparator.EQ, s), cEq);
+        assertEquals(plus.unfoldComparison(Comparator.NEQ, s), cNeq);
+        assertEquals(plus.unfoldComparison(Comparator.GT, s), cGt);
+        assertEquals(plus.unfoldComparison(Comparator.GTE, s), cGte);
+        assertEquals(plus.unfoldComparison(Comparator.LT, s), cLt);
+        assertEquals(plus.unfoldComparison(Comparator.LTE, s), cLte);
+
     }
 }

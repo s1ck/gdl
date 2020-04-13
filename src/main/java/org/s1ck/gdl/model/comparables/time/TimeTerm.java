@@ -1,5 +1,8 @@
 package org.s1ck.gdl.model.comparables.time;
 
+import org.s1ck.gdl.model.predicates.Predicate;
+import org.s1ck.gdl.utils.Comparator;
+
 import java.util.ArrayList;
 import java.util.Collections;
 
@@ -25,6 +28,9 @@ public abstract class TimeTerm extends TimePoint {
      * @param args the arguments
      */
     protected TimeTerm(TimePoint...args){
+        if(args.length < 2){
+            throw new IllegalArgumentException("need at least 2 arguments");
+        }
         this.args = new ArrayList<>();
         Collections.addAll(this.args, args);
     }

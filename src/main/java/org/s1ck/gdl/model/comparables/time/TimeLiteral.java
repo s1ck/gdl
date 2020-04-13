@@ -1,13 +1,16 @@
 package org.s1ck.gdl.model.comparables.time;
 
-import java.text.SimpleDateFormat;
+import org.s1ck.gdl.model.predicates.expressions.Comparison;
+
 import java.time.*;
-import java.util.*;
+import java.util.ArrayList;
+
+import org.s1ck.gdl.utils.Comparator;
 
 /**
  * Represents a constant Timestamp. Wraps a java.time.LocalDateTime
  */
-public class TimeLiteral extends TimePoint {
+public class TimeLiteral extends TimeAtom {
 
     /**
      * The wrapped LocalDateTime
@@ -129,6 +132,7 @@ public class TimeLiteral extends TimePoint {
     public long getUpperBound(){
         return getMilliseconds();
     }
+
 
     /**
      * Utility method to handle input strings like 1970-01-01. They are not recognized by LocalDateTime.
