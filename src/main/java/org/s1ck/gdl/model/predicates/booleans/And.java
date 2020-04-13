@@ -51,7 +51,29 @@ public class And implements Predicate {
   }
 
   @Override
+  public Predicate switchSides(){
+    return new And(lhs.switchSides(), rhs.switchSides());
+  }
+
+  @Override
+  public Predicate unfoldTemporalComparisonsLeft(){
+    return new And(lhs.unfoldTemporalComparisonsLeft(), rhs.unfoldTemporalComparisonsLeft());
+  }
+
+  @Override
   public String toString() {
     return String.format("(%s AND %s)", lhs, rhs);
+  }
+
+  @Override
+  public boolean equals(Object o){
+    if(o==null){
+      return false;
+    }
+    if(!this.getClass().equals(o.getClass())){
+      return false;
+    }
+    And that = (And)o;
+    return (that.lhs.equals(this.lhs) && that.rhs.equals(this.rhs));
   }
 }

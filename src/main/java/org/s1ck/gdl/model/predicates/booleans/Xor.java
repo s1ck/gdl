@@ -38,6 +38,16 @@ public class Xor implements Predicate {
     return new Predicate[] { lhs, rhs };
   }
 
+  @Override
+  public Predicate unfoldTemporalComparisonsLeft(){
+    return new Xor(lhs.unfoldTemporalComparisonsLeft(), rhs.unfoldTemporalComparisonsLeft());
+  }
+
+  @Override
+  public Predicate switchSides(){
+    return new Xor(lhs.switchSides(), rhs.switchSides());
+  }
+
   /**
    * Returns a set of variables referenced by the predicates
    * @return set of variables
@@ -53,5 +63,17 @@ public class Xor implements Predicate {
   @Override
   public String toString() {
     return String.format("(%s XOR %s)", lhs, rhs);
+  }
+
+  @Override
+  public boolean equals(Object o){
+    if(o==null){
+      return false;
+    }
+    if(!this.getClass().equals(o.getClass())){
+      return false;
+    }
+    Xor that = (Xor)o;
+    return (that.lhs.equals(this.lhs) && that.rhs.equals(this.rhs));
   }
 }

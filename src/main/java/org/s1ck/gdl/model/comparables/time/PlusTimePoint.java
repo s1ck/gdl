@@ -1,60 +1,66 @@
 package org.s1ck.gdl.model.comparables.time;
 
+import org.s1ck.gdl.model.comparables.time.util.TimeConstant;
+
+import java.util.ArrayList;
+
 /**
- * Represents a +(p1,...,pn) term, where p1...pn are TimePoints
+ * Represents an addition of a constant to a given TimePoint
  */
-public class PlusTimePoint extends TimeTerm{
+public class PlusTimePoint extends TimeAtom{
 
     /**
-     * Operator name
+     * The wrapped TimePoint
      */
-    private final static String operator = "PLUS";
+    private TimePoint timePoint;
 
     /**
-     * Creates a +(args[0],...,args[args.length-1]) term
-     * @param args the arguments for the + term (TimePoints)
+     * The constant to be added to the wrapped TimePoint
      */
-    public PlusTimePoint(TimePoint...args){
-        super(args);
+    private TimeConstant constant;
+
+    /**
+     * Initializes a Sum of a TimePoint and a constant
+     * @param timePoint the TimePoint
+     * @param constant the constant to be added to the TimePoint
+     */
+    public PlusTimePoint(TimePoint timePoint, TimeConstant constant){
+        this.timePoint = timePoint;
+        this.constant = constant;
+    }
+
+    @Override
+    public ArrayList<String> getVariables() {
+        return timePoint.getVariables();
     }
 
     @Override
     public long evaluate(){
-        long ret = 0;
-        for (TimePoint p: args){
-            long p_val = p.evaluate();
-            if(p_val == -1){
-                return -1;
-            }
-            ret +=p_val;
+        long tp = timePoint.evaluate();
+        if(tp==UNDEFINED){
+            return UNDEFINED;
         }
-        return ret;
+        return tp + constant.getMillis();
     }
 
     @Override
     public long getLowerBound(){
-        // lower bound of a sum of positive elements is the sum of all known elements
-        long ret = 0;
-        for (TimePoint p: args){
-            ret += p.getLowerBound();
+        long tp_lb = timePoint.getLowerBound();
+        if(tp_lb == UNDEFINED){
+            return constant.getMillis();
         }
-        return ret;
+        return tp_lb + constant.getMillis();
     }
 
     @Override
     public long getUpperBound(){
-        // upper bound of a sum of positive elements is either the sum of them (if all known)
-        // or the maximum long value (if not all known)
-        long ret = 0;
-        for (TimePoint p: args){
-            long up_p = p.getUpperBound();
-            if(up_p == Long.MAX_VALUE){
-                return Long.MAX_VALUE;
-            }
-            ret += up_p;
+        long tp_ub = timePoint.getUpperBound();
+        if(tp_ub == Long.MAX_VALUE){
+            return Long.MAX_VALUE;
         }
-        return ret;
+        return tp_ub + constant.getMillis();
     }
+
 
 
 }

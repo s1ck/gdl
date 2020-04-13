@@ -309,6 +309,7 @@ class GDLLoader extends GDLBaseListener {
    */
   @Override
   public void exitQuery(GDLParser.QueryContext ctx) {
+    predicates = Predicate.unfoldTemporalComparisons(predicates);
     for(Vertex v : vertices) {
       addPredicates(Predicate.fromGraphElement(v, getDefaultVertexLabel()));
     }

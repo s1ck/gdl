@@ -1,13 +1,16 @@
 package org.s1ck.gdl.model.comparables.time;
 
 import org.s1ck.gdl.model.comparables.ComparableExpression;
+import org.s1ck.gdl.model.predicates.Predicate;
+import org.s1ck.gdl.model.predicates.expressions.Comparison;
+import org.s1ck.gdl.utils.Comparator;
 
 import java.util.ArrayList;
 
 /**
  * Represents a timestamp selection of a graph variable, e.g. v.VAL_FROM selects the VAL_FROM value of a graph element v
  */
-public class TimeSelector extends TimePoint{
+public class TimeSelector extends TimeAtom{
 
     /**
      * The variable name
@@ -73,7 +76,7 @@ public class TimeSelector extends TimePoint{
 
     @Override
     public long evaluate(){
-        return -1;
+        return UNDEFINED;
     }
 
     @Override
@@ -84,6 +87,36 @@ public class TimeSelector extends TimePoint{
     @Override
     public long getUpperBound(){
         return Long.MAX_VALUE;
+    }
+
+    @Override
+    protected Predicate unfoldEQ(TimePoint arg){
+        return new Comparison(this, Comparator.EQ, arg);
+    }
+
+    @Override
+    protected Predicate unfoldNEQ(TimePoint arg){
+        return new Comparison(this, Comparator.NEQ, arg);
+    }
+
+    @Override
+    protected Predicate unfoldGT(TimePoint arg){
+        return new Comparison(this, Comparator.GT, arg);
+    }
+
+    @Override
+    protected Predicate unfoldGTE(TimePoint arg){
+        return new Comparison(this, Comparator.GTE, arg);
+    }
+
+    @Override
+    protected Predicate unfoldLT(TimePoint arg){
+        return new Comparison(this, Comparator.LT, arg);
+    }
+
+    @Override
+    protected Predicate unfoldLTE(TimePoint arg){
+        return new Comparison(this, Comparator.LTE, arg);
     }
 
     /**

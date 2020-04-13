@@ -36,4 +36,5 @@ public class AndTest{
 
     assertEquals(reference,and.getVariables());
   }
+
 }

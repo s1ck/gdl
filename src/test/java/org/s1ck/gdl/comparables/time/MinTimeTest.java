@@ -5,6 +5,12 @@ import org.s1ck.gdl.model.comparables.time.MaxTimePoint;
 import org.s1ck.gdl.model.comparables.time.MinTimePoint;
 import org.s1ck.gdl.model.comparables.time.TimeLiteral;
 import org.s1ck.gdl.model.comparables.time.TimeSelector;
+import org.s1ck.gdl.model.predicates.Predicate;
+import org.s1ck.gdl.model.predicates.booleans.And;
+import org.s1ck.gdl.model.predicates.booleans.Not;
+import org.s1ck.gdl.model.predicates.booleans.Or;
+import org.s1ck.gdl.model.predicates.expressions.Comparison;
+import org.s1ck.gdl.utils.Comparator;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -121,4 +127,176 @@ public class MinTimeTest {
         assertEquals(mn.getUpperBound(), l1.evaluate());
         assertEquals(mn.getLowerBound(), 0);
     }
+
+    @Test
+    public void unfoldEQTest(){
+        TimeLiteral p1 = new TimeLiteral("2020-04-10T12:30:00");
+        TimeSelector p2 = new TimeSelector("var", TimeSelector.TimeField.VAL_TO);
+        TimeLiteral p3 = new TimeLiteral("1970-01-01T01:01:01");
+        MinTimePoint mn = new MinTimePoint(p1, p2, p3);
+        TimeLiteral arg = new TimeLiteral("2020-04-10T12:28:45");
+
+        Predicate expected =
+                new Or(
+                        new Or(
+                                new And(
+                                        new And(
+                                                new Comparison(p1, Comparator.EQ, arg),
+                                                new Comparison(p1, Comparator.LTE, p2)
+                                        ),
+                                        new Comparison(p1, Comparator.LTE, p3)
+                                ),
+                                new And(
+                                        new And(
+                                                new Comparison(p2, Comparator.EQ, arg),
+                                                new Comparison(p2, Comparator.LTE, p1)
+                                        ),
+                                        new Comparison(p2, Comparator.LTE, p3)
+                                )
+                        ),
+                        new And(
+                                new And(
+                                        new Comparison(p3, Comparator.EQ, arg),
+                                        new Comparison(p3, Comparator.LTE, p1)
+                                ),
+                                new Comparison(p3, Comparator.LTE, p2)
+                        )
+                );
+
+        Predicate unfolded = mn.unfoldComparison(Comparator.EQ, arg);
+        System.out.println(unfolded);
+        assertEquals(expected, unfolded);
+    }
+
+    @Test
+    public void unfoldNEQTest(){
+        TimeLiteral p1 = new TimeLiteral("2020-04-10T12:30:00");
+        TimeSelector p2 = new TimeSelector("var", TimeSelector.TimeField.VAL_TO);
+        TimeLiteral p3 = new TimeLiteral("1970-01-01T01:01:01");
+        MinTimePoint mn = new MinTimePoint(p1, p2, p3);
+        TimeLiteral arg = new TimeLiteral("2020-04-10T12:28:45");
+
+        Predicate expected =
+                new And(
+                        new And(
+                                new Or(
+                                        new Or(
+                                                new Comparison(p1, Comparator.NEQ, arg),
+                                                new Comparison(p1, Comparator.GT, p2)
+                                        ),
+                                        new Comparison(p1, Comparator.GT, p3)
+                                ),
+                                new Or(
+                                        new Or(
+                                                new Comparison(p2, Comparator.NEQ, arg),
+                                                new Comparison(p2, Comparator.GT, p1)
+                                        ),
+                                        new Comparison(p2, Comparator.GT, p3)
+                                )
+                        ),
+                        new Or(
+                                new Or(
+                                        new Comparison(p3, Comparator.NEQ, arg),
+                                        new Comparison(p3, Comparator.GT, p1)
+                                ),
+                                new Comparison(p3, Comparator.GT,p2)
+                        )
+                );
+
+        Predicate unfolded = mn.unfoldComparison(Comparator.NEQ, arg);
+        System.out.println(unfolded);
+        assertEquals(expected, unfolded);
+    }
+
+    @Test
+    public void unfoldGTTest(){
+        TimeLiteral p1 = new TimeLiteral("2020-04-10T12:30:00");
+        TimeSelector p2 = new TimeSelector("var", TimeSelector.TimeField.VAL_TO);
+        TimeLiteral p3 = new TimeLiteral("1970-01-01T01:01:01");
+        MinTimePoint mn = new MinTimePoint(p1, p2, p3);
+        TimeLiteral arg = new TimeLiteral("2020-04-10T12:28:45");
+
+        Predicate expected =
+                new And(
+                        new And(
+                                new Comparison(p1, Comparator.GT, arg),
+                                new Comparison(p2, Comparator.GT, arg)
+                        ),
+                        new Comparison(p3, Comparator.GT, arg)
+                );
+
+        Predicate unfolded = mn.unfoldComparison(Comparator.GT, arg);
+        System.out.println(unfolded);
+        assertEquals(expected, unfolded);
+    }
+
+    @Test
+    public void unfoldGTETest(){
+        TimeLiteral p1 = new TimeLiteral("2020-04-10T12:30:00");
+        TimeSelector p2 = new TimeSelector("var", TimeSelector.TimeField.VAL_TO);
+        TimeLiteral p3 = new TimeLiteral("1970-01-01T01:01:01");
+        MinTimePoint mn = new MinTimePoint(p1, p2, p3);
+        TimeLiteral arg = new TimeLiteral("2020-04-10T12:28:45");
+
+        Predicate expected =
+                new And(
+                        new And(
+                                new Comparison(p1, Comparator.GTE, arg),
+                                new Comparison(p2, Comparator.GTE, arg)
+                        ),
+                        new Comparison(p3, Comparator.GTE, arg)
+                );
+
+        Predicate unfolded = mn.unfoldComparison(Comparator.GTE, arg);
+        System.out.println(unfolded);
+        assertEquals(expected, unfolded);
+    }
+
+    @Test
+    public void unfoldLTTest(){
+        TimeLiteral p1 = new TimeLiteral("2020-04-10T12:30:00");
+        TimeSelector p2 = new TimeSelector("var", TimeSelector.TimeField.VAL_TO);
+        TimeLiteral p3 = new TimeLiteral("1970-01-01T01:01:01");
+        MinTimePoint mn = new MinTimePoint(p1, p2, p3);
+        TimeLiteral arg = new TimeLiteral("2020-04-10T12:28:45");
+
+        Predicate expected =
+                new Or(
+                        new Or(
+                                new Comparison(p1, Comparator.LT, arg),
+                                new Comparison(p2, Comparator.LT, arg)
+                        ),
+                        new Comparison(p3, Comparator.LT, arg)
+                );
+
+        Predicate unfolded = mn.unfoldComparison(Comparator.LT, arg);
+        System.out.println(unfolded);
+        assertEquals(expected, unfolded);
+    }
+
+    @Test
+    public void unfoldLTETest(){
+        TimeLiteral p1 = new TimeLiteral("2020-04-10T12:30:00");
+        TimeSelector p2 = new TimeSelector("var", TimeSelector.TimeField.VAL_TO);
+        TimeLiteral p3 = new TimeLiteral("1970-01-01T01:01:01");
+        MinTimePoint mn = new MinTimePoint(p1, p2, p3);
+        TimeLiteral arg = new TimeLiteral("2020-04-10T12:28:45");
+
+        Predicate expected =
+                new Or(
+                        new Or(
+                                new Comparison(p1, Comparator.LTE, arg),
+                                new Comparison(p2, Comparator.LTE, arg)
+                        ),
+                        new Comparison(p3, Comparator.LTE, arg)
+                );
+
+        Predicate unfolded = mn.unfoldComparison(Comparator.LTE, arg);
+        System.out.println(unfolded);
+        assertEquals(expected, unfolded);
+    }
+
+
+
+
 }
