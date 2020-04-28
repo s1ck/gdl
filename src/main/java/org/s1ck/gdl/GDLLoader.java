@@ -394,7 +394,7 @@ class GDLLoader extends GDLBaseListener {
   @Override
   public void exitNotExpression(GDLParser.NotExpressionContext ctx) {
     if (!ctx.NOT().isEmpty()) {
-      Predicate not = new Not(currentPredicates.pop());
+      Predicate not = new Not(currentPredicates.removeLast());
       currentPredicates.add(not);
     }
   }
