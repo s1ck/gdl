@@ -27,13 +27,13 @@ public class GDLLoaderTemporalTest {
         System.out.println("Predicates: "+loader.getPredicates());
         assertTrue(predicateContainedIn(
                 new Comparison(new TimeSelector("e1", "tx_from"), Comparator.LT, new TimeLiteral("2017-01-01")),
-                loader.getPredicates().get()));
+                loader.getPredicates().get().switchSides()));
         assertTrue(predicateContainedIn(
                 new Comparison(new TimeSelector("e2", "val_to"), Comparator.LTE, new TimeLiteral("2018-12-23T15:55:23")),
-                loader.getPredicates().get()));
+                loader.getPredicates().get().switchSides()));
         assertTrue(predicateContainedIn(
                 new Comparison(new PropertySelector("e1", "knows"), Comparator.GT, new Literal(2010)),
-                loader.getPredicates().get()));
+                loader.getPredicates().get().switchSides()));
     }
 
     @Test

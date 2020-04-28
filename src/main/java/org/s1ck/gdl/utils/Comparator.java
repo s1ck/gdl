@@ -71,10 +71,10 @@ public enum Comparator {
     switch (this) {
       case NEQ:   return EQ;
       case EQ:  return NEQ;
-      case LT:   return GT;
-      case GT:   return LT;
-      case LTE:  return GTE;
-      case GTE:  return LTE;
+      case LT:   return GTE;
+      case GT:   return LTE;
+      case LTE:  return GT;
+      case GTE:  return LT;
       default:    return null;
     }
   }
