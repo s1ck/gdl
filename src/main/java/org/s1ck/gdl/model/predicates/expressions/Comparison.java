@@ -96,6 +96,9 @@ public class Comparison implements Predicate {
 
   @Override
   public Comparison switchSides(){
+    if(!isTemporal()){
+      return this;
+    }
     Comparator newComp = null;
     if(comparator == Comparator.EQ){
       newComp = Comparator.EQ;
