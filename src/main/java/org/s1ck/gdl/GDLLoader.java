@@ -309,7 +309,9 @@ class GDLLoader extends GDLBaseListener {
    */
   @Override
   public void exitQuery(GDLParser.QueryContext ctx) {
-    predicates = Predicate.unfoldTemporalComparisons(predicates);
+    if(predicates!=null) {
+      predicates = Predicate.unfoldTemporalComparisons(predicates);
+    }
     for(Vertex v : vertices) {
       addPredicates(Predicate.fromGraphElement(v, getDefaultVertexLabel()));
     }
@@ -558,7 +560,7 @@ class GDLLoader extends GDLBaseListener {
   @Override
   public void exitNotExpression(GDLParser.NotExpressionContext ctx) {
     if (!ctx.NOT().isEmpty()) {
-      Predicate not = new Not(currentPredicates.pop());
+      Predicate not = new Not(currentPredicates.removeLast());
       currentPredicates.add(not);
     }
   }
@@ -637,7 +639,6 @@ class GDLLoader extends GDLBaseListener {
    */
   private void processConjunctionExpression(List<TerminalNode> conjunctions) {
     Predicate conjunctionReuse;
-
     for (int i = conjunctions.size() - 1; i >= 0; i--) {
       Predicate rhs = currentPredicates.removeLast();
       Predicate lhs = currentPredicates.removeLast();
