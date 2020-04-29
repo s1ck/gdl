@@ -437,6 +437,12 @@ class GDLLoader extends GDLBaseListener {
     else if(intervalFunc.fromToOperator()!=null){
       return createFromToPredicates(from, to, intervalFunc.fromToOperator());
     }
+    else if(intervalFunc.betweenOperator()!=null){
+      return createBetweenPredicates(from, to, intervalFunc.betweenOperator());
+    }
+    else if(intervalFunc.precedesOperator()!=null){
+      return createPrecedesPredicates(to, intervalFunc.precedesOperator());
+    }
     return null;
   }
 
@@ -475,6 +481,36 @@ class GDLLoader extends GDLBaseListener {
             new Comparison(from, Comparator.LT, y),
             new Comparison(to, Comparator.GT, x)
     );
+  }
+
+  /**
+   * Creates a predicate a.between(x,y) = a.from<=y AND a.to>x
+   * @param from from value of the calling interval
+   * @param to to value of the calling interval
+   * @param ctx context of the call, containing x and y
+   * @return between predicate
+   */
+  private Predicate createBetweenPredicates(TimePoint from, TimePoint to, GDLParser.BetweenOperatorContext ctx){
+    TimePoint x = buildTimePoint(ctx.timePoint(0));
+    TimePoint y = buildTimePoint(ctx.timePoint(1));
+    return new And(
+            new Comparison(from, Comparator.LTE, y),
+            new Comparison(to, Comparator.GT, x)
+    );
+  }
+
+  /**
+   * Creates a predicate a.precedes(b) = a <= b.
+   * Function is used for interval and timestamp function {@code precedes}, as they both
+   * only compare two time stamps
+   * @param point the time stamp of the caller to compare
+   * @param ctx the context containing the value to be compared
+   * @return precedes predicate
+   */
+  private Predicate createPrecedesPredicates(TimePoint point, GDLParser.PrecedesOperatorContext ctx){
+    TimePoint[] arg = buildIntervall(ctx.interval());
+    TimePoint arg_from = arg[0];
+    return new Comparison(point, Comparator.LTE, arg_from);
   }
 
   /**
@@ -540,6 +576,9 @@ class GDLLoader extends GDLBaseListener {
     }
     else if(stampFunc.afterPointOperator()!=null){
       return createAfterPredicates(tp, stampFunc.afterPointOperator());
+    }
+    else if(stampFunc.precedesOperator()!=null){
+      return createPrecedesPredicates(tp, stampFunc.precedesOperator());
     }
     return null;
   }

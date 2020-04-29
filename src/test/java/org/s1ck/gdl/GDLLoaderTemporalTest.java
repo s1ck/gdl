@@ -105,6 +105,39 @@ public class GDLLoaderTemporalTest {
     }
 
     @Test
+    public void betweenTest(){
+        GDLLoader loader = getLoaderFromGDLString("MATCH (a)-->(b) " +
+                "WHERE a.tx.between(b.tx_from, 2020-04-28T10:39:15)");
+        Predicate result = loader.getPredicates().get();
+        Predicate expected = new And(
+                new Comparison(
+                        new TimeSelector("a", TimeSelector.TimeField.TX_FROM),
+                        Comparator.LTE,
+                        new TimeLiteral("2020-04-28T10:39:15")
+                ),
+                new Comparison(
+                        new TimeSelector("a", TimeSelector.TimeField.TX_TO),
+                        Comparator.GT,
+                        new TimeSelector("b", TimeSelector.TimeField.TX_FROM)
+                )
+        ).switchSides();
+        assertEquals(result.toString(), expected.toString());
+    }
+
+    @Test
+    public void precedesTest(){
+        GDLLoader loader = getLoaderFromGDLString("MATCH (a)-->(b) " +
+                "WHERE a.tx.precedes(b.val)");
+        Predicate result = loader.getPredicates().get();
+        Predicate expected = new Comparison(
+                new TimeSelector("a", TimeSelector.TimeField.TX_TO),
+                Comparator.LTE,
+                new TimeSelector("b", TimeSelector.TimeField.VAL_FROM)
+        ).switchSides();
+        assertEquals(result.toString(), expected.toString());
+    }
+
+    @Test
     public void graphTimeStampTest(){
 
     }

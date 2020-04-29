@@ -183,6 +183,8 @@ intervalFunc
             : overlapsIntervallOperator
             | asOfOperator
             | fromToOperator
+            | betweenOperator
+            | precedesOperator
             ;
 overlapsIntervallOperator
     : 'overlaps(' interval ')'
@@ -196,10 +198,19 @@ fromToOperator
     : 'fromTo(' timePoint ',' timePoint ')'
     ;
 
+betweenOperator
+    : 'between(' timePoint ',' timePoint ')'
+    ;
+
+precedesOperator
+    : 'precedes(' interval ')'
+    ;
+
 stampFunc
     : beforePointOperator
     | afterPointOperator
     | asOfOperator
+    | precedesOperator
     ;
 
 beforePointOperator
