@@ -68,6 +68,16 @@ public class MinTimePoint extends TimeTerm {
     }
 
     @Override
+    public boolean containsSelectorType(TimeSelector.TimeField type){
+        for(TimePoint p: args){
+            if(p.containsSelectorType(type)){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Override
     protected Predicate unfoldEQ(TimePoint arg){
         //MIN(p1...pn) == x    <=>        exists pi: (pi<=p1 AND pi<=p2...AND pi<=pn) AND (pi==x)
 

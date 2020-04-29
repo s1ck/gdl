@@ -61,6 +61,11 @@ public class PlusTimePoint extends TimeAtom{
         return tp_ub + constant.getMillis();
     }
 
+    @Override
+    public boolean containsSelectorType(TimeSelector.TimeField type){
+        return timePoint.containsSelectorType(type);
+    }
+
 
 
 }

@@ -17,6 +17,7 @@
 package org.s1ck.gdl.model.predicates.expressions;
 
 import org.s1ck.gdl.model.comparables.time.TimePoint;
+import org.s1ck.gdl.model.comparables.time.TimeSelector;
 import org.s1ck.gdl.model.predicates.Predicate;
 import org.s1ck.gdl.model.comparables.ComparableExpression;
 import org.s1ck.gdl.utils.Comparator;
@@ -76,14 +77,11 @@ public class Comparison implements Predicate {
     return list;
   }
 
-  /**
-   * Comparisons can be temporal or not (TimePoints can only be compared to TimePoints, enforced by the grammar)
-   * Method returns whether the comparison is temporal
-   * @return whether the comparison is temporal
-   */
+  @Override
   public boolean isTemporal(){
-    //time data can only be compared to time data, thus it suffices to check whether lhs a TimePoint
-    return lhs instanceof TimePoint;
+    //actually, time data can only be compared to time data (yet), thus it would suffices to check whether
+    // lhs is a TimePoint at the moment
+    return lhs instanceof TimePoint || rhs instanceof TimePoint;
   }
 
   @Override
@@ -134,6 +132,12 @@ public class Comparison implements Predicate {
 
     return variables;
   }
+
+  @Override
+  public boolean containsSelectorType(TimeSelector.TimeField type){
+    return lhs.containsSelectorType(type) || rhs.containsSelectorType(type);
+  }
+
 
   @Override
   public String toString() {

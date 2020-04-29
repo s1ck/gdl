@@ -6,7 +6,7 @@ import org.s1ck.gdl.model.comparables.time.util.TimeConstant;
 import org.s1ck.gdl.model.predicates.expressions.Comparison;
 import org.s1ck.gdl.utils.Comparator;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 public class PlusTimeTest {
 
@@ -101,5 +101,17 @@ public class PlusTimeTest {
         assertEquals(plus.unfoldComparison(Comparator.LT, s), cLt);
         assertEquals(plus.unfoldComparison(Comparator.LTE, s), cLte);
 
+    }
+
+    @Test
+    public void containsTxToTest(){
+        TimeConstant c = new TimeConstant(1000);
+        TimeSelector s1 = new TimeSelector("a", "val_from");
+        PlusTimePoint p1 = new PlusTimePoint(s1, c);
+        assertFalse(p1.containsSelectorType(TimeSelector.TimeField.TX_TO));
+
+        TimeSelector s2 = new TimeSelector("a", "tx_to");
+        PlusTimePoint p2 = new PlusTimePoint(s2, c);
+        assertTrue(p2.containsSelectorType(TimeSelector.TimeField.TX_TO));maxPlusTest();
     }
 }

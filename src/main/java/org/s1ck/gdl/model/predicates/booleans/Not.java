@@ -16,6 +16,7 @@
 
 package org.s1ck.gdl.model.predicates.booleans;
 
+import org.s1ck.gdl.model.comparables.time.TimeSelector;
 import org.s1ck.gdl.model.predicates.Predicate;
 
 import java.util.Set;
@@ -51,6 +52,16 @@ public class Not implements Predicate {
   @Override
   public Predicate switchSides(){
     return new Not(expression.switchSides());
+  }
+
+  @Override
+  public boolean containsSelectorType(TimeSelector.TimeField type){
+    return expression.containsSelectorType(type);
+  }
+
+  @Override
+  public boolean isTemporal(){
+    return expression.isTemporal();
   }
 
   @Override

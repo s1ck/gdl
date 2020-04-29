@@ -1,4 +1,4 @@
-package org.s1ck.gdl.comparables.time;
+package org.s1ck.gdl.comparables.time.util;
 import org.junit.Test;
 import org.s1ck.gdl.model.comparables.time.util.TimeConstant;
 import org.s1ck.gdl.model.comparables.time.TimeLiteral;

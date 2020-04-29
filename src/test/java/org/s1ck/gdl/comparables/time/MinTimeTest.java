@@ -12,8 +12,7 @@ import org.s1ck.gdl.model.predicates.booleans.Or;
 import org.s1ck.gdl.model.predicates.expressions.Comparison;
 import org.s1ck.gdl.utils.Comparator;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 public class MinTimeTest {
 
@@ -294,6 +293,18 @@ public class MinTimeTest {
         Predicate unfolded = mn.unfoldComparison(Comparator.LTE, arg);
         System.out.println(unfolded);
         assertEquals(expected, unfolded);
+    }
+
+    @Test
+    public void containsTxToTest(){
+        TimeSelector s1 = new TimeSelector("a", "val_to");
+        TimeLiteral l = new TimeLiteral("2020-04-28");
+        MinTimePoint m1 = new MinTimePoint(s1,l);
+        assertFalse(m1.containsSelectorType(TimeSelector.TimeField.TX_TO));
+
+        TimeSelector s2 = new TimeSelector("a", "tx_to");
+        MinTimePoint m2 = new MinTimePoint(s2,l);
+        assertTrue(m2.containsSelectorType(TimeSelector.TimeField.TX_TO));
     }
 
 

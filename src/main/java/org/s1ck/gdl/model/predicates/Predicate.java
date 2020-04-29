@@ -17,6 +17,7 @@
 package org.s1ck.gdl.model.predicates;
 
 import org.s1ck.gdl.model.GraphElement;
+import org.s1ck.gdl.model.comparables.time.TimeSelector;
 import org.s1ck.gdl.model.predicates.expressions.Comparison;
 import org.s1ck.gdl.model.comparables.Literal;
 import org.s1ck.gdl.model.comparables.PropertySelector;
@@ -86,10 +87,8 @@ public interface Predicate extends Serializable {
       unfolded_old = unfolded_new;
       unfolded_new = unfolded_new.unfoldTemporalComparisonsLeft();
     }
-    System.out.println("After left unfold: " + unfolded_new);
     // now unfold RHSs until there are only atoms left on right hand sides anymore
     unfolded_new = unfolded_new.switchSides();
-    System.out.println("After switch: " + unfolded_new);
     while(!unfolded_new.equals(unfolded_old)){
       unfolded_old = unfolded_new;
       unfolded_new = unfolded_new.unfoldTemporalComparisonsLeft();
@@ -126,4 +125,18 @@ public interface Predicate extends Serializable {
    * @return equivalent predicate with rhs and lhs of comparisons switched
    */
   Predicate switchSides();
+
+  /**
+   * Checks whether a certain type of selector (val_from, val_to, tx_from, tx_to) is contained
+   * @param type the type of selector (val_from, val_to, tx_from, tx_to)
+   * @return true iff the specified type of selector is contained
+   */
+  boolean containsSelectorType(TimeSelector.TimeField type);
+
+  /**
+   * Checks whether the query contains temporal elements
+   * @return true iff the query contains temporal elements
+   */
+  boolean isTemporal();
+
 }

@@ -16,6 +16,7 @@
 
 package org.s1ck.gdl.model.predicates.booleans;
 
+import org.s1ck.gdl.model.comparables.time.TimeSelector;
 import org.s1ck.gdl.model.predicates.Predicate;
 
 import java.util.Set;
@@ -58,6 +59,16 @@ public class Xor implements Predicate {
     variables.addAll(rhs.getVariables());
 
     return variables;
+  }
+
+  @Override
+  public boolean containsSelectorType(TimeSelector.TimeField type){
+    return lhs.containsSelectorType(type) || rhs.containsSelectorType(type);
+  }
+
+  @Override
+  public boolean isTemporal(){
+    return lhs.isTemporal() || rhs.isTemporal();
   }
 
   @Override

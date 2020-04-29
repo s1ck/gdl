@@ -138,6 +138,7 @@ literal
 timeFunc
     : interval '.' intervalFunc             #intvF
     | timePoint '.' stampFunc                 #stmpF
+    | Identifier '.asOf(' timePoint ')'   #asOf
     ;
 
 interval
@@ -169,7 +170,8 @@ timeLiteral
     : Datetime
     | Date
     | Time
-    | IntegerLiteral;
+    | IntegerLiteral
+    | Now;
 
 timeSelector
     : Identifier '.' TimeProp
@@ -177,7 +179,6 @@ timeSelector
 
 intervalFunc
             : overlapsIntervallOperator
-            | asOfOperator
             | fromToOperator
             | betweenOperator
             | precedesOperator
@@ -187,9 +188,6 @@ overlapsIntervallOperator
     : 'overlaps(' interval ')'
     ;
 
-asOfOperator
-    : 'asOf' '(' timePoint ')'
-    ;
 
 fromToOperator
     : 'fromTo(' timePoint ',' timePoint ')'
@@ -210,7 +208,6 @@ succeedsOperator
 stampFunc
     : beforePointOperator
     | afterPointOperator
-    | asOfOperator
     | precedesOperator
     | succeedsOperator
     ;
@@ -344,6 +341,10 @@ Date
 
 Time
     : Digit Digit ':' Digit Digit (':' Digit Digit)?
+    ;
+
+Now
+    : ('N'|'n')('O'|'o')('W'|'w')
     ;
 
 //-------------------------------

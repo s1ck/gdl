@@ -32,12 +32,19 @@ public class TimeLiteral extends TimeAtom {
 
     /**
      * Constructs a literal from a given string of the form YYYY-MM-DDTHH:MM(:SS) or YYYY-MM-DD
+     * or "now"
      * @param date the string to construct the DateTime from
      */
     public TimeLiteral(String date){
         try {
-            date = preprocessDateString(date);
-            this.time = LocalDateTime.parse(date);
+            if(date.toLowerCase().equals("now")){
+                this.time = LocalDateTime.now();
+            }
+            else{
+                date = preprocessDateString(date);
+                this.time = LocalDateTime.parse(date);
+            }
+
         }
         catch(Exception e){
             throw new IllegalArgumentException("Date string not in the right format");
@@ -131,6 +138,11 @@ public class TimeLiteral extends TimeAtom {
     @Override
     public long getUpperBound(){
         return getMilliseconds();
+    }
+
+    @Override
+    public boolean containsSelectorType(TimeSelector.TimeField type){
+        return false;
     }
 
 

@@ -90,6 +90,11 @@ public class TimeSelector extends TimeAtom{
     }
 
     @Override
+    public boolean containsSelectorType(TimeSelector.TimeField type){
+        return timeProp.equals(type);
+    }
+
+    @Override
     protected Predicate unfoldEQ(TimePoint arg){
         return new Comparison(this, Comparator.EQ, arg);
     }
