@@ -135,6 +135,41 @@ public class GDLLoaderTemporalTest {
                 new TimeSelector("b", TimeSelector.TimeField.VAL_FROM)
         ).switchSides();
         assertEquals(result.toString(), expected.toString());
+
+        // timestamp as caller
+        loader = getLoaderFromGDLString("MATCH (a)-->(b) " +
+                "WHERE a.tx_from.precedes(b.val)");
+        result = loader.getPredicates().get();
+        expected = new Comparison(
+                new TimeSelector("a", TimeSelector.TimeField.TX_FROM),
+                Comparator.LTE,
+                new TimeSelector("b", TimeSelector.TimeField.VAL_FROM)
+        ).switchSides();
+        assertEquals(result.toString(), expected.toString());
+    }
+
+    @Test
+    public void succeedsTest(){
+        GDLLoader loader = getLoaderFromGDLString("MATCH (a)-->(b) " +
+                "WHERE a.val.succeeds(b.tx)");
+        Predicate result = loader.getPredicates().get();
+        Predicate expected = new Comparison(
+                new TimeSelector("a", TimeSelector.TimeField.VAL_FROM),
+                Comparator.GTE,
+                new TimeSelector("b", TimeSelector.TimeField.TX_TO)
+        ).switchSides();
+        assertEquals(result.toString(), expected.toString());
+
+        // timestamp as caller
+        loader = getLoaderFromGDLString("MATCH (a)-->(b) " +
+                "WHERE a.val_to.succeeds(b.tx)");
+        result = loader.getPredicates().get();
+        expected = new Comparison(
+                new TimeSelector("a", TimeSelector.TimeField.VAL_TO),
+                Comparator.GTE,
+                new TimeSelector("b", TimeSelector.TimeField.TX_TO)
+        ).switchSides();
+        assertEquals(result.toString(), expected.toString());
     }
 
     @Test

@@ -443,6 +443,9 @@ class GDLLoader extends GDLBaseListener {
     else if(intervalFunc.precedesOperator()!=null){
       return createPrecedesPredicates(to, intervalFunc.precedesOperator());
     }
+    else if(intervalFunc.succeedsOperator()!=null){
+      return createSucceedsPredicates(from, intervalFunc.succeedsOperator());
+    }
     return null;
   }
 
@@ -514,6 +517,20 @@ class GDLLoader extends GDLBaseListener {
   }
 
   /**
+   * Creates a predicate a.succeeds(b) = a >= b.
+   * Function is used for interval and timestamp function {@code precedes}, as they both
+   * only compare two time stamps
+   * @param point the time stamp of the caller to compare
+   * @param ctx the context containing the value to be compared
+   * @return succeeds predicate
+   */
+  private Predicate createSucceedsPredicates(TimePoint point, GDLParser.SucceedsOperatorContext ctx){
+    TimePoint[] arg = buildIntervall(ctx.interval());
+    TimePoint arg_to = arg[1];
+    return new Comparison(point, Comparator.GTE, arg_to);
+  }
+
+  /**
    * Creates an array {@code {from, to}} representing an intervall.
    * @param ctx context from which to derive {@code from} and {@code to}
    * @return {@code {from, to}} representing an intervall
@@ -579,6 +596,9 @@ class GDLLoader extends GDLBaseListener {
     }
     else if(stampFunc.precedesOperator()!=null){
       return createPrecedesPredicates(tp, stampFunc.precedesOperator());
+    }
+    else if(stampFunc.succeedsOperator()!=null){
+      return createSucceedsPredicates(tp, stampFunc.succeedsOperator());
     }
     return null;
   }
