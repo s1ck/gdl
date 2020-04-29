@@ -181,6 +181,7 @@ intervalFunc
             | fromToOperator
             | betweenOperator
             | precedesOperator
+            | succeedsOperator
             ;
 overlapsIntervallOperator
     : 'overlaps(' interval ')'
@@ -202,11 +203,16 @@ precedesOperator
     : 'precedes(' interval ')'
     ;
 
+succeedsOperator
+    : 'succeeds(' interval ')'
+    ;
+
 stampFunc
     : beforePointOperator
     | afterPointOperator
     | asOfOperator
     | precedesOperator
+    | succeedsOperator
     ;
 
 beforePointOperator
