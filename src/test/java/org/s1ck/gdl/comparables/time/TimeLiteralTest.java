@@ -5,7 +5,12 @@ import org.s1ck.gdl.model.comparables.time.TimeSelector;
 import org.s1ck.gdl.model.predicates.expressions.Comparison;
 import org.s1ck.gdl.utils.Comparator;
 
-import static org.junit.Assert.assertEquals;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.util.Date;
+
+import static org.junit.Assert.*;
 
 public class TimeLiteralTest {
 
@@ -45,6 +50,13 @@ public class TimeLiteralTest {
         assertEquals(tl2.getHour(),0);
         assertEquals(tl2.getMinute(),0);
         assertEquals(tl2.getSecond(), 0);
+
+        TimeLiteral tl3 = new TimeLiteral("now");
+        System.out.println(tl3.getMilliseconds());
+        long millis = LocalDateTime.now().toInstant(ZoneOffset.ofTotalSeconds(0)).toEpochMilli();
+        //should work...
+        assertTrue(millis - tl3.getMilliseconds() > 0);
+        assertTrue(millis - tl3.getMilliseconds() < 5000);
     }
 
     @Test
@@ -66,5 +78,11 @@ public class TimeLiteralTest {
         assertEquals(literal.unfoldComparison(Comparator.LT, s), cLt);
         assertEquals(literal.unfoldComparison(Comparator.LTE, s), cLte);
 
+    }
+
+    @Test
+    public void containsTxToTest(){
+        TimeLiteral literal = new TimeLiteral("1970-02-01T15:23:05");
+        assertFalse(literal.containsSelectorType(TimeSelector.TimeField.TX_TO));
     }
 }

@@ -36,6 +36,8 @@ import org.s1ck.gdl.utils.Comparator;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static org.s1ck.gdl.utils.Comparator.LTE;
+
 class GDLLoader extends GDLBaseListener {
 
   // used to cache elements which are assigned to user-defined variables
@@ -88,6 +90,7 @@ class GDLLoader extends GDLBaseListener {
   private static final String ANONYMOUS_GRAPH_VARIABLE = "__g%d";
   private static final String ANONYMOUS_VERTEX_VARIABLE = "__v%d";
   private static final String ANONYMOUS_EDGE_VARIABLE = "__e%d";
+
 
   /**
    * Initializes a new GDL Loader.
@@ -375,13 +378,15 @@ class GDLLoader extends GDLBaseListener {
    * Called when the parser leaves a WHERE expression
    *
    * Takes care that the filter build from the current expression is stored
-   * in the graph
+   * in the graph and that default asOf(now) predicates are added iff there are no constraints
+   * on any tx_to values
    *
    * @param ctx where context
    */
   @Override
   public void exitWhere(GDLParser.WhereContext ctx) {
-    addPredicates(Collections.singletonList(currentPredicates.pop()));
+    Predicate predicate = currentPredicates.pop();
+    addPredicates(Collections.singletonList(predicate));
   }
 
   /**
@@ -396,7 +401,7 @@ class GDLLoader extends GDLBaseListener {
 
   /**
    * Builds a {@code Predicate} from the given Intervall-Function (caller is a interval)
-   * interval functions are e.g. asOf(x), between(x,y)....
+   * interval functions are e.g. succeeds(x), between(x,y)....
    *
    * @param ctx interval function context
    */
@@ -420,7 +425,7 @@ class GDLLoader extends GDLBaseListener {
 
   /**
    * Creates a new predicate about an intervall. There are different types of intervall predicates/
-   * functions: asOf, fromTo,...
+   * functions: precedes, fromTo,...
    * @param from represents the start time (from value) of the intervall
    * @param to  represents the end time (to value) of the intervall
    * @param intervalFunc contains the context information needed to create the correct predicate
@@ -430,9 +435,6 @@ class GDLLoader extends GDLBaseListener {
   private Predicate createIntervalPredicates(TimePoint from, TimePoint to, GDLParser.IntervalFuncContext intervalFunc) {
     if(intervalFunc.overlapsIntervallOperator()!=null){
       return createOverlapsPredicates(from, to, intervalFunc.overlapsIntervallOperator());
-    }
-    else if(intervalFunc.asOfOperator()!=null){
-      return createAsOfPredicates(from, to, intervalFunc.asOfOperator());
     }
     else if(intervalFunc.fromToOperator()!=null){
       return createFromToPredicates(from, to, intervalFunc.fromToOperator());
@@ -465,10 +467,6 @@ class GDLLoader extends GDLBaseListener {
     return new Comparison(mx, Comparator.LT, mn);
   }
 
-  private Predicate createAsOfPredicates(TimePoint from, TimePoint to, GDLParser.AsOfOperatorContext ctx){
-    TimePoint x = buildTimePoint(ctx.timePoint());
-    return new And(new Comparison(from, Comparator.LTE, x), new Comparison(to, Comparator.GTE, x));
-  }
 
   /**
    * Creates a predicate a.fromTo(x,y)= a.from<y AND a.to>x
@@ -497,7 +495,7 @@ class GDLLoader extends GDLBaseListener {
     TimePoint x = buildTimePoint(ctx.timePoint(0));
     TimePoint y = buildTimePoint(ctx.timePoint(1));
     return new And(
-            new Comparison(from, Comparator.LTE, y),
+            new Comparison(from, LTE, y),
             new Comparison(to, Comparator.GT, x)
     );
   }
@@ -513,7 +511,7 @@ class GDLLoader extends GDLBaseListener {
   private Predicate createPrecedesPredicates(TimePoint point, GDLParser.PrecedesOperatorContext ctx){
     TimePoint[] arg = buildIntervall(ctx.interval());
     TimePoint arg_from = arg[0];
-    return new Comparison(point, Comparator.LTE, arg_from);
+    return new Comparison(point, LTE, arg_from);
   }
 
   /**
@@ -556,7 +554,7 @@ class GDLLoader extends GDLBaseListener {
 
   /**
    * Builds a {@code Predicate} from the given TimeStamp-Function (caller is a timestamp)
-   * time stamp functions are e.g. asOf(x), before(x),...
+   * time stamp functions are e.g. succeeds(x), before(x),...
    *
    * @param ctx stamp function context
    */
@@ -567,7 +565,7 @@ class GDLLoader extends GDLBaseListener {
 
   /**
    * Converts a time stamp function into a (potentially complex) {@code Predicate}
-   * For example, i.asOf(x) would be translated to a {@code Predicate} i<=x
+   * For example, i.before(x) would be translated to a {@code Predicate} i<x
    *
    * @param ctx time stamp function context
    * @return (potentially complex) {@code Predicate} that encodes the time stamp function. Atoms are time stamp comparisons
@@ -581,14 +579,11 @@ class GDLLoader extends GDLBaseListener {
    * Returns time stamp {@code Predicate} given the caller (a time stamp) and its context
    *
    * @param tp the caller
-   * @param stampFunc context including the operator (e.g. asOf, before,...) and its argument(s)
+   * @param stampFunc context including the operator (e.g. before,...) and its argument(s)
    * @return (potentially complex) {@code Predicate} that encodes the time stamp function. Atoms are time stamp comparisons
    */
   private Predicate createStampPredicates(TimePoint tp, GDLParser.StampFuncContext stampFunc) {
-    if(stampFunc.asOfOperator()!=null){
-      return createAsOfPredicates(tp, stampFunc.asOfOperator());
-    }
-    else if(stampFunc.beforePointOperator()!=null) {
+    if(stampFunc.beforePointOperator()!=null) {
       return createBeforePredicates(tp, stampFunc.beforePointOperator());
     }
     else if(stampFunc.afterPointOperator()!=null){
@@ -603,19 +598,6 @@ class GDLLoader extends GDLBaseListener {
     return null;
   }
 
-
-  /**
-   * Creates an asOf-{@code Predicate} given the caller (a timestamp) and its context
-   *
-   * @param from the caller
-   * @param ctx its context including the argument
-   * @return a {@code Predicate} encoding the asOf function: from<=x
-   */
-  private Predicate createAsOfPredicates(TimePoint from, GDLParser.AsOfOperatorContext ctx) {
-    TimePoint x = buildTimePoint(ctx.timePoint());
-    // TODO hier schon Abschätzung reinbringen?
-    return new Comparison(from, Comparator.LTE, x);
-  }
 
   /**
    * Creates a before {@code Predicate} given the caller (a timestamp) and its context
@@ -652,6 +634,75 @@ class GDLLoader extends GDLBaseListener {
       return new TimeSelector(var, field);
     }
     return null;
+  }
+
+  @Override
+  public void enterAsOf(GDLParser.AsOfContext ctx){
+      TimePoint tp = buildTimePoint(ctx.timePoint());
+      String identifier = resolveIdentifier(ctx.Identifier().getText());
+      currentPredicates.add(new And(
+              new Comparison(
+                      new TimeSelector(identifier, TimeSelector.TimeField.TX_FROM),
+                      LTE,
+                      tp),
+              new Comparison(
+                      new TimeSelector(identifier, TimeSelector.TimeField.TX_TO),
+                      Comparator.GTE,
+                      tp)
+              )
+      );
+  }
+
+  /**
+   * Creates the default asOf conditions, that ensure that every element's transaction time is
+   * as of now. This is only done if no other constraints on transaction times' ends
+   * are specified in the query.
+   * @return
+   */
+  private Predicate createDefaultAsOf(){
+      Set<String> vars = new HashSet<>();
+      vars.addAll(userEdgeCache.keySet());
+      vars.addAll(userVertexCache.keySet());
+      vars.addAll(autoEdgeCache.keySet());
+      vars.addAll(autoVertexCache.keySet());
+      if(vars==null){
+        return null;
+      }
+      else{
+        TimeLiteral now = new TimeLiteral("now");
+        ArrayList<String> variables = new ArrayList<>();
+        variables.addAll(vars);
+        Predicate asOfNow = new And(
+                new Comparison(
+                        new TimeSelector(variables.get(0), TimeSelector.TimeField.TX_FROM),
+                        Comparator.LTE,
+                        now
+                ),
+                new Comparison(
+                        new TimeSelector(variables.get(0), TimeSelector.TimeField.TX_TO),
+                        Comparator.GTE,
+                        now
+                )
+        );
+        for(int i=1; i<variables.size(); i++){
+            asOfNow = new And(
+                    asOfNow,
+                    new And(
+                            new Comparison(
+                                    new TimeSelector(variables.get(i), TimeSelector.TimeField.TX_FROM),
+                                    Comparator.LTE,
+                                    now
+                            ),
+                            new Comparison(
+                                    new TimeSelector(variables.get(i), TimeSelector.TimeField.TX_TO),
+                                    Comparator.GTE,
+                                    now
+                            )
+                    )
+            );
+        }
+        return asOfNow;
+      }
   }
 
 

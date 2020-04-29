@@ -4,7 +4,7 @@ import org.s1ck.gdl.model.comparables.time.TimeSelector;
 import org.s1ck.gdl.model.predicates.expressions.Comparison;
 import org.s1ck.gdl.utils.Comparator;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 public class TimeSelectorTest {
 
@@ -38,5 +38,17 @@ public class TimeSelectorTest {
         assertEquals(selector.unfoldComparison(Comparator.LT, s2), cLt);
         assertEquals(selector.unfoldComparison(Comparator.LTE, s2), cLte);
 
+    }
+
+    @Test
+    public void containsTxToTest(){
+        TimeSelector valF = new TimeSelector("a", "val_from");
+        assertFalse(valF.containsSelectorType(TimeSelector.TimeField.TX_TO));
+        TimeSelector valT = new TimeSelector("a", "val_to");
+        assertFalse(valT.containsSelectorType(TimeSelector.TimeField.TX_TO));
+        TimeSelector txF = new TimeSelector("a", "tx_from");
+        assertFalse(txF.containsSelectorType(TimeSelector.TimeField.TX_TO));
+        TimeSelector txT = new TimeSelector("a", "tx_to");
+        assertTrue(txT.containsSelectorType(TimeSelector.TimeField.TX_TO));
     }
 }

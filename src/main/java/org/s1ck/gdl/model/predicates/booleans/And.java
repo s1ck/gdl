@@ -16,6 +16,7 @@
 
 package org.s1ck.gdl.model.predicates.booleans;
 
+import org.s1ck.gdl.model.comparables.time.TimeSelector;
 import org.s1ck.gdl.model.predicates.Predicate;
 
 import java.util.Set;
@@ -61,6 +62,16 @@ public class And implements Predicate {
   }
 
   @Override
+  public boolean containsSelectorType(TimeSelector.TimeField type){
+    return lhs.containsSelectorType(type) || rhs.containsSelectorType(type);
+  }
+
+  @Override
+  public boolean isTemporal(){
+    return lhs.isTemporal() || rhs.isTemporal();
+  }
+
+  @Override
   public String toString() {
     return String.format("(%s AND %s)", lhs, rhs);
   }
@@ -76,4 +87,5 @@ public class And implements Predicate {
     And that = (And)o;
     return (that.lhs.equals(this.lhs) && that.rhs.equals(this.rhs));
   }
+
 }

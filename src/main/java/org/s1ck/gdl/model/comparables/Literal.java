@@ -16,6 +16,8 @@
 
 package org.s1ck.gdl.model.comparables;
 
+import org.s1ck.gdl.model.comparables.time.TimeSelector;
+
 /**
  * Represents a literal like String, Integer, ...
  */
@@ -46,6 +48,11 @@ public class Literal implements ComparableExpression {
   @Override
   public String getVariable() {
     return null;
+  }
+
+  @Override
+  public boolean containsSelectorType(TimeSelector.TimeField type){
+    return false;
   }
 
   @Override

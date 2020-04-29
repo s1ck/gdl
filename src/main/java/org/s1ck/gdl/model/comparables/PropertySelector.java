@@ -16,6 +16,8 @@
 
 package org.s1ck.gdl.model.comparables;
 
+import org.s1ck.gdl.model.comparables.time.TimeSelector;
+
 /**
  * Selects a property of a variable
  */
@@ -52,6 +54,11 @@ public class PropertySelector implements ComparableExpression {
   @Override
   public String getVariable() {
     return this.variable;
+  }
+
+  @Override
+  public boolean containsSelectorType(TimeSelector.TimeField type){
+    return false;
   }
 
   @Override

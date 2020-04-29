@@ -16,6 +16,8 @@
 
 package org.s1ck.gdl.model.comparables;
 
+import org.s1ck.gdl.model.comparables.time.TimeSelector;
+
 import java.io.Serializable;
 
 public interface ComparableExpression extends Serializable{
@@ -24,4 +26,13 @@ public interface ComparableExpression extends Serializable{
    * @return variable
    */
   public String getVariable();
+
+  /**
+   * Checks whether a certain type of selector (val_from, val_to, tx_from, tx_to) is contained
+   * @param type the type of selector (val_from, val_to, tx_from, tx_to)
+   * @return true iff the specified type of selector is contained
+   */
+  boolean containsSelectorType(TimeSelector.TimeField type);
+
+
 }

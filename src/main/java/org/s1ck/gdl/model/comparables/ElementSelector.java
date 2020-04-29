@@ -16,6 +16,8 @@
 
 package org.s1ck.gdl.model.comparables;
 
+import org.s1ck.gdl.model.comparables.time.TimeSelector;
+
 /**
  * Used to compare elements (by id)
  */
@@ -42,6 +44,11 @@ public class ElementSelector implements ComparableExpression {
   @Override
   public String getVariable() {
     return this.variable;
+  }
+
+  @Override
+  public boolean containsSelectorType(TimeSelector.TimeField type){
+    return false;
   }
 
   @Override

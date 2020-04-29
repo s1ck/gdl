@@ -23,15 +23,15 @@ public class GDLLoaderTemporalTest {
     public void simpleTimestampFunctionsTest(){
         GDLLoader loader = getLoaderFromGDLString(
                 "MATCH (alice)-[e1:knows {since : 2014}]->(bob) (alice)-[e2:knows {since : 2013}]->(eve) " +
-                        "WHERE (e1.tx_from.before(2017-01-01) AND e2.val_to.asOf(2018-12-23T15:55:23)) OR e1.knows>2010");
+                        "WHERE (e1.val_from.before(2017-01-01) AND e2.tx_to.after(2018-12-23T15:55:23)) OR e1.knows>2010");
         System.out.println("Edges: "+loader.getEdgeCache());
         System.out.println("Vertices: "+loader.getVertexCache());
         System.out.println("Predicates: "+loader.getPredicates());
         assertTrue(predicateContainedIn(
-                new Comparison(new TimeSelector("e1", "tx_from"), Comparator.LT, new TimeLiteral("2017-01-01")),
+                new Comparison(new TimeSelector("e1", "val_from"), Comparator.LT, new TimeLiteral("2017-01-01")),
                 loader.getPredicates().get().switchSides()));
         assertTrue(predicateContainedIn(
-                new Comparison(new TimeSelector("e2", "val_to"), Comparator.LTE, new TimeLiteral("2018-12-23T15:55:23")),
+                new Comparison(new TimeSelector("e2", "tx_to"), Comparator.GT, new TimeLiteral("2018-12-23T15:55:23")),
                 loader.getPredicates().get().switchSides()));
         assertTrue(predicateContainedIn(
                 new Comparison(new PropertySelector("e1", "knows"), Comparator.GT, new Literal(2010)),
@@ -75,12 +75,20 @@ public class GDLLoaderTemporalTest {
     @Test
     public void afterTest(){
         GDLLoader loader = getLoaderFromGDLString("MATCH (a)-->(b) " +
-                "WHERE a.val_from.after(1970-01-01T00:00:01)");
+                "WHERE a.val_from.after(1970-01-01T00:00:01) AND a.tx_to.after(1970-01-01T00:00:01)");
         Predicate result = loader.getPredicates().get();
-        Predicate expected = new Comparison(
-                new TimeLiteral("1970-01-01T00:00:01"),
-                Comparator.LT,
-                new TimeSelector("a", "val_from"));
+        Predicate expected =
+                new And(
+                    new Comparison(
+                        new TimeLiteral("1970-01-01T00:00:01"),
+                        Comparator.LT,
+                        new TimeSelector("a", "val_from")),
+                        new Comparison(
+                                new TimeLiteral("1970-01-01T00:00:01"),
+                                Comparator.LT,
+                                new TimeSelector("a", "tx_to"))
+
+                );
         assertEquals(result.toString(), expected.toString());
     }
 
@@ -138,10 +146,10 @@ public class GDLLoaderTemporalTest {
 
         // timestamp as caller
         loader = getLoaderFromGDLString("MATCH (a)-->(b) " +
-                "WHERE a.tx_from.precedes(b.val)");
+                "WHERE a.tx_to.precedes(b.val)");
         result = loader.getPredicates().get();
         expected = new Comparison(
-                new TimeSelector("a", TimeSelector.TimeField.TX_FROM),
+                new TimeSelector("a", TimeSelector.TimeField.TX_TO),
                 Comparator.LTE,
                 new TimeSelector("b", TimeSelector.TimeField.VAL_FROM)
         ).switchSides();
@@ -162,15 +170,36 @@ public class GDLLoaderTemporalTest {
 
         // timestamp as caller
         loader = getLoaderFromGDLString("MATCH (a)-->(b) " +
-                "WHERE a.val_to.succeeds(b.tx)");
+                "WHERE a.tx_to.succeeds(b.val)");
         result = loader.getPredicates().get();
         expected = new Comparison(
-                new TimeSelector("a", TimeSelector.TimeField.VAL_TO),
+                new TimeSelector("a", TimeSelector.TimeField.TX_TO),
                 Comparator.GTE,
-                new TimeSelector("b", TimeSelector.TimeField.TX_TO)
+                new TimeSelector("b", TimeSelector.TimeField.VAL_TO)
         ).switchSides();
         assertEquals(result.toString(), expected.toString());
     }
+
+    @Test
+    public void asOfTest(){
+        GDLLoader loader = getLoaderFromGDLString("MATCH (a)-[e]->(b) " +
+                "WHERE e.asOf(1970-01-01");
+        Predicate result = loader.getPredicates().get();
+        Predicate expected = new And(
+                new Comparison(
+                        new TimeSelector("e", TimeSelector.TimeField.TX_FROM),
+                        Comparator.LTE,
+                        new TimeLiteral("1970-01-01")
+                ),
+                new Comparison(
+                        new TimeSelector("e", TimeSelector.TimeField.TX_TO),
+                        Comparator.GTE,
+                        new TimeLiteral("1970-01-01")
+                )
+        ).switchSides();
+        assertEquals(result.toString(), expected.toString());
+    }
+
 
     @Test
     public void graphTimeStampTest(){
