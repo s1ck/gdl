@@ -418,7 +418,15 @@ class GDLLoader extends GDLBaseListener {
     return createIntervalPredicates(from, to, ctx.intervalFunc());
   }
 
-
+  /**
+   * Creates a new predicate about an intervall. There are different types of intervall predicates/
+   * functions: asOf, fromTo,...
+   * @param from represents the start time (from value) of the intervall
+   * @param to  represents the end time (to value) of the intervall
+   * @param intervalFunc contains the context information needed to create the correct predicate
+   * @return new predicate (according to {@code intervalFunc}) about the intervall represented by
+   *    {@code from} and {@code to}.
+   */
   private Predicate createIntervalPredicates(TimePoint from, TimePoint to, GDLParser.IntervalFuncContext intervalFunc) {
     if(intervalFunc.overlapsIntervallOperator()!=null){
       return createOverlapsPredicates(from, to, intervalFunc.overlapsIntervallOperator());
@@ -426,16 +434,25 @@ class GDLLoader extends GDLBaseListener {
     else if(intervalFunc.asOfOperator()!=null){
       return createAsOfPredicates(from, to, intervalFunc.asOfOperator());
     }
+    else if(intervalFunc.fromToOperator()!=null){
+      return createFromToPredicates(from, to, intervalFunc.fromToOperator());
+    }
     return null;
   }
 
+  /**
+   * Creates a predicate a.overlaps(b)=max(a.from,b.from)<min(a.to,b.to)
+   * @param from the from value of the calling interval
+   * @param to the to value of the calling interval
+   * @param ctx the context containing the called interval
+   * @return overlaps predicate
+   */
   private Predicate createOverlapsPredicates(TimePoint from, TimePoint to, GDLParser.OverlapsIntervallOperatorContext ctx) {
     TimePoint[] arg = buildIntervall(ctx.interval());
     TimePoint arg_from = arg[0];
     TimePoint arg_to = arg[1];
     TimePoint mx = new MaxTimePoint(from, arg_from);
     TimePoint mn = new MinTimePoint(to, arg_to);
-    // TODO unzip comparison
     return new Comparison(mx, Comparator.LT, mn);
   }
 
@@ -444,7 +461,27 @@ class GDLLoader extends GDLBaseListener {
     return new And(new Comparison(from, Comparator.LTE, x), new Comparison(to, Comparator.GTE, x));
   }
 
+  /**
+   * Creates a predicate a.fromTo(x,y)= a.from<y AND a.to>x
+   * @param from from value of the calling interval
+   * @param to to value of the calling interval
+   * @param ctx context of the call, containing x and y
+   * @return fromTo predicate
+   */
+  private Predicate createFromToPredicates(TimePoint from, TimePoint to, GDLParser.FromToOperatorContext ctx){
+    TimePoint x = buildTimePoint(ctx.timePoint(0));
+    TimePoint y = buildTimePoint(ctx.timePoint(1));
+    return new And(
+            new Comparison(from, Comparator.LT, y),
+            new Comparison(to, Comparator.GT, x)
+    );
+  }
 
+  /**
+   * Creates an array {@code {from, to}} representing an intervall.
+   * @param ctx context from which to derive {@code from} and {@code to}
+   * @return {@code {from, to}} representing an intervall
+   */
   private TimePoint[] buildIntervall(GDLParser.IntervalContext ctx) {
     if (ctx.intervalSelector()!=null){
       GDLParser.IntervalSelectorContext selector = ctx.intervalSelector();
@@ -498,8 +535,11 @@ class GDLLoader extends GDLBaseListener {
     if(stampFunc.asOfOperator()!=null){
       return createAsOfPredicates(tp, stampFunc.asOfOperator());
     }
-    else if(stampFunc.beforePointOperator()!=null){
+    else if(stampFunc.beforePointOperator()!=null) {
       return createBeforePredicates(tp, stampFunc.beforePointOperator());
+    }
+    else if(stampFunc.afterPointOperator()!=null){
+      return createAfterPredicates(tp, stampFunc.afterPointOperator());
     }
     return null;
   }
@@ -528,6 +568,11 @@ class GDLLoader extends GDLBaseListener {
   private Predicate createBeforePredicates(TimePoint from, GDLParser.BeforePointOperatorContext ctx){
     TimePoint x = buildTimePoint(ctx.timePoint());
     return new Comparison(from, Comparator.LT, x);
+  }
+
+  private Predicate createAfterPredicates(TimePoint from, GDLParser.AfterPointOperatorContext ctx){
+    TimePoint x = buildTimePoint(ctx.timePoint());
+    return new Comparison(from, Comparator.GT, x);
   }
 
   /**
