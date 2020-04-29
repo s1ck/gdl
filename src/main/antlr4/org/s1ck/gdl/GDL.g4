@@ -155,7 +155,7 @@ intervalSelector
     ;
 
 intervalFromStamps
-    : 'Interval([' timePoint ',' timePoint '])'
+    : 'Interval(' timePoint ',' timePoint ')'
     ;
 
 // TODO: change (only placeholder yet)
@@ -182,6 +182,7 @@ timeSelector
 intervalFunc
             : overlapsIntervallOperator
             | asOfOperator
+            | fromToOperator
             ;
 overlapsIntervallOperator
     : 'overlaps(' interval ')'
@@ -191,13 +192,22 @@ asOfOperator
     : 'asOf' '(' timePoint ')'
     ;
 
+fromToOperator
+    : 'fromTo(' timePoint ',' timePoint ')'
+    ;
+
 stampFunc
     : beforePointOperator
+    | afterPointOperator
     | asOfOperator
     ;
 
 beforePointOperator
     : 'before' '(' timePoint ')'
+    ;
+
+afterPointOperator
+    : 'after' '(' timePoint ')'
     ;
 
 

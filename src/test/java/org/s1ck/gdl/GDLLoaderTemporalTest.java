@@ -10,9 +10,11 @@ import org.s1ck.gdl.model.comparables.time.MinTimePoint;
 import org.s1ck.gdl.model.comparables.time.TimeLiteral;
 import org.s1ck.gdl.model.comparables.time.TimeSelector;
 import org.s1ck.gdl.model.predicates.Predicate;
+import org.s1ck.gdl.model.predicates.booleans.And;
 import org.s1ck.gdl.model.predicates.expressions.Comparison;
 import org.s1ck.gdl.utils.Comparator;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 public class GDLLoaderTemporalTest {
@@ -34,6 +36,72 @@ public class GDLLoaderTemporalTest {
         assertTrue(predicateContainedIn(
                 new Comparison(new PropertySelector("e1", "knows"), Comparator.GT, new Literal(2010)),
                 loader.getPredicates().get().switchSides()));
+    }
+
+    @Test
+    public void periodLiteralTest(){
+        GDLLoader loader = getLoaderFromGDLString("MATCH (a)-->(b) " +
+                "WHERE a.tx.overlaps(Interval(1970-01-01,1970-01-02))");
+        assertEquals(loader.getPredicates().get().toString(),
+                new And(
+                   new And(
+                           new Comparison(
+                                   new TimeSelector("a", "tx_to"),
+                                   Comparator.GT,
+                                   new TimeSelector("a", "tx_from")
+                           ),
+                           new Comparison(
+                                   new TimeLiteral("1970-01-02"),
+                                   Comparator.GT,
+                                   new TimeSelector("a", "tx_from")
+                           )
+                   ),
+                   new And(
+                           new Comparison(
+                                   new TimeSelector("a", "tx_to"),
+                                   Comparator.GT,
+                                   new TimeLiteral("1970-01-01")
+                           ),
+                           new Comparison(
+                                   new TimeLiteral("1970-01-02"),
+                                   Comparator.GT,
+                                   new TimeLiteral("1970-01-01")
+                           )
+                   )
+                ).toString()
+                );
+    }
+
+    @Test
+    public void afterTest(){
+        GDLLoader loader = getLoaderFromGDLString("MATCH (a)-->(b) " +
+                "WHERE a.val_from.after(1970-01-01T00:00:01)");
+        Predicate result = loader.getPredicates().get();
+        Predicate expected = new Comparison(
+                new TimeLiteral("1970-01-01T00:00:01"),
+                Comparator.LT,
+                new TimeSelector("a", "val_from"));
+        assertEquals(result.toString(), expected.toString());
+    }
+
+    @Test
+    public void fromToTest(){
+        GDLLoader loader = getLoaderFromGDLString("MATCH (a)-->(b) " +
+                "WHERE a.tx.fromTo(1970-01-01, b.tx_to)");
+        Predicate result = loader.getPredicates().get();
+        Predicate expected = new And(
+                new Comparison(
+                        new TimeSelector("b", "tx_to"),
+                        Comparator.GT,
+                        new TimeSelector("a", "tx_from")
+                ),
+                new Comparison(
+                        new TimeLiteral("1970-01-01"),
+                        Comparator.LT,
+                        new TimeSelector("a", "tx_to")
+                )
+        );
+        assertEquals(result.toString(), expected.toString());
     }
 
     @Test
