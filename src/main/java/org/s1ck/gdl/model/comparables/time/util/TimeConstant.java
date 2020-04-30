@@ -1,5 +1,8 @@
 package org.s1ck.gdl.model.comparables.time.util;
 
+import org.s1ck.gdl.model.comparables.time.MinTimePoint;
+import org.s1ck.gdl.model.comparables.time.TimePoint;
+
 /**
  * Represents a constant duration via a fixed number of milliseconds
  * Not really a timestamp, but needed for certain related computations (e.g. deltas)
@@ -46,6 +49,15 @@ public class TimeConstant{
      */
     public long getMillis(){
         return millis;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        TimeConstant that = (TimeConstant) o;
+        return getMillis()==that.getMillis();
     }
 
 }

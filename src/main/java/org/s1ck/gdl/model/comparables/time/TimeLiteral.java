@@ -145,6 +145,16 @@ public class TimeLiteral extends TimeAtom {
         return false;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        TimeLiteral that = (TimeLiteral) o;
+
+        return evaluate()==that.evaluate();
+    }
+
 
     /**
      * Utility method to handle input strings like 1970-01-01. They are not recognized by LocalDateTime.

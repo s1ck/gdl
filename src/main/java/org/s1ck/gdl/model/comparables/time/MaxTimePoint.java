@@ -186,4 +186,30 @@ public class MaxTimePoint extends TimeTerm{
         return disjGt;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        MaxTimePoint that = (MaxTimePoint) o;
+
+        if(args.size()!=that.args.size()){
+            return false;
+        }
+
+        for(TimePoint arg: args){
+            boolean foundEq = false;
+            for(TimePoint arg2: that.args){
+                if(arg.equals(arg2)){
+                    foundEq = true;
+                    break;
+                }
+            }
+            if(!foundEq){
+                return false;
+            }
+        }
+        return true;
+    }
+
 }

@@ -66,6 +66,16 @@ public class PlusTimePoint extends TimeAtom{
         return timePoint.containsSelectorType(type);
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        PlusTimePoint that = (PlusTimePoint) o;
+
+        return timePoint.equals(that.timePoint) && constant.equals(that.constant);
+
+    }
 
 
 }

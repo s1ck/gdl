@@ -42,7 +42,7 @@ public class GDLLoaderTemporalTest {
     public void periodLiteralTest(){
         GDLLoader loader = getLoaderFromGDLString("MATCH (a)-->(b) " +
                 "WHERE a.tx.overlaps(Interval(1970-01-01,1970-01-02))");
-        assertEquals(loader.getPredicates().get().toString(),
+        assertEquals(loader.getPredicates().get(),
                 new And(
                    new And(
                            new Comparison(
@@ -68,7 +68,7 @@ public class GDLLoaderTemporalTest {
                                    new TimeLiteral("1970-01-01")
                            )
                    )
-                ).toString()
+                )
                 );
     }
 
@@ -89,7 +89,7 @@ public class GDLLoaderTemporalTest {
                                 new TimeSelector("a", "tx_to"))
 
                 );
-        assertEquals(result.toString(), expected.toString());
+        assertEquals(result, expected);
     }
 
     @Test
@@ -109,7 +109,7 @@ public class GDLLoaderTemporalTest {
                         new TimeSelector("a", "tx_to")
                 )
         );
-        assertEquals(result.toString(), expected.toString());
+        assertEquals(result, expected);
     }
 
     @Test
@@ -129,7 +129,7 @@ public class GDLLoaderTemporalTest {
                         new TimeSelector("b", TimeSelector.TimeField.TX_FROM)
                 )
         ).switchSides();
-        assertEquals(result.toString(), expected.toString());
+        assertEquals(result, expected);
     }
 
     @Test
@@ -153,7 +153,7 @@ public class GDLLoaderTemporalTest {
                 Comparator.LTE,
                 new TimeSelector("b", TimeSelector.TimeField.VAL_FROM)
         ).switchSides();
-        assertEquals(result.toString(), expected.toString());
+        assertEquals(result, expected);
     }
 
     @Test
@@ -166,7 +166,7 @@ public class GDLLoaderTemporalTest {
                 Comparator.GTE,
                 new TimeSelector("b", TimeSelector.TimeField.TX_TO)
         ).switchSides();
-        assertEquals(result.toString(), expected.toString());
+        assertEquals(result, expected);
 
         // timestamp as caller
         loader = getLoaderFromGDLString("MATCH (a)-->(b) " +
@@ -177,7 +177,7 @@ public class GDLLoaderTemporalTest {
                 Comparator.GTE,
                 new TimeSelector("b", TimeSelector.TimeField.VAL_TO)
         ).switchSides();
-        assertEquals(result.toString(), expected.toString());
+        assertEquals(result, expected);
     }
 
     @Test
@@ -197,7 +197,7 @@ public class GDLLoaderTemporalTest {
                         new TimeLiteral("1970-01-01")
                 )
         ).switchSides();
-        assertEquals(result.toString(), expected.toString());
+        assertEquals(result, expected);
     }
 
 
