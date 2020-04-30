@@ -187,5 +187,31 @@ public class MinTimePoint extends TimeTerm {
         return disjLte;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        MinTimePoint that = (MinTimePoint) o;
+
+        if(args.size()!=that.args.size()){
+            return false;
+        }
+
+        for(TimePoint arg: args){
+            boolean foundEq = false;
+            for(TimePoint arg2: that.args){
+                if(arg.equals(arg2)){
+                    foundEq = true;
+                    break;
+                }
+            }
+            if(!foundEq){
+                return false;
+            }
+        }
+        return true;
+    }
+
 
 }
