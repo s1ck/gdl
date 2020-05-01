@@ -1,9 +1,12 @@
 package org.s1ck.gdl.model.comparables.time;
 
+import org.s1ck.gdl.model.comparables.ComparableExpression;
+import org.s1ck.gdl.model.predicates.Predicate;
 import org.s1ck.gdl.model.predicates.expressions.Comparison;
 
 import java.time.*;
 import java.util.ArrayList;
+import java.util.List;
 
 import org.s1ck.gdl.utils.Comparator;
 
@@ -170,4 +173,8 @@ public class TimeLiteral extends TimeAtom {
         return date;
     }
 
+    @Override
+    public Predicate unfoldGlobal(Comparator comp, ComparableExpression rhs, List<String> variables) {
+        return new Comparison(this, comp, rhs);
+    }
 }

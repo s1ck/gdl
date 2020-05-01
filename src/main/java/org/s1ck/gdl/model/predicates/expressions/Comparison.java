@@ -16,6 +16,7 @@
 
 package org.s1ck.gdl.model.predicates.expressions;
 
+import org.s1ck.gdl.model.comparables.time.TimeAtom;
 import org.s1ck.gdl.model.comparables.time.TimePoint;
 import org.s1ck.gdl.model.comparables.time.TimeSelector;
 import org.s1ck.gdl.model.predicates.Predicate;
@@ -23,6 +24,7 @@ import org.s1ck.gdl.model.comparables.ComparableExpression;
 import org.s1ck.gdl.utils.Comparator;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -82,6 +84,17 @@ public class Comparison implements Predicate {
     //actually, time data can only be compared to time data (yet), thus it would suffices to check whether
     // lhs is a TimePoint at the moment
     return lhs instanceof TimePoint || rhs instanceof TimePoint;
+  }
+
+  @Override
+  public Predicate unfoldGlobalLeft(List<String> variables) {
+    // check whether there is something to do
+    if(!isTemporal() || !(lhs instanceof TimeAtom)){
+      return this;
+    }
+
+    return (((TimeAtom)lhs).unfoldGlobal(comparator, rhs, variables));
+
   }
 
   @Override

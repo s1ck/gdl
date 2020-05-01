@@ -97,6 +97,28 @@ public interface Predicate extends Serializable {
   }
 
   /**
+   * "Translates" a predicate possibly containing global time predicates to a predicate
+   * containing only local time comparisons.
+   * E.g., for a pattern {@code (a)-->(b)}, the global predicate {@code tx_to >= 2020-04-28)} would be
+   * reduced to {@code a.tx_to>=2020-04-28 AND b.tx_to>=2020-04-28}
+   * while {@code tx_to <= 2020-04-28)} is reduced to
+   * {@code @code a.tx_to<=2020-04-28 OR b.tx_to<=2020-04-28}
+   * @param predicate the predicate whose global time predicates should be translated
+   * @param unfoldedComparisons indicates whether complex time predicates were already reduced to
+   *                            simple comparisons. If so, this flag should be set to {@code true}
+   *                            to avoid unnecessary work.
+   * @return equivalent predicate consisting only of primitive local time value comparisons
+   */
+  static Predicate translateGlobalPredicates(Predicate predicate, ArrayList<String> vars, boolean unfoldedComparisons){
+    if(!unfoldedComparisons){
+      predicate = Predicate.unfoldTemporalComparisons(predicate);
+    }
+    predicate = predicate.unfoldGlobalLeft(vars);
+    predicate = predicate.switchSides();
+    return predicate.unfoldGlobalLeft(vars);
+  }
+
+  /**
    * Returns the predicates arguments
    *
    * @return The predicates arguments
@@ -138,5 +160,13 @@ public interface Predicate extends Serializable {
    * @return true iff the query contains temporal elements
    */
   boolean isTemporal();
+
+  /**
+   * "Translates" a predicate possibly containing global time predicates to a predicate
+   * containing only local time comparisons. Only unfolds the left side(!!!)
+   * @param variables the variables in the whole query
+   * @return translated predicate (only left side "translated"!!!)
+   */
+  Predicate unfoldGlobalLeft(List<String> variables);
 
 }
