@@ -153,6 +153,7 @@ interval
 
 intervalSelector
     : Identifier '.' IntervalConst
+    | IntervalConst
     ;
 
 intervalFromStamps
@@ -179,6 +180,7 @@ timeLiteral
 
 timeSelector
     : Identifier '.' TimeProp
+    | TimeProp
     ;
 
 intervalFunc

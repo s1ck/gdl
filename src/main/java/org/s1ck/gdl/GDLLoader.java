@@ -312,14 +312,30 @@ class GDLLoader extends GDLBaseListener {
    */
   @Override
   public void exitQuery(GDLParser.QueryContext ctx) {
-    if(predicates!=null) {
-      predicates = Predicate.unfoldTemporalComparisons(predicates);
-    }
+    postprocessPredicates();
     for(Vertex v : vertices) {
       addPredicates(Predicate.fromGraphElement(v, getDefaultVertexLabel()));
     }
     for(Edge e : edges) {
       addPredicates(Predicate.fromGraphElement(e, getDefaultEdgeLabel()));
+    }
+  }
+
+  /**
+   * Reformulates the predicates when leaving the query. First, complex temporal expressions
+   * like {@code MIN(t1,t2)<MAX(t2,t3)} are reduced to comparisons of simple timestamps.
+   * Then, global time comparisons referring to the whole pattern are reduced to comparisons of
+   * variables.
+   */
+  private void postprocessPredicates(){
+    if(predicates!=null) {
+      predicates = Predicate.unfoldTemporalComparisons(predicates);
+      ArrayList<String> vars = new ArrayList<>();
+      vars.addAll(userEdgeCache.keySet());
+      vars.addAll(userVertexCache.keySet());
+      vars.addAll(autoEdgeCache.keySet());
+      vars.addAll(autoVertexCache.keySet());
+      predicates = Predicate.translateGlobalPredicates(predicates, vars, true);
     }
   }
 
@@ -537,7 +553,8 @@ class GDLLoader extends GDLBaseListener {
     if (ctx.intervalSelector()!=null){
       GDLParser.IntervalSelectorContext selector = ctx.intervalSelector();
       // throws exception, if variable invalid
-      String var = resolveIdentifier(selector.Identifier().getText());
+      String var = selector.Identifier()!=null ?
+              resolveIdentifier(selector.Identifier().getText()) : TimeSelector.GLOBAL_SELECTOR;
       String intId = selector.IntervalConst().getText();
       TimePoint from = new TimeSelector(var, intId+"_from");
       TimePoint to = new TimeSelector(var, intId+"_to");
@@ -629,7 +646,8 @@ class GDLLoader extends GDLBaseListener {
     else if (ctx.timeSelector()!=null){
       GDLParser.TimeSelectorContext ts = ctx.timeSelector();
       // checks whether ID is even there (is a vertex or edge) and returns its variable
-      String var = resolveIdentifier(ts.Identifier().getText());
+      String var = ts.Identifier()!=null ?
+              resolveIdentifier(ts.Identifier().getText()) : TimeSelector.GLOBAL_SELECTOR;
       String field = ts.TimeProp().getText();
       return new TimeSelector(var, field);
     }
@@ -665,7 +683,7 @@ class GDLLoader extends GDLBaseListener {
       vars.addAll(userVertexCache.keySet());
       vars.addAll(autoEdgeCache.keySet());
       vars.addAll(autoVertexCache.keySet());
-      if(vars==null){
+      if(vars.isEmpty()){
         return null;
       }
       else{

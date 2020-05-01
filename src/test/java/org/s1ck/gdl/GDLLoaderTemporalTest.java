@@ -11,6 +11,7 @@ import org.s1ck.gdl.model.comparables.time.TimeLiteral;
 import org.s1ck.gdl.model.comparables.time.TimeSelector;
 import org.s1ck.gdl.model.predicates.Predicate;
 import org.s1ck.gdl.model.predicates.booleans.And;
+import org.s1ck.gdl.model.predicates.booleans.Or;
 import org.s1ck.gdl.model.predicates.expressions.Comparison;
 import org.s1ck.gdl.utils.Comparator;
 
@@ -24,9 +25,6 @@ public class GDLLoaderTemporalTest {
         GDLLoader loader = getLoaderFromGDLString(
                 "MATCH (alice)-[e1:knows {since : 2014}]->(bob) (alice)-[e2:knows {since : 2013}]->(eve) " +
                         "WHERE (e1.val_from.before(2017-01-01) AND e2.tx_to.after(2018-12-23T15:55:23)) OR e1.knows>2010");
-        System.out.println("Edges: "+loader.getEdgeCache());
-        System.out.println("Vertices: "+loader.getVertexCache());
-        System.out.println("Predicates: "+loader.getPredicates());
         assertTrue(predicateContainedIn(
                 new Comparison(new TimeSelector("e1", "val_from"), Comparator.LT, new TimeLiteral("2017-01-01")),
                 loader.getPredicates().get().switchSides()));
@@ -42,7 +40,7 @@ public class GDLLoaderTemporalTest {
     public void periodLiteralTest(){
         GDLLoader loader = getLoaderFromGDLString("MATCH (a)-->(b) " +
                 "WHERE a.tx.overlaps(Interval(1970-01-01,1970-01-02))");
-        assertEquals(loader.getPredicates().get(),
+        assertPredicateEquals(loader.getPredicates().get(),
                 new And(
                    new And(
                            new Comparison(
@@ -89,7 +87,7 @@ public class GDLLoaderTemporalTest {
                                 new TimeSelector("a", "tx_to"))
 
                 );
-        assertEquals(result, expected);
+        assertPredicateEquals(result, expected);
     }
 
     @Test
@@ -109,7 +107,7 @@ public class GDLLoaderTemporalTest {
                         new TimeSelector("a", "tx_to")
                 )
         );
-        assertEquals(result, expected);
+        assertPredicateEquals(result, expected);
     }
 
     @Test
@@ -128,8 +126,8 @@ public class GDLLoaderTemporalTest {
                         Comparator.GT,
                         new TimeSelector("b", TimeSelector.TimeField.TX_FROM)
                 )
-        ).switchSides();
-        assertEquals(result, expected);
+        );
+        assertPredicateEquals(result, expected);
     }
 
     @Test
@@ -141,8 +139,8 @@ public class GDLLoaderTemporalTest {
                 new TimeSelector("a", TimeSelector.TimeField.TX_TO),
                 Comparator.LTE,
                 new TimeSelector("b", TimeSelector.TimeField.VAL_FROM)
-        ).switchSides();
-        assertEquals(result.toString(), expected.toString());
+        );
+        assertPredicateEquals(result, expected);
 
         // timestamp as caller
         loader = getLoaderFromGDLString("MATCH (a)-->(b) " +
@@ -152,8 +150,8 @@ public class GDLLoaderTemporalTest {
                 new TimeSelector("a", TimeSelector.TimeField.TX_TO),
                 Comparator.LTE,
                 new TimeSelector("b", TimeSelector.TimeField.VAL_FROM)
-        ).switchSides();
-        assertEquals(result, expected);
+        );
+        assertPredicateEquals(result, expected);
     }
 
     @Test
@@ -165,8 +163,8 @@ public class GDLLoaderTemporalTest {
                 new TimeSelector("a", TimeSelector.TimeField.VAL_FROM),
                 Comparator.GTE,
                 new TimeSelector("b", TimeSelector.TimeField.TX_TO)
-        ).switchSides();
-        assertEquals(result, expected);
+        );
+        assertPredicateEquals(result, expected);
 
         // timestamp as caller
         loader = getLoaderFromGDLString("MATCH (a)-->(b) " +
@@ -176,14 +174,14 @@ public class GDLLoaderTemporalTest {
                 new TimeSelector("a", TimeSelector.TimeField.TX_TO),
                 Comparator.GTE,
                 new TimeSelector("b", TimeSelector.TimeField.VAL_TO)
-        ).switchSides();
-        assertEquals(result, expected);
+        );
+        assertPredicateEquals(result, expected);
     }
 
     @Test
     public void asOfTest(){
         GDLLoader loader = getLoaderFromGDLString("MATCH (a)-[e]->(b) " +
-                "WHERE e.asOf(1970-01-01");
+                "WHERE e.asOf(1970-01-01)");
         Predicate result = loader.getPredicates().get();
         Predicate expected = new And(
                 new Comparison(
@@ -196,14 +194,106 @@ public class GDLLoaderTemporalTest {
                         Comparator.GTE,
                         new TimeLiteral("1970-01-01")
                 )
-        ).switchSides();
-        assertEquals(result, expected);
+        );
+        assertPredicateEquals(result, expected);
+    }
+
+    @Test
+    public void globalPredicateTest(){
+        TimeLiteral l1 = new TimeLiteral("1970-01-01");
+        TimeLiteral l2 = new TimeLiteral("2020-05-01");
+
+        TimeSelector aFrom = new TimeSelector("a", TimeSelector.TimeField.TX_FROM);
+        TimeSelector aTo = new TimeSelector("a", TimeSelector.TimeField.TX_TO);
+        TimeSelector bFrom = new TimeSelector("b", TimeSelector.TimeField.TX_FROM);
+        TimeSelector bTo = new TimeSelector("b", TimeSelector.TimeField.TX_TO);
+        TimeSelector eFrom = new TimeSelector("e", TimeSelector.TimeField.TX_FROM);
+        TimeSelector eTo = new TimeSelector("e", TimeSelector.TimeField.TX_TO);
+        // only lhs global
+        GDLLoader loader = getLoaderFromGDLString("MATCH (a)-[e]->(b) " +
+                "WHERE tx.between(1970-01-01, 2020-05-01)");
+        Predicate result1 = loader.getPredicates().get();
+        Predicate expected1 = new And(
+                // all froms <= l2
+                new And(
+                        new And(
+                                new Comparison(eFrom, Comparator.LTE, l2),
+                                new Comparison(aFrom, Comparator.LTE, l2)
+                        ),
+                        new Comparison(bFrom, Comparator.LTE, l2)
+                ),
+                new And(
+                        new And(
+                                new Comparison(eTo, Comparator.GT, l1),
+                                new Comparison(aTo, Comparator.GT, l1)
+                        ),
+                        new Comparison(bTo, Comparator.GT, l1)
+                )
+        );
+        assertPredicateEquals(expected1, result1);
+
+        //only rhs global
+        loader = getLoaderFromGDLString("MATCH (a)-[e]->(b) " +
+                "WHERE 1970-01-01.precedes(tx)");
+        Predicate result2 = loader.getPredicates().get();
+        Or expected2 = new Or(
+                new Or(
+                        new Comparison(l1, Comparator.LTE, eFrom),
+                        new Comparison(l1, Comparator.LTE, aFrom)
+                ),
+                new Comparison(l1, Comparator.LTE, bFrom)
+        );
+        assertPredicateEquals(expected2, result2);
+
+        //both sides global
+
+        loader = getLoaderFromGDLString("MATCH (a)-[e]->(b) " +
+                "WHERE val_to.after(tx_from)");
+        TimeSelector aValTo = new TimeSelector("a", TimeSelector.TimeField.VAL_TO);
+        TimeSelector bValTo = new TimeSelector("b", TimeSelector.TimeField.VAL_TO);
+        TimeSelector eValTo = new TimeSelector("e", TimeSelector.TimeField.VAL_TO);
+        Predicate result3 = loader.getPredicates().get();
+        Predicate expected3 = new And(
+                new And(
+                        new And(
+                                new And(
+                                        new Comparison(eValTo, Comparator.GT, eFrom),
+                                        new Comparison(aValTo, Comparator.GT, eFrom)
+                                ),
+                                new Comparison(bValTo, Comparator.GT, eFrom)
+                        ),
+                        new And(
+                                new And(
+                                        new Comparison(eValTo, Comparator.GT, aFrom),
+                                        new Comparison(aValTo, Comparator.GT, aFrom)
+                                ),
+                                new Comparison(bValTo, Comparator.GT, aFrom)
+                        )
+                ),
+                new And(
+                        new And(
+                                new Comparison(eValTo, Comparator.GT, bFrom),
+                                new Comparison(aValTo, Comparator.GT, bFrom)
+                        ),
+                        new Comparison(bValTo, Comparator.GT, bFrom)
+                )
+        );
+        assertPredicateEquals(expected3, result3);
     }
 
 
     @Test
     public void graphTimeStampTest(){
 
+    }
+
+    /**
+     * Does not fail iff {@code result==expected} or {@code result.switchSides()==expected}
+     * @param result    predicate to compare
+     * @param expected  predicate to compare
+     */
+    private void assertPredicateEquals(Predicate result, Predicate expected){
+        assertTrue(result.equals(expected) || result.switchSides().equals(expected));
     }
 
 
@@ -213,7 +303,7 @@ public class GDLLoaderTemporalTest {
         if(p1 instanceof Comparison){
             if(p2 instanceof Comparison){
                 // TODO better equals method?
-                return p1.toString().equals(p2.toString());
+                return p1.equals(p2) || p1.switchSides().equals(p2);
             }
             else{
                 Predicate lhs = p2.getArguments()[0];
@@ -229,7 +319,7 @@ public class GDLLoaderTemporalTest {
                 return false;
             }
             else if(p1.toString().length() == p2.toString().length()){
-                return p1.toString().equals(p2.toString());
+                return p1.equals(p2) || p1.switchSides().equals(p2);
             }
             else{
                 Predicate lhs = p2.getArguments()[0];

@@ -19,6 +19,7 @@ package org.s1ck.gdl.model.predicates.booleans;
 import org.s1ck.gdl.model.comparables.time.TimeSelector;
 import org.s1ck.gdl.model.predicates.Predicate;
 
+import java.util.List;
 import java.util.Set;
 
 public class Not implements Predicate {
@@ -62,6 +63,11 @@ public class Not implements Predicate {
   @Override
   public boolean isTemporal(){
     return expression.isTemporal();
+  }
+
+  @Override
+  public Predicate unfoldGlobalLeft(List<String> variables) {
+    return new Not(expression.unfoldGlobalLeft(variables));
   }
 
   @Override

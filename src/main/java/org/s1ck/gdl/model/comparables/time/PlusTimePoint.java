@@ -1,8 +1,15 @@
 package org.s1ck.gdl.model.comparables.time;
 
+import org.s1ck.gdl.model.comparables.ComparableExpression;
 import org.s1ck.gdl.model.comparables.time.util.TimeConstant;
+import org.s1ck.gdl.model.predicates.Predicate;
+import org.s1ck.gdl.model.predicates.expressions.Comparison;
+import org.s1ck.gdl.utils.Comparator;
 
 import java.util.ArrayList;
+import java.util.List;
+
+import static org.s1ck.gdl.utils.Comparator.EQ;
 
 /**
  * Represents an addition of a constant to a given TimePoint
@@ -78,4 +85,9 @@ public class PlusTimePoint extends TimeAtom{
     }
 
 
+    @Override
+    public Predicate unfoldGlobal(Comparator comp, ComparableExpression rhs, List<String> variables) {
+        //TODO implement, if necessary. Practically the same as in TimeSelector
+        return null;
+    }
 }
