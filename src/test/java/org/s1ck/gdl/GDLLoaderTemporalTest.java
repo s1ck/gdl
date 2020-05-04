@@ -17,6 +17,10 @@ import org.s1ck.gdl.utils.Comparator;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.s1ck.gdl.model.comparables.time.TimeSelector.TimeField.TX_FROM;
+import static org.s1ck.gdl.model.comparables.time.TimeSelector.TimeField.TX_TO;
+import static org.s1ck.gdl.utils.Comparator.GTE;
+import static org.s1ck.gdl.utils.Comparator.LTE;
 
 public class GDLLoaderTemporalTest {
 
@@ -117,14 +121,14 @@ public class GDLLoaderTemporalTest {
         Predicate result = loader.getPredicates().get();
         Predicate expected = new And(
                 new Comparison(
-                        new TimeSelector("a", TimeSelector.TimeField.TX_FROM),
-                        Comparator.LTE,
+                        new TimeSelector("a", TX_FROM),
+                        LTE,
                         new TimeLiteral("2020-04-28T10:39:15")
                 ),
                 new Comparison(
-                        new TimeSelector("a", TimeSelector.TimeField.TX_TO),
+                        new TimeSelector("a", TX_TO),
                         Comparator.GT,
-                        new TimeSelector("b", TimeSelector.TimeField.TX_FROM)
+                        new TimeSelector("b", TX_FROM)
                 )
         );
         assertPredicateEquals(result, expected);
@@ -136,8 +140,8 @@ public class GDLLoaderTemporalTest {
                 "WHERE a.tx.precedes(b.val)");
         Predicate result = loader.getPredicates().get();
         Predicate expected = new Comparison(
-                new TimeSelector("a", TimeSelector.TimeField.TX_TO),
-                Comparator.LTE,
+                new TimeSelector("a", TX_TO),
+                LTE,
                 new TimeSelector("b", TimeSelector.TimeField.VAL_FROM)
         );
         assertPredicateEquals(result, expected);
@@ -147,8 +151,8 @@ public class GDLLoaderTemporalTest {
                 "WHERE a.tx_to.precedes(b.val)");
         result = loader.getPredicates().get();
         expected = new Comparison(
-                new TimeSelector("a", TimeSelector.TimeField.TX_TO),
-                Comparator.LTE,
+                new TimeSelector("a", TX_TO),
+                LTE,
                 new TimeSelector("b", TimeSelector.TimeField.VAL_FROM)
         );
         assertPredicateEquals(result, expected);
@@ -161,8 +165,8 @@ public class GDLLoaderTemporalTest {
         Predicate result = loader.getPredicates().get();
         Predicate expected = new Comparison(
                 new TimeSelector("a", TimeSelector.TimeField.VAL_FROM),
-                Comparator.GTE,
-                new TimeSelector("b", TimeSelector.TimeField.TX_TO)
+                GTE,
+                new TimeSelector("b", TX_TO)
         );
         assertPredicateEquals(result, expected);
 
@@ -171,8 +175,8 @@ public class GDLLoaderTemporalTest {
                 "WHERE a.tx_to.succeeds(b.val)");
         result = loader.getPredicates().get();
         expected = new Comparison(
-                new TimeSelector("a", TimeSelector.TimeField.TX_TO),
-                Comparator.GTE,
+                new TimeSelector("a", TX_TO),
+                GTE,
                 new TimeSelector("b", TimeSelector.TimeField.VAL_TO)
         );
         assertPredicateEquals(result, expected);
@@ -185,13 +189,13 @@ public class GDLLoaderTemporalTest {
         Predicate result = loader.getPredicates().get();
         Predicate expected = new And(
                 new Comparison(
-                        new TimeSelector("e", TimeSelector.TimeField.TX_FROM),
-                        Comparator.LTE,
+                        new TimeSelector("e", TX_FROM),
+                        LTE,
                         new TimeLiteral("1970-01-01")
                 ),
                 new Comparison(
-                        new TimeSelector("e", TimeSelector.TimeField.TX_TO),
-                        Comparator.GTE,
+                        new TimeSelector("e", TX_TO),
+                        GTE,
                         new TimeLiteral("1970-01-01")
                 )
         );
@@ -203,12 +207,12 @@ public class GDLLoaderTemporalTest {
         TimeLiteral l1 = new TimeLiteral("1970-01-01");
         TimeLiteral l2 = new TimeLiteral("2020-05-01");
 
-        TimeSelector aFrom = new TimeSelector("a", TimeSelector.TimeField.TX_FROM);
-        TimeSelector aTo = new TimeSelector("a", TimeSelector.TimeField.TX_TO);
-        TimeSelector bFrom = new TimeSelector("b", TimeSelector.TimeField.TX_FROM);
-        TimeSelector bTo = new TimeSelector("b", TimeSelector.TimeField.TX_TO);
-        TimeSelector eFrom = new TimeSelector("e", TimeSelector.TimeField.TX_FROM);
-        TimeSelector eTo = new TimeSelector("e", TimeSelector.TimeField.TX_TO);
+        TimeSelector aFrom = new TimeSelector("a", TX_FROM);
+        TimeSelector aTo = new TimeSelector("a", TX_TO);
+        TimeSelector bFrom = new TimeSelector("b", TX_FROM);
+        TimeSelector bTo = new TimeSelector("b", TX_TO);
+        TimeSelector eFrom = new TimeSelector("e", TX_FROM);
+        TimeSelector eTo = new TimeSelector("e", TX_TO);
         // only lhs global
         GDLLoader loader = getLoaderFromGDLString("MATCH (a)-[e]->(b) " +
                 "WHERE tx.between(1970-01-01, 2020-05-01)");
@@ -217,10 +221,10 @@ public class GDLLoaderTemporalTest {
                 // all froms <= l2
                 new And(
                         new And(
-                                new Comparison(eFrom, Comparator.LTE, l2),
-                                new Comparison(aFrom, Comparator.LTE, l2)
+                                new Comparison(eFrom, LTE, l2),
+                                new Comparison(aFrom, LTE, l2)
                         ),
-                        new Comparison(bFrom, Comparator.LTE, l2)
+                        new Comparison(bFrom, LTE, l2)
                 ),
                 new And(
                         new And(
@@ -238,10 +242,10 @@ public class GDLLoaderTemporalTest {
         Predicate result2 = loader.getPredicates().get();
         Or expected2 = new Or(
                 new Or(
-                        new Comparison(l1, Comparator.LTE, eFrom),
-                        new Comparison(l1, Comparator.LTE, aFrom)
+                        new Comparison(l1, LTE, eFrom),
+                        new Comparison(l1, LTE, aFrom)
                 ),
-                new Comparison(l1, Comparator.LTE, bFrom)
+                new Comparison(l1, LTE, bFrom)
         );
         assertPredicateEquals(expected2, result2);
 
@@ -279,6 +283,150 @@ public class GDLLoaderTemporalTest {
                 )
         );
         assertPredicateEquals(expected3, result3);
+    }
+
+    @Test
+    public void intervallMergeAndJoinTest(){
+        GDLLoader loader = getLoaderFromGDLString("MATCH (a)-[e]->(b) " +
+                "WHERE a.tx.merge(b.tx).succeeds(Interval(1970-01-01, 2020-05-01))");
+        TimeSelector aTxFrom = new TimeSelector("a", TX_FROM);
+        TimeSelector aTxTo = new TimeSelector("a", TX_TO);
+        TimeSelector bTxFrom = new TimeSelector("b", TX_FROM);
+        TimeSelector bTxTo = new TimeSelector("b",TX_TO);
+        TimeLiteral tl1 = new TimeLiteral("1970-01-01");
+        TimeLiteral tl2 = new TimeLiteral("2020-05-01");
+        Predicate expected = new And(
+                //succeeds
+                new Or(
+                    new Comparison(aTxFrom, GTE, tl2),
+                    new Comparison(bTxFrom, GTE, tl2)
+                ),
+                //overlaps/meets
+                new And(
+                        new And(
+                                new Comparison(aTxFrom, LTE, aTxTo),
+                                new Comparison(aTxFrom, LTE, bTxTo)
+                        ),
+                        new And(
+                                new Comparison(bTxFrom, LTE, aTxTo),
+                                new Comparison(bTxFrom, LTE, bTxTo)
+                        )
+                )
+        );
+        Predicate result = loader.getPredicates().get();
+        assertPredicateEquals(expected, result);
+
+        /*
+         * Join
+         */
+        loader = getLoaderFromGDLString("MATCH (a)-[e]->(b) " +
+                "WHERE a.tx.join(b.tx).succeeds(Interval(1970-01-01, 2020-05-01))");
+        expected = new And(
+                //succeeds
+                new And(
+                        new Comparison(aTxFrom, GTE, tl2),
+                        new Comparison(bTxFrom, GTE, tl2)
+                ),
+                //overlaps/meets
+                new And(
+                        new And(
+                                new Comparison(aTxFrom, LTE, aTxTo),
+                                new Comparison(aTxFrom, LTE, bTxTo)
+                        ),
+                        new And(
+                                new Comparison(bTxFrom, LTE, aTxTo),
+                                new Comparison(bTxFrom, LTE, bTxTo)
+                        )
+                )
+        );
+        result = loader.getPredicates().get();
+        assertPredicateEquals(expected, result);
+        /*
+         * Combine Merge And Join
+         */
+        loader = getLoaderFromGDLString("MATCH (a)-[e]->(b) " +
+                "WHERE a.tx.join(b.tx).precedes(a.tx.merge(b.tx))");
+        expected = new And(
+                new And(
+                        // actual precedes predicate
+                        new And(
+                                new Or(
+                                      new Comparison(aTxTo, LTE, aTxFrom),
+                                      new Comparison(aTxTo, LTE, bTxFrom)
+                                ),
+                                new Or(
+                                        new Comparison(bTxTo, LTE, aTxFrom),
+                                        new Comparison(bTxTo, LTE, bTxFrom)
+                                )
+                        ),
+                        //first overlap/meet
+                        new And(
+                                new And(
+                                        new Comparison(aTxFrom, LTE, aTxTo),
+                                        new Comparison(aTxFrom, LTE, bTxTo)
+                                ),
+                                new And(
+                                        new Comparison(bTxFrom, LTE, aTxTo),
+                                        new Comparison(bTxFrom, LTE, bTxTo)
+                                )
+                        )
+                ),
+                //second overlap/meet
+                new And(
+                        new And(
+                                new Comparison(aTxFrom, LTE, aTxTo),
+                                new Comparison(aTxFrom, LTE, bTxTo)
+                        ),
+                        new And(
+                                new Comparison(bTxFrom, LTE, aTxTo),
+                                new Comparison(bTxFrom, LTE, bTxTo)
+                        )
+                )
+        );
+        result = loader.getPredicates().get();
+        assertPredicateEquals(expected, result);
+        loader = getLoaderFromGDLString("MATCH (a)-[e]->(b) " +
+                "WHERE a.tx.merge(b.tx).precedes(a.tx.join(b.tx))");
+        expected = new And(
+                new And(
+                        // actual preceeds predicate
+                        new Or(
+                                new And(
+                                        new Comparison(aTxTo, LTE, aTxFrom),
+                                        new Comparison(aTxTo, LTE, bTxFrom)
+                                ),
+                                new And(
+                                        new Comparison(bTxTo, LTE, aTxFrom),
+                                        new Comparison(bTxTo, LTE, bTxFrom)
+                                )
+                        ),
+                        //first overlap/meet
+                        new And(
+                                new And(
+                                        new Comparison(aTxFrom, LTE, aTxTo),
+                                        new Comparison(aTxFrom, LTE, bTxTo)
+                                ),
+                                new And(
+                                        new Comparison(bTxFrom, LTE, aTxTo),
+                                        new Comparison(bTxFrom, LTE, bTxTo)
+                                )
+                        )
+                ),
+                //second overlap/meet
+                new And(
+                        new And(
+                                new Comparison(aTxFrom, LTE, aTxTo),
+                                new Comparison(aTxFrom, LTE, bTxTo)
+                        ),
+                        new And(
+                                new Comparison(bTxFrom, LTE, aTxTo),
+                                new Comparison(bTxFrom, LTE, bTxTo)
+                        )
+                )
+        );
+        result = loader.getPredicates().get();
+        assertPredicateEquals(result, expected);
+        System.out.println(loader.getPredicates());
     }
 
 

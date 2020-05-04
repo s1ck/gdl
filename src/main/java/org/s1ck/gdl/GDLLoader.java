@@ -433,10 +433,17 @@ class GDLLoader extends GDLBaseListener {
    * @return complex predicate that encodes the interval function. Atoms are time stamp comparisons
    */
   private Predicate buildIntervalFunction(GDLParser.IntvFContext ctx) {
+    int predicateSizeBefore = currentPredicates.size();
     TimePoint[] intv = buildIntervall(ctx.interval());
     TimePoint from = intv[0];
     TimePoint to = intv[1];
-    return createIntervalPredicates(from, to, ctx.intervalFunc());
+    Predicate predicate = createIntervalPredicates(from, to, ctx.intervalFunc());
+    // additional constraints?
+    int countConstraints = currentPredicates.size() - predicateSizeBefore;
+    for(int i = 0; i<countConstraints; i++){
+      predicate = new And(predicate, currentPredicates.removeFirst());
+    }
+    return predicate;
   }
 
   /**
@@ -449,22 +456,24 @@ class GDLLoader extends GDLBaseListener {
    *    {@code from} and {@code to}.
    */
   private Predicate createIntervalPredicates(TimePoint from, TimePoint to, GDLParser.IntervalFuncContext intervalFunc) {
+    Predicate predicate = null;
     if(intervalFunc.overlapsIntervallOperator()!=null){
-      return createOverlapsPredicates(from, to, intervalFunc.overlapsIntervallOperator());
+      predicate = createOverlapsPredicates(from, to, intervalFunc.overlapsIntervallOperator());
     }
     else if(intervalFunc.fromToOperator()!=null){
-      return createFromToPredicates(from, to, intervalFunc.fromToOperator());
+      predicate = createFromToPredicates(from, to, intervalFunc.fromToOperator());
     }
     else if(intervalFunc.betweenOperator()!=null){
-      return createBetweenPredicates(from, to, intervalFunc.betweenOperator());
+      predicate = createBetweenPredicates(from, to, intervalFunc.betweenOperator());
     }
     else if(intervalFunc.precedesOperator()!=null){
-      return createPrecedesPredicates(to, intervalFunc.precedesOperator());
+      predicate = createPrecedesPredicates(to, intervalFunc.precedesOperator());
     }
     else if(intervalFunc.succeedsOperator()!=null){
-      return createSucceedsPredicates(from, intervalFunc.succeedsOperator());
+      predicate = createSucceedsPredicates(from, intervalFunc.succeedsOperator());
     }
-    return null;
+    // additional constraints added during interval processing?
+    return predicate;
   }
 
   /**
@@ -553,20 +562,72 @@ class GDLLoader extends GDLBaseListener {
     if (ctx.intervalSelector()!=null){
       GDLParser.IntervalSelectorContext selector = ctx.intervalSelector();
       // throws exception, if variable invalid
-      String var = selector.Identifier()!=null ?
-              resolveIdentifier(selector.Identifier().getText()) : TimeSelector.GLOBAL_SELECTOR;
-      String intId = selector.IntervalConst().getText();
-      TimePoint from = new TimeSelector(var, intId+"_from");
-      TimePoint to = new TimeSelector(var, intId+"_to");
-      return new TimePoint[]{from, to};
+      return buildIntervalFromSelector(selector);
     }
     else if(ctx.intervalFromStamps()!=null){
       GDLParser.IntervalFromStampsContext fs = ctx.intervalFromStamps();
-      TimePoint from = buildTimePoint(fs.timePoint(0));
-      TimePoint to = buildTimePoint(fs.timePoint(1));
-      return new TimePoint[]{from,to};
+      return buildIntervalFromStamps(fs);
+    }
+    else if(ctx.complexInterval()!=null){
+      GDLParser.ComplexIntervalArgumentContext arg1 = ctx.complexInterval()
+              .complexIntervalArgument(0);
+      GDLParser.ComplexIntervalArgumentContext arg2 = ctx.complexInterval()
+              .complexIntervalArgument(1);
+      boolean join = ctx.getText().contains(".join(");
+      return buildIntervalFromComplex(arg1, arg2, join);
     }
     return null;
+  }
+
+  private TimePoint[] buildIntervalFromSelector(GDLParser.IntervalSelectorContext ctx){
+    String var = ctx.Identifier()!=null ?
+            resolveIdentifier(ctx.Identifier().getText()) : TimeSelector.GLOBAL_SELECTOR;
+    String intId = ctx.IntervalConst().getText();
+    TimePoint from = new TimeSelector(var, intId+"_from");
+    TimePoint to = new TimeSelector(var, intId+"_to");
+    return new TimePoint[]{from, to};
+  }
+
+  private TimePoint[] buildIntervalFromStamps(GDLParser.IntervalFromStampsContext ctx){
+    TimePoint from = buildTimePoint(ctx.timePoint(0));
+    TimePoint to = buildTimePoint(ctx.timePoint(1));
+    return new TimePoint[]{from,to};
+  }
+
+  private TimePoint[] buildIntervalFromComplex(GDLParser.ComplexIntervalArgumentContext arg1,
+                                               GDLParser.ComplexIntervalArgumentContext arg2,
+                                               boolean join){
+    TimePoint[] i1 = null;
+    TimePoint[] i2 = null;
+    if(arg1.intervalFromStamps()!=null){
+      i1 = buildIntervalFromStamps(arg1.intervalFromStamps());
+    }
+    else{
+      i1 = buildIntervalFromSelector(arg1.intervalSelector());
+    }
+    if(arg2.intervalFromStamps()!=null){
+      i2 = buildIntervalFromStamps(arg2.intervalFromStamps());
+    }
+    else{
+      i2 = buildIntervalFromSelector(arg2.intervalSelector());
+    }
+    // constraint: merge and join only when overlapping or meeting
+    Comparison constraint = new Comparison(
+            new MaxTimePoint(i1[0], i2[0]), LTE, new MinTimePoint(i1[1], i2[1])
+    );
+    currentPredicates.addFirst(constraint);
+    // now build complex intervall from i1, i2
+    if(join){
+      TimePoint start = new MinTimePoint(i1[0],i2[0]);
+      TimePoint end = new MaxTimePoint(i1[1],i2[1]);
+      return new TimePoint[]{start, end};
+    }
+    // merge
+    else{
+      TimePoint start = new MaxTimePoint(i1[0],i2[0]);
+      TimePoint end = new MinTimePoint(i1[1],i2[1]);
+      return new TimePoint[]{start, end};
+    }
   }
 
   /**
