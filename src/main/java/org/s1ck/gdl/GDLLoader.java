@@ -36,6 +36,7 @@ import org.s1ck.gdl.utils.Comparator;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static org.s1ck.gdl.utils.Comparator.GTE;
 import static org.s1ck.gdl.utils.Comparator.LTE;
 
 class GDLLoader extends GDLBaseListener {
@@ -472,6 +473,9 @@ class GDLLoader extends GDLBaseListener {
     else if(intervalFunc.succeedsOperator()!=null){
       predicate = createSucceedsPredicates(from, intervalFunc.succeedsOperator());
     }
+    else if(intervalFunc.containsOperator()!=null){
+      predicate = createContainsPredicates(from, to, intervalFunc.containsOperator());
+    }
     // additional constraints added during interval processing?
     return predicate;
   }
@@ -550,7 +554,33 @@ class GDLLoader extends GDLBaseListener {
   private Predicate createSucceedsPredicates(TimePoint point, GDLParser.SucceedsOperatorContext ctx){
     TimePoint[] arg = buildIntervall(ctx.interval());
     TimePoint arg_to = arg[1];
-    return new Comparison(point, Comparator.GTE, arg_to);
+    return new Comparison(point, GTE, arg_to);
+  }
+
+  /**
+   * Creates a predicate a.contains(b) = a.from<=b.from AND a.to>=b.to
+   * @param from from value of the calling interval
+   * @param to to value of the calling interval
+   * @param ctx context of the call, containing b
+   * @return contains predicate
+   */
+  private Predicate createContainsPredicates(TimePoint from, TimePoint to, GDLParser.ContainsOperatorContext ctx){
+    if(ctx.interval()!=null){
+      TimePoint[] arg = buildIntervall(ctx.interval());
+      TimePoint arg_from = arg[0];
+      TimePoint arg_to = arg[1];
+      return new And(
+              new Comparison(from, LTE, arg_from),
+              new Comparison(to, GTE, arg_to)
+      );
+    }
+    // argument is only a timestamp
+    else{
+      TimePoint arg = buildTimePoint(ctx.timePoint());
+      return new And(
+              new Comparison(from, LTE, arg), new Comparison(to, GTE, arg)
+      );
+    }
   }
 
   /**
@@ -726,7 +756,7 @@ class GDLLoader extends GDLBaseListener {
                       tp),
               new Comparison(
                       new TimeSelector(identifier, TimeSelector.TimeField.TX_TO),
-                      Comparator.GTE,
+                      GTE,
                       tp)
               )
       );
@@ -759,7 +789,7 @@ class GDLLoader extends GDLBaseListener {
                 ),
                 new Comparison(
                         new TimeSelector(variables.get(0), TimeSelector.TimeField.TX_TO),
-                        Comparator.GTE,
+                        GTE,
                         now
                 )
         );
@@ -774,7 +804,7 @@ class GDLLoader extends GDLBaseListener {
                             ),
                             new Comparison(
                                     new TimeSelector(variables.get(i), TimeSelector.TimeField.TX_TO),
-                                    Comparator.GTE,
+                                    GTE,
                                     now
                             )
                     )

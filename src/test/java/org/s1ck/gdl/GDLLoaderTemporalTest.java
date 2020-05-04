@@ -17,8 +17,7 @@ import org.s1ck.gdl.utils.Comparator;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.s1ck.gdl.model.comparables.time.TimeSelector.TimeField.TX_FROM;
-import static org.s1ck.gdl.model.comparables.time.TimeSelector.TimeField.TX_TO;
+import static org.s1ck.gdl.model.comparables.time.TimeSelector.TimeField.*;
 import static org.s1ck.gdl.utils.Comparator.GTE;
 import static org.s1ck.gdl.utils.Comparator.LTE;
 
@@ -177,7 +176,7 @@ public class GDLLoaderTemporalTest {
         expected = new Comparison(
                 new TimeSelector("a", TX_TO),
                 GTE,
-                new TimeSelector("b", TimeSelector.TimeField.VAL_TO)
+                new TimeSelector("b", VAL_TO)
         );
         assertPredicateEquals(result, expected);
     }
@@ -253,9 +252,9 @@ public class GDLLoaderTemporalTest {
 
         loader = getLoaderFromGDLString("MATCH (a)-[e]->(b) " +
                 "WHERE val_to.after(tx_from)");
-        TimeSelector aValTo = new TimeSelector("a", TimeSelector.TimeField.VAL_TO);
-        TimeSelector bValTo = new TimeSelector("b", TimeSelector.TimeField.VAL_TO);
-        TimeSelector eValTo = new TimeSelector("e", TimeSelector.TimeField.VAL_TO);
+        TimeSelector aValTo = new TimeSelector("a", VAL_TO);
+        TimeSelector bValTo = new TimeSelector("b", VAL_TO);
+        TimeSelector eValTo = new TimeSelector("e", VAL_TO);
         Predicate result3 = loader.getPredicates().get();
         Predicate expected3 = new And(
                 new And(
@@ -429,10 +428,15 @@ public class GDLLoaderTemporalTest {
         System.out.println(loader.getPredicates());
     }
 
-
     @Test
-    public void graphTimeStampTest(){
-
+    public void containsTest(){
+        GDLLoader loader = getLoaderFromGDLString("MATCH (a)-[e]->(b) " +
+                "WHERE a.tx.contains(b.val)");
+        Predicate expected = new And(
+                new Comparison(new TimeSelector("a", TX_FROM), LTE, new TimeSelector("b", VAL_FROM)),
+                new Comparison(new TimeSelector("a", TX_TO), GTE, new TimeSelector("b", VAL_TO))
+        );
+        assertPredicateEquals(expected, loader.getPredicates().get());
     }
 
     /**
