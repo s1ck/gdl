@@ -148,6 +148,7 @@ timeFunc
 interval
     : intervalSelector
     | intervalFromStamps
+    | complexInterval
     ;
 
 
@@ -161,8 +162,14 @@ intervalFromStamps
     ;
 
 // TODO: change (only placeholder yet)
-complexIntervall
-    : Identifier '.' IntervalConst
+complexInterval
+    : complexIntervalArgument '.merge(' complexIntervalArgument ')'
+    | complexIntervalArgument '.join(' complexIntervalArgument ')'
+    ;
+
+complexIntervalArgument
+    : intervalSelector
+    | intervalFromStamps
     ;
 
 // TODO: add functions that yield timePoint
