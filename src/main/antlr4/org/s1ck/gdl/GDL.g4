@@ -23,7 +23,11 @@ database
     ;
 
 elementList
-    : (definition ','?)+ | query
+    : CREATE? definitions | query
+    ;
+
+definitions
+    : (definition ','?)+
     ;
 
 definition
@@ -40,7 +44,7 @@ query
     ;
 
 match
-    : 'MATCH' (path ','?)+
+    : MATCH (path ','?)+
     ;
 
 path
@@ -224,6 +228,14 @@ ComparisonOP
 //-------------------------------
 // General fragments
 //-------------------------------
+
+MATCH
+    : 'MATCH'
+    ;
+
+CREATE
+    : 'CREATE'
+    ;
 
 NaN
     : 'NaN'
