@@ -416,6 +416,11 @@ class GDLLoader extends GDLBaseListener {
     currentPredicates.add(buildComparison(ctx));
   }
 
+  @Override
+  public void enterTemporalComparison(GDLParser.TemporalComparisonContext ctx){
+    currentPredicates.add(buildTemporalComparison(ctx));
+  }
+
   /**
    * Builds a {@code Predicate} from the given Intervall-Function (caller is a interval)
    * interval functions are e.g. succeeds(x), between(x,y)....
@@ -425,6 +430,20 @@ class GDLLoader extends GDLBaseListener {
   @Override
   public void enterIntvF(GDLParser.IntvFContext ctx){
     currentPredicates.add(buildIntervalFunction(ctx));
+  }
+
+  /**
+   * Builds a Comparison filter operator from comparison context
+   *
+   * @param ctx the comparison context that will be parsed
+   * @return parsed operator
+   */
+  private Comparison buildTemporalComparison(GDLParser.TemporalComparisonContext ctx) {
+    ComparableExpression lhs = buildTimePoint(ctx.timePoint(0));
+    ComparableExpression rhs = buildTimePoint(ctx.timePoint(1));
+    Comparator comp = Comparator.fromString(ctx .ComparisonOP().getText());
+
+    return new Comparison(lhs, comp, rhs);
   }
 
   /**
@@ -608,7 +627,14 @@ class GDLLoader extends GDLBaseListener {
     }
     return null;
   }
-
+  
+  /**
+   * Creates an intervall as an array {@code {from, to}} from a selector context.
+   * I.e., a intervall like {@code a.val} would result in {@code {a.val_from, a.val_to}}.
+   * What is more, {@code val} results in {@code GLOBAL_SELECTOR.val_from, GLOBAL_SELECTOR.val_to}
+   * @param ctx context from which to derive the interval
+   * @return {@code {from, to}} representing the interval
+   */
   private TimePoint[] buildIntervalFromSelector(GDLParser.IntervalSelectorContext ctx){
     String var = ctx.Identifier()!=null ?
             resolveIdentifier(ctx.Identifier().getText()) : TimeSelector.GLOBAL_SELECTOR;
@@ -618,12 +644,31 @@ class GDLLoader extends GDLBaseListener {
     return new TimePoint[]{from, to};
   }
 
+  /**
+   * Creates an intervall as an array {@code {from, to}} from a interval constant context.
+   * I.e., a intervall like {@code Interval(1970-01-01, 2020-01-01)} would result in
+   * {@code {1970-01-01, 2020-01-01}}.
+   * @param ctx context from which to derive the interval
+   * @return {@code {from, to}} representing the interval
+   */
   private TimePoint[] buildIntervalFromStamps(GDLParser.IntervalFromStampsContext ctx){
     TimePoint from = buildTimePoint(ctx.timePoint(0));
     TimePoint to = buildTimePoint(ctx.timePoint(1));
     return new TimePoint[]{from,to};
   }
 
+  /**
+   * Creates an intervall as an array {@code {from, to}} from a complex interval context, i.e.
+   * {@code merge} and {@code join} expressions.
+   * An intervall like {@code a.merge(b)} would result in {@code {max(a.from, b.from), min(a.to, b.to}}
+   * while {@code a.join(b)} results in {@code {min(a.from, b.from), max(a.to, b.to)}}.
+   * Furthermore, a constraint {max(a.from, b.from)<= min(a.to, b.to)} is added (intervals must overlap,
+   * in at least one ms)
+   * @param arg1 context from which to derive the calling interval
+   * @param arg2 context from which to derive the callee interval
+   * @param join true iff join should be performed, false iff merge is desired
+   * @return {@code {from, to}} representing the interval
+   */
   private TimePoint[] buildIntervalFromComplex(GDLParser.ComplexIntervalArgumentContext arg1,
                                                GDLParser.ComplexIntervalArgumentContext arg2,
                                                boolean join){
@@ -1157,7 +1202,8 @@ class GDLLoader extends GDLBaseListener {
       return new Literal(getPropertyValue(element.literal()));
     } else if(element.propertyLookup() != null) {
       return buildPropertySelector(element.propertyLookup());
-    } else {
+    }
+      else {
       return new ElementSelector(element.Identifier().getText());
     }
   }
