@@ -18,8 +18,7 @@ import org.s1ck.gdl.utils.Comparator;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.s1ck.gdl.model.comparables.time.TimeSelector.TimeField.*;
-import static org.s1ck.gdl.utils.Comparator.GTE;
-import static org.s1ck.gdl.utils.Comparator.LTE;
+import static org.s1ck.gdl.utils.Comparator.*;
 
 public class GDLLoaderTemporalTest {
 
@@ -437,6 +436,22 @@ public class GDLLoaderTemporalTest {
                 new Comparison(new TimeSelector("a", TX_TO), GTE, new TimeSelector("b", VAL_TO))
         );
         assertPredicateEquals(expected, loader.getPredicates().get());
+    }
+
+    @Test
+    public void comparisonTest(){
+        GDLLoader loader = getLoaderFromGDLString("MATCH (a)-[e]->(b) " +
+                "WHERE a.tx_from > b.val_from AND 2013-06-01 <= a.val_to");
+        Predicate expected = new And(
+                new Comparison(new TimeSelector("a", TX_FROM), GT,
+                        new TimeSelector("b", VAL_FROM)),
+                new Comparison(new TimeLiteral("2013-06-01"), LTE,
+                        new TimeSelector("a", VAL_TO)
+                )
+        );
+        System.out.println(loader.getPredicates().get());
+        System.out.println(expected);
+        assertPredicateEquals(loader.getPredicates().get(), expected);
     }
 
     /**

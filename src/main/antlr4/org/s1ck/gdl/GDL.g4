@@ -103,6 +103,7 @@ expression2 : atom ;
 atom : parenthesizedExpression
      | comparisonExpression
      | timeFunc
+     | temporalComparison
      ;
 
 comparisonExpression
@@ -113,8 +114,7 @@ comparisonExpression
 comparisonElement
     : Identifier
     | propertyLookup
-    | literal 
-    | timeSelector
+    | literal
     ;
 
 parenthesizedExpression : '(' expression ')' ;
@@ -132,13 +132,17 @@ literal
     | FloatingPointLiteral
     | NaN
     | Null
-    | timeLiteral
     ;
     
     
 //------------------------
 // time-related 
 //________________________
+
+temporalComparison
+    : timePoint ComparisonOP timePoint
+    ;
+
 timeFunc
     : interval '.' intervalFunc             #intvF
     | timePoint '.' stampFunc                 #stmpF
