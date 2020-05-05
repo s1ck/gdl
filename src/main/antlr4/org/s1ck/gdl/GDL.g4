@@ -201,6 +201,9 @@ intervalFunc
             | precedesOperator
             | succeedsOperator
             | containsOperator
+            | immediatelyPrecedesOperator
+            | immediatelySucceedsOperator
+            | equalsOperator
             ;
 overlapsIntervallOperator
     : 'overlaps(' interval ')'
@@ -226,6 +229,18 @@ succeedsOperator
 containsOperator
     : 'contains(' interval ')'
     | 'contains(' timePoint ')'
+    ;
+
+immediatelyPrecedesOperator
+    : 'immediatelyPrecedes(' interval ')'
+    ;
+
+immediatelySucceedsOperator
+    : 'immediatelySucceeds(' interval ')'
+    ;
+
+equalsOperator
+    : 'equals(' interval ')'
     ;
 
 stampFunc

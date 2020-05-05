@@ -454,6 +454,37 @@ public class GDLLoaderTemporalTest {
         assertPredicateEquals(loader.getPredicates().get(), expected);
     }
 
+    @Test
+    public void immediatelyPrecedesTest(){
+        GDLLoader loader = getLoaderFromGDLString("MATCH (a)-[e]->(b) " +
+                "WHERE a.tx.immediatelyPrecedes(e.val)");
+        Predicate expected = new Comparison(
+                new TimeSelector("a", TX_TO), EQ, new TimeSelector("e", VAL_FROM)
+        );
+        assertPredicateEquals(loader.getPredicates().get(), expected);
+    }
+
+    @Test
+    public void immediatelySucceedsTest(){
+        GDLLoader loader = getLoaderFromGDLString("MATCH (a)-[e]->(b) " +
+                "WHERE a.tx.immediatelySucceeds(e.val)");
+        Predicate expected = new Comparison(
+                new TimeSelector("a", TX_FROM), EQ, new TimeSelector("e", VAL_TO)
+        );
+        assertPredicateEquals(loader.getPredicates().get(), expected);
+    }
+
+    @Test
+    public void equalsTest(){
+        GDLLoader loader = getLoaderFromGDLString("MATCH (a)-[e]->(b) " +
+                "WHERE a.tx.equals(e.val)");
+        Predicate expected = new And(
+                new Comparison(new TimeSelector("a", TX_FROM), EQ, new TimeSelector("e", VAL_FROM)),
+                new Comparison(new TimeSelector("a", TX_TO), EQ, new TimeSelector("e", VAL_TO))
+        );
+        assertPredicateEquals(loader.getPredicates().get(), expected);
+    }
+
     /**
      * Does not fail iff {@code result==expected} or {@code result.switchSides()==expected}
      * @param result    predicate to compare

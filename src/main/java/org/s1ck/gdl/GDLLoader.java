@@ -36,8 +36,7 @@ import org.s1ck.gdl.utils.Comparator;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static org.s1ck.gdl.utils.Comparator.GTE;
-import static org.s1ck.gdl.utils.Comparator.LTE;
+import static org.s1ck.gdl.utils.Comparator.*;
 
 class GDLLoader extends GDLBaseListener {
 
@@ -476,27 +475,34 @@ class GDLLoader extends GDLBaseListener {
    *    {@code from} and {@code to}.
    */
   private Predicate createIntervalPredicates(TimePoint from, TimePoint to, GDLParser.IntervalFuncContext intervalFunc) {
-    Predicate predicate = null;
     if(intervalFunc.overlapsIntervallOperator()!=null){
-      predicate = createOverlapsPredicates(from, to, intervalFunc.overlapsIntervallOperator());
+      return createOverlapsPredicates(from, to, intervalFunc.overlapsIntervallOperator());
     }
     else if(intervalFunc.fromToOperator()!=null){
-      predicate = createFromToPredicates(from, to, intervalFunc.fromToOperator());
+      return createFromToPredicates(from, to, intervalFunc.fromToOperator());
     }
     else if(intervalFunc.betweenOperator()!=null){
-      predicate = createBetweenPredicates(from, to, intervalFunc.betweenOperator());
+      return createBetweenPredicates(from, to, intervalFunc.betweenOperator());
     }
     else if(intervalFunc.precedesOperator()!=null){
-      predicate = createPrecedesPredicates(to, intervalFunc.precedesOperator());
+      return createPrecedesPredicates(to, intervalFunc.precedesOperator());
     }
     else if(intervalFunc.succeedsOperator()!=null){
-      predicate = createSucceedsPredicates(from, intervalFunc.succeedsOperator());
+      return createSucceedsPredicates(from, intervalFunc.succeedsOperator());
     }
     else if(intervalFunc.containsOperator()!=null){
-      predicate = createContainsPredicates(from, to, intervalFunc.containsOperator());
+      return createContainsPredicates(from, to, intervalFunc.containsOperator());
     }
-    // additional constraints added during interval processing?
-    return predicate;
+    else if(intervalFunc.immediatelyPrecedesOperator()!=null){
+      return createImmediatelyPrecedesPredicates(to, intervalFunc.immediatelyPrecedesOperator());
+    }
+    else if(intervalFunc.immediatelySucceedsOperator()!=null){
+      return createImmediatelySucceedsPredicates(from, intervalFunc.immediatelySucceedsOperator());
+    }
+    else if(intervalFunc.equalsOperator()!=null){
+      return createEqualsPredicates(from, to, intervalFunc.equalsOperator());
+    }
+    return null;
   }
 
   /**
@@ -552,14 +558,20 @@ class GDLLoader extends GDLBaseListener {
    * Creates a predicate a.precedes(b) = a <= b.
    * Function is used for interval and timestamp function {@code precedes}, as they both
    * only compare two time stamps
-   * @param point the time stamp of the caller to compare
+   * @param to the time stamp of the caller to compare
    * @param ctx the context containing the value to be compared
    * @return precedes predicate
    */
-  private Predicate createPrecedesPredicates(TimePoint point, GDLParser.PrecedesOperatorContext ctx){
+  private Predicate createPrecedesPredicates(TimePoint to, GDLParser.PrecedesOperatorContext ctx){
     TimePoint[] arg = buildIntervall(ctx.interval());
     TimePoint arg_from = arg[0];
-    return new Comparison(point, LTE, arg_from);
+    return new Comparison(to, LTE, arg_from);
+  }
+
+  private Predicate createImmediatelyPrecedesPredicates(TimePoint to, GDLParser.ImmediatelyPrecedesOperatorContext ctx){
+    TimePoint[] arg = buildIntervall(ctx.interval());
+    TimePoint arg_from = arg[0];
+    return new Comparison(to, EQ, arg_from);
   }
 
   /**
@@ -574,6 +586,13 @@ class GDLLoader extends GDLBaseListener {
     TimePoint[] arg = buildIntervall(ctx.interval());
     TimePoint arg_to = arg[1];
     return new Comparison(point, GTE, arg_to);
+  }
+
+  private Predicate createImmediatelySucceedsPredicates(TimePoint from,
+                                                        GDLParser.ImmediatelySucceedsOperatorContext ctx){
+    TimePoint[] arg = buildIntervall(ctx.interval());
+    TimePoint arg_to = arg[1];
+    return new Comparison(from, EQ, arg_to);
   }
 
   /**
@@ -600,6 +619,16 @@ class GDLLoader extends GDLBaseListener {
               new Comparison(from, LTE, arg), new Comparison(to, GTE, arg)
       );
     }
+  }
+
+  private Predicate createEqualsPredicates(TimePoint from, TimePoint to, GDLParser.EqualsOperatorContext ctx){
+    TimePoint[] arg = buildIntervall(ctx.interval());
+    TimePoint arg_from = arg[0];
+    TimePoint arg_to = arg[1];
+    return new And(
+            new Comparison(from, EQ, arg_from),
+            new Comparison(to, EQ, arg_to)
+    );
   }
 
   /**
