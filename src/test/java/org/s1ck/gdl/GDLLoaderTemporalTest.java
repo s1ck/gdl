@@ -15,6 +15,8 @@ import org.s1ck.gdl.model.predicates.booleans.Or;
 import org.s1ck.gdl.model.predicates.expressions.Comparison;
 import org.s1ck.gdl.utils.Comparator;
 
+import java.sql.Time;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.s1ck.gdl.model.comparables.time.TimeSelector.TimeField.*;
@@ -483,6 +485,86 @@ public class GDLLoaderTemporalTest {
                 new Comparison(new TimeSelector("a", TX_TO), EQ, new TimeSelector("e", VAL_TO))
         );
         assertPredicateEquals(loader.getPredicates().get(), expected);
+    }
+
+    @Test
+    public void minMaxTest(){
+        TimeSelector aTxFrom = new TimeSelector("a", TX_FROM);
+        TimeSelector bTxFrom = new TimeSelector("b", TX_FROM);
+        TimeSelector eTxFrom = new TimeSelector("e", TX_FROM);
+        TimeSelector aValTo = new TimeSelector("a", VAL_TO);
+        TimeSelector bValTo = new TimeSelector("b", VAL_TO);
+        TimeSelector eValTo = new TimeSelector("e", VAL_TO);
+        TimeLiteral literal1 = new TimeLiteral("2020-05-05");
+        GDLLoader loader = getLoaderFromGDLString("MATCH (a)-[e]->(b) " +
+                "WHERE MIN(a.tx_from, b.tx_from, e.tx_from).before(2020-05-05)");
+        Predicate expected = new Or(
+                new Or(
+                        new Comparison(aTxFrom, LT, literal1),
+                        new Comparison(bTxFrom, LT, literal1)
+                ),
+                new Comparison(eTxFrom, LT, literal1)
+        );
+        assertPredicateEquals(loader.getPredicates().get(), expected);
+
+        loader = getLoaderFromGDLString("MATCH (a)-[e]->(b) " +
+                "WHERE MAX(a.tx_from, b.tx_from, e.tx_from).before(2020-05-05)");
+        expected = new And(
+                new And(
+                        new Comparison(aTxFrom, LT, literal1),
+                        new Comparison(bTxFrom, LT, literal1)
+                ),
+                new Comparison(eTxFrom, LT, literal1)
+        );
+        assertPredicateEquals(loader.getPredicates().get(), expected);
+        loader = getLoaderFromGDLString("MATCH (a)-[e]->(b) " +
+                "WHERE MAX(a.tx_from, b.tx_from, e.tx_from).after(" +
+                "MIN(a.val_to, b.val_to, e.val_to))");
+        expected = new Or(
+                //a, b
+                new Or(
+                        // a
+                        new Or(new Or(
+                                new Comparison(aTxFrom, GT, aValTo),
+                                new Comparison(aTxFrom, GT, bValTo)
+                        ),
+                                new Comparison(aTxFrom, GT, eValTo)
+                        ),
+                        // b
+                        new Or(
+                                new Or(
+                                        new Comparison(bTxFrom, GT, aValTo),
+                                        new Comparison(bTxFrom, GT, bValTo)
+                                ),
+                                new Comparison(bTxFrom, GT, eValTo)
+                        )
+                ),
+                //e
+                new Or(
+                        new Or(
+                                new Comparison(eTxFrom, GT, aValTo),
+                                new Comparison(eTxFrom, GT, bValTo)
+                        ),
+                        new Comparison(eTxFrom, GT, eValTo)
+                )
+        );
+        assertPredicateEquals(loader.getPredicates().get(), expected);
+        loader = getLoaderFromGDLString("MATCH (a)-[e]->(b) " +
+                "WHERE MIN(a.tx_from, b.tx_from, e.tx_from).before(2020-05-05) AND" +
+                " a.tx.succeeds(b.tx)");
+        expected = new And(
+                new Or(
+                        new Or(
+                                new Comparison(aTxFrom, LT, literal1),
+                                new Comparison(bTxFrom, LT, literal1)
+                        ),
+                        new Comparison(eTxFrom, LT, literal1)
+                ),
+                new Comparison(aTxFrom, GTE, new TimeSelector("b", TX_TO))
+        );
+        assertPredicateEquals(loader.getPredicates().get(), expected);
+        System.out.println(loader.getPredicates().get());
+
     }
 
     /**

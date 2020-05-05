@@ -176,6 +176,7 @@ complexIntervalArgument
 timePoint
     : timeLiteral
     | timeSelector
+    | complexTimePoint
     ;
 
 timeLiteral
@@ -188,6 +189,16 @@ timeLiteral
 timeSelector
     : Identifier '.' TimeProp
     | TimeProp
+    ;
+
+complexTimePoint
+    : 'MAX(' complexTimePointArgument ',' complexTimePointArgument (','complexTimePointArgument) ')'
+    | 'MIN(' complexTimePointArgument ',' complexTimePointArgument (','complexTimePointArgument) ')'
+    ;
+
+complexTimePointArgument
+    : timeLiteral
+    | timeSelector
     ;
 
 intervalFunc

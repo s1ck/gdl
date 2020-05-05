@@ -806,15 +806,50 @@ class GDLLoader extends GDLBaseListener {
    */
   private TimePoint buildTimePoint(GDLParser.TimePointContext ctx) {
     if (ctx.timeLiteral() != null){
-      return new TimeLiteral(ctx.getText());
+      return buildTimeLiteral(ctx.timeLiteral());
     }
     else if (ctx.timeSelector()!=null){
-      GDLParser.TimeSelectorContext ts = ctx.timeSelector();
-      // checks whether ID is even there (is a vertex or edge) and returns its variable
-      String var = ts.Identifier()!=null ?
-              resolveIdentifier(ts.Identifier().getText()) : TimeSelector.GLOBAL_SELECTOR;
-      String field = ts.TimeProp().getText();
-      return new TimeSelector(var, field);
+      return buildTimeSelector(ctx.timeSelector());
+    }
+    else if (ctx.complexTimePoint()!=null){
+      return buildComplexTimePoint(ctx.complexTimePoint());
+    }
+    return null;
+  }
+
+  private TimeLiteral buildTimeLiteral(GDLParser.TimeLiteralContext ctx){
+    return new TimeLiteral(ctx.getText().trim());
+  }
+
+  private TimeSelector buildTimeSelector(GDLParser.TimeSelectorContext ctx){
+    // checks whether ID is even there (is a vertex or edge) and returns its variable
+    String var = ctx.Identifier()!=null ?
+            resolveIdentifier(ctx.Identifier().getText()) : TimeSelector.GLOBAL_SELECTOR;
+    String field = ctx.TimeProp().getText();
+    return new TimeSelector(var, field);
+  }
+
+  private TimePoint buildComplexTimePoint(GDLParser.ComplexTimePointContext ctx){
+
+    List<GDLParser.ComplexTimePointArgumentContext> argumentContexts =
+            ctx.complexTimePointArgument();
+    TimePoint[] args = new TimePoint[argumentContexts.size()];
+
+    for(int i=0; i<argumentContexts.size(); i++){
+      GDLParser.ComplexTimePointArgumentContext argumentContext = argumentContexts.get(i);
+      if(argumentContext.timeLiteral()!=null){
+        args[i]= buildTimeLiteral(argumentContext.timeLiteral());
+      }
+      else if(argumentContext.timeSelector()!=null){
+        args[i]= buildTimeSelector(argumentContext.timeSelector());
+      }
+    }
+    // available complex timepoints: min and max
+    if(ctx.getText().startsWith("MAX(")){
+      return new MaxTimePoint(args);
+    }
+    else if(ctx.getText().startsWith("MIN(")){
+      return new MinTimePoint(args);
     }
     return null;
   }
