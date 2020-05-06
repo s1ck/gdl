@@ -212,4 +212,14 @@ public class MaxTimePoint extends TimeTerm{
         return true;
     }
 
+    @Override
+    public boolean isGlobal(){
+        for(TimePoint arg: args){
+            if(arg.isGlobal()){
+                return true;
+            }
+        }
+        return false;
+    }
+
 }

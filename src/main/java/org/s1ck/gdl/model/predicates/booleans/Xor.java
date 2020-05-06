@@ -78,6 +78,11 @@ public class Xor implements Predicate {
   }
 
   @Override
+  public boolean isGlobal(){
+    return lhs.isGlobal() || rhs.isGlobal();
+  }
+
+  @Override
   public String toString() {
     return String.format("(%s XOR %s)", lhs, rhs);
   }

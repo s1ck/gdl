@@ -22,6 +22,7 @@ import org.s1ck.gdl.exceptions.InvalidReferenceException;
 import org.s1ck.gdl.model.*;
 import org.s1ck.gdl.model.comparables.ElementSelector;
 import org.s1ck.gdl.model.comparables.time.*;
+import org.s1ck.gdl.model.comparables.time.util.TimeConstant;
 import org.s1ck.gdl.model.predicates.booleans.And;
 import org.s1ck.gdl.model.predicates.expressions.Comparison;
 import org.s1ck.gdl.model.predicates.Predicate;
@@ -91,6 +92,9 @@ class GDLLoader extends GDLBaseListener {
   private static final String ANONYMOUS_VERTEX_VARIABLE = "__v%d";
   private static final String ANONYMOUS_EDGE_VARIABLE = "__e%d";
 
+  // should predicates be reformulated to simple comparisons?
+  private boolean processPredicates = true;
+
 
   /**
    * Initializes a new GDL Loader.
@@ -102,6 +106,20 @@ class GDLLoader extends GDLBaseListener {
   GDLLoader(String defaultGraphLabel, String defaultVertexLabel, String defaultEdgeLabel) {
     this(defaultGraphLabel, defaultVertexLabel, defaultEdgeLabel,
       true, true, true);
+  }
+
+  /**
+   * Initializes a new GDL Loader.
+   *
+   * @param defaultGraphLabel   graph label to be used if no label is given in the GDL script
+   * @param defaultVertexLabel  vertex label to be used if no label is given in the GDL script
+   * @param defaultEdgeLabel    edge label to be used if no label is given in the GDL script
+   * @param processPredicates   true iff predicates should be reformulated to simple (atomic) comparisons
+   */
+  GDLLoader(String defaultGraphLabel, String defaultVertexLabel, String defaultEdgeLabel,
+            boolean processPredicates) {
+    this(defaultGraphLabel, defaultVertexLabel, defaultEdgeLabel);
+    this.processPredicates = processPredicates;
   }
 
   /**
@@ -140,6 +158,25 @@ class GDLLoader extends GDLBaseListener {
     edges     = new HashSet<>();
 
     currentPredicates = new ArrayDeque<>();
+  }
+
+  /**
+   * Initializes a new GDL Loader.
+   *
+   * @param defaultGraphLabel     graph label to be used if no label is given in the GDL script
+   * @param defaultVertexLabel    vertex label to be used if no label is given in the GDL script
+   * @param defaultEdgeLabel      edge label to be used if no label is given in the GDL script
+   * @param useDefaultGraphLabel  enable default graph label
+   * @param useDefaultVertexLabel enable default vertex label
+   * @param useDefaultEdgeLabel   enable default edge label
+   */
+  GDLLoader(String defaultGraphLabel, String defaultVertexLabel, String defaultEdgeLabel,
+            boolean useDefaultGraphLabel, boolean useDefaultVertexLabel, boolean useDefaultEdgeLabel,
+            boolean processPredicates) {
+
+    this(defaultGraphLabel, defaultVertexLabel, defaultEdgeLabel, useDefaultGraphLabel, useDefaultVertexLabel,
+            useDefaultEdgeLabel);
+    this.processPredicates = processPredicates;
   }
 
   /**
@@ -312,7 +349,9 @@ class GDLLoader extends GDLBaseListener {
    */
   @Override
   public void exitQuery(GDLParser.QueryContext ctx) {
-    postprocessPredicates();
+    if(processPredicates) {
+      postprocessPredicates();
+    }
     for(Vertex v : vertices) {
       addPredicates(Predicate.fromGraphElement(v, getDefaultVertexLabel()));
     }
@@ -502,6 +541,9 @@ class GDLLoader extends GDLBaseListener {
     else if(intervalFunc.equalsOperator()!=null){
       return createEqualsPredicates(from, to, intervalFunc.equalsOperator());
     }
+    else if(intervalFunc.longerThanOperator()!=null){
+      return createLongerThanPredicates(from, to, intervalFunc.longerThanOperator());
+    }
     return null;
   }
 
@@ -629,6 +671,34 @@ class GDLLoader extends GDLBaseListener {
             new Comparison(from, EQ, arg_from),
             new Comparison(to, EQ, arg_to)
     );
+  }
+
+  private Predicate createLongerThanPredicates(TimePoint from, TimePoint to, GDLParser.LongerThanOperatorContext ctx){
+    TimeConstant constant = buildTimeConstant(ctx.timeConstant());
+    Comparison c = new Comparison(new PlusTimePoint(from, constant), LT, to);
+    return new Comparison(
+            new PlusTimePoint(from, constant), LT, to
+    );
+  }
+
+  private TimeConstant buildTimeConstant(GDLParser.TimeConstantContext ctx){
+    int value = Integer.parseInt(ctx.IntegerLiteral().getText());
+    if(ctx.getText().contains("days")){
+      return new TimeConstant(value,0,0,0,0);
+    }
+    else if(ctx.getText().contains("hours")){
+      return new TimeConstant(0, value, 0, 0, 0);
+    }
+    else if(ctx.getText().contains("minutes")){
+      return new TimeConstant(0, 0, value, 0, 0);
+    }
+    else if(ctx.getText().contains("seconds")){
+      return new TimeConstant(0, 0, 0, value, 0);
+    }
+    else if(ctx.getText().contains("milliseconds") || ctx.getText().contains("millis")){
+      return new TimeConstant(0, 0, 0, 0, value);
+    }
+    return null;
   }
 
   /**

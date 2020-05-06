@@ -62,6 +62,11 @@ public class PropertySelector implements ComparableExpression {
   }
 
   @Override
+  public boolean isGlobal(){
+    return false;
+  }
+
+  @Override
   public String toString() {
     return variable + "." + propertyName;
   }

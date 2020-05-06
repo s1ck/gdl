@@ -56,6 +56,11 @@ public class Literal implements ComparableExpression {
   }
 
   @Override
+  public boolean isGlobal(){
+    return false;
+  }
+
+  @Override
   public String toString() {
     return value.toString();
   }

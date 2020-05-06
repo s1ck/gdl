@@ -76,6 +76,11 @@ public class Not implements Predicate {
   }
 
   @Override
+  public boolean isGlobal(){
+    return expression.isGlobal();
+  }
+
+  @Override
   public boolean equals(Object o){
     if(o==null){
       return false;

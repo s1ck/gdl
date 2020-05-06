@@ -162,6 +162,12 @@ public interface Predicate extends Serializable {
   boolean isTemporal();
 
   /**
+   * Checks whether the query contains a global selector
+   * @return true iff the query contains a global selector
+   */
+  boolean isGlobal();
+
+  /**
    * "Translates" a predicate possibly containing global time predicates to a predicate
    * containing only local time comparisons. Only unfolds the left side(!!!)
    * @param variables the variables in the whole query
