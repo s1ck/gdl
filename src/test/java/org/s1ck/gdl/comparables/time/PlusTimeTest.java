@@ -114,4 +114,14 @@ public class PlusTimeTest {
         PlusTimePoint p2 = new PlusTimePoint(s2, c);
         assertTrue(p2.containsSelectorType(TimeSelector.TimeField.TX_TO));maxPlusTest();
     }
+
+    @Test
+    public void globalTest(){
+        TimeConstant c = new TimeConstant(1000);
+        TimeSelector s1 = new TimeSelector("a", "val_from");
+        TimeSelector global = new TimeSelector(TimeSelector.GLOBAL_SELECTOR, "val_to");
+
+        assertFalse(new PlusTimePoint(s1,c).isGlobal());
+        assertTrue(new PlusTimePoint(global, c).isGlobal());
+    }
 }

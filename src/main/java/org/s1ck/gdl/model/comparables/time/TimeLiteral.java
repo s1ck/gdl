@@ -177,4 +177,9 @@ public class TimeLiteral extends TimeAtom {
     public Predicate unfoldGlobal(Comparator comp, ComparableExpression rhs, List<String> variables) {
         return new Comparison(this, comp, rhs);
     }
+
+    @Override
+    public boolean isGlobal(){
+        return false;
+    }
 }

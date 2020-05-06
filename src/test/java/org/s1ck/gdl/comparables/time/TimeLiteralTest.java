@@ -94,4 +94,11 @@ public class TimeLiteralTest {
         Comparison c = new Comparison(literal, NEQ, s);
         assertEquals(c.unfoldTemporalComparisonsLeft(), c);
     }
+
+    @Test
+    public void globalTest(){
+        TimeLiteral literal1 = new TimeLiteral();
+        TimeLiteral literal2 = new TimeLiteral("2020-05-06");
+        assertFalse(literal1.isGlobal() || literal2.isGlobal());
+    }
 }

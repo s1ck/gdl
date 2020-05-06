@@ -307,7 +307,15 @@ public class MinTimeTest {
         assertTrue(m2.containsSelectorType(TimeSelector.TimeField.TX_TO));
     }
 
+    @Test
+    public void globalTest(){
+        TimeSelector s1 = new TimeSelector("a", "val_to");
+        TimeLiteral l = new TimeLiteral("2020-04-28");
+        TimeSelector global = new TimeSelector(TimeSelector.GLOBAL_SELECTOR, "tx_from");
 
+        assertTrue(new MinTimePoint(s1,global, l, global).isGlobal());
+        assertFalse(new MinTimePoint(s1,l).isGlobal());
+    }
 
 
 }

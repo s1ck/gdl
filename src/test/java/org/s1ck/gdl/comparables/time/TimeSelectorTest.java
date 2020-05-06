@@ -219,4 +219,12 @@ public class TimeSelectorTest {
         TimeSelector txT = new TimeSelector("a", "tx_to");
         assertTrue(txT.containsSelectorType(TimeSelector.TimeField.TX_TO));
     }
+
+    @Test
+    public void globalTest(){
+        TimeSelector valF = new TimeSelector("a", "val_from");
+        assertFalse(valF.isGlobal());
+        TimeSelector global = new TimeSelector(TimeSelector.GLOBAL_SELECTOR, "val_to");
+        assertTrue(global.isGlobal());
+    }
 }

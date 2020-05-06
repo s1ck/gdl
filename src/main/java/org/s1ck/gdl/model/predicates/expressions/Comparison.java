@@ -92,7 +92,6 @@ public class Comparison implements Predicate {
     if(!isTemporal() || !(lhs instanceof TimeAtom)){
       return this;
     }
-
     return (((TimeAtom)lhs).unfoldGlobal(comparator, rhs, variables));
 
   }
@@ -149,6 +148,11 @@ public class Comparison implements Predicate {
   @Override
   public boolean containsSelectorType(TimeSelector.TimeField type){
     return lhs.containsSelectorType(type) || rhs.containsSelectorType(type);
+  }
+
+  @Override
+  public boolean isGlobal(){
+    return lhs.isGlobal() || rhs.isGlobal();
   }
 
 

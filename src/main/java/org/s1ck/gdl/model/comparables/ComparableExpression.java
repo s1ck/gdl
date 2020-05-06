@@ -34,5 +34,10 @@ public interface ComparableExpression extends Serializable{
    */
   boolean containsSelectorType(TimeSelector.TimeField type);
 
+  /**
+   * Checks whether a global time selector is contained.
+   * @return true iff a global time selector is contained
+   */
+  boolean isGlobal();
 
 }

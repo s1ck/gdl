@@ -298,4 +298,14 @@ public class MaxTimeTest {
         MaxTimePoint m2 = new MaxTimePoint(s2,l);
         assertTrue(m2.containsSelectorType(TimeSelector.TimeField.TX_TO));
     }
+
+    @Test
+    public void globalTest(){
+        TimeSelector s1 = new TimeSelector("a", "val_to");
+        TimeLiteral l = new TimeLiteral("2020-04-28");
+        TimeSelector global = new TimeSelector(TimeSelector.GLOBAL_SELECTOR, TimeSelector.TimeField.VAL_TO);
+
+        assertTrue(new MaxTimePoint(s1, l, global).isGlobal());
+        assertFalse(new MaxTimePoint(s1,l,l,s1).isGlobal());
+    }
 }

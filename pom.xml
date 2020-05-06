@@ -7,7 +7,6 @@
     <version>0.3.5-SNAPSHOT</version>
 
 
-
     <name>GDL - Graph Definition Language</name>
     <description>ANTLR Grammar for the definition of extended property graphs.</description>
     <url>http://github.com/s1ck/gdl.git</url>

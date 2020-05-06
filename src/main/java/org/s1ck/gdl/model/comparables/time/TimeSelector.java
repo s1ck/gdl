@@ -157,6 +157,7 @@ public class TimeSelector extends TimeAtom{
      */
     private Predicate unfoldGlobalEQ(ComparableExpression rhs, List<String> variables){
         // exists var: var.from==rhs
+
         Predicate exists = existsVariable(EQ, rhs, variables);
 
         if(timeProp.equals(TimeField.TX_FROM) || timeProp.equals(TimeField.VAL_FROM)){
@@ -322,6 +323,11 @@ public class TimeSelector extends TimeAtom{
     @Override
     protected Predicate unfoldLTE(TimePoint arg){
         return new Comparison(this, Comparator.LTE, arg);
+    }
+
+    @Override
+    public boolean isGlobal(){
+        return variable.equals(GLOBAL_SELECTOR);
     }
 
     /**

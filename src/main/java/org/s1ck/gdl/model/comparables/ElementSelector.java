@@ -52,6 +52,11 @@ public class ElementSelector implements ComparableExpression {
   }
 
   @Override
+  public boolean isGlobal(){
+    return false;
+  }
+
+  @Override
   public String toString() {
     return variable;
   }

@@ -196,8 +196,8 @@ timeSelector
     ;
 
 complexTimePoint
-    : 'MAX(' complexTimePointArgument ',' complexTimePointArgument (','complexTimePointArgument) ')'
-    | 'MIN(' complexTimePointArgument ',' complexTimePointArgument (','complexTimePointArgument) ')'
+    : 'MAX(' complexTimePointArgument (',' complexTimePointArgument)+ ')'
+    | 'MIN(' complexTimePointArgument (',' complexTimePointArgument)+ ')'
     ;
 
 complexTimePointArgument
@@ -215,6 +215,7 @@ intervalFunc
             | immediatelyPrecedesOperator
             | immediatelySucceedsOperator
             | equalsOperator
+            | longerThanOperator
             ;
 overlapsIntervallOperator
     : 'overlaps(' interval ')'
@@ -252,6 +253,14 @@ immediatelySucceedsOperator
 
 equalsOperator
     : 'equals(' interval ')'
+    ;
+
+longerThanOperator
+    : 'longerThan(' timeConstant ')'
+    ;
+
+timeConstant
+    : IntegerLiteral ('days'|'hours'|'minutes'|'seconds'|'millis')
     ;
 
 stampFunc
