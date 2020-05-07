@@ -2,6 +2,7 @@ package org.s1ck.gdl.model.comparables.time;
 
 import org.s1ck.gdl.model.comparables.ComparableExpression;
 import org.s1ck.gdl.model.predicates.Predicate;
+import org.s1ck.gdl.model.predicates.expressions.Comparison;
 
 import java.util.HashSet;
 import java.util.List;
@@ -139,4 +140,5 @@ public class TimeConstant extends TimePoint {
     public ComparableExpression replaceGlobalByLocal(List<String> variables) {
         return this;
     }
+
 }

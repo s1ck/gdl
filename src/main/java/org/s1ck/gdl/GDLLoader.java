@@ -683,27 +683,34 @@ class GDLLoader extends GDLBaseListener {
   }
 
   private Predicate createLongerThanPredicates(TimePoint from, TimePoint to, GDLParser.LongerThanOperatorContext ctx){
-    TimeConstant constant = buildTimeConstant(ctx.timeConstant());
-    return new Comparison(
-            new Duration(from, to), GT, constant
-    );
+    Duration rhs = new Duration(from, to);
+    if(ctx.timeConstant()!=null) {
+      TimeConstant constant = buildTimeConstant(ctx.timeConstant());
+      return new Comparison(rhs, GT, constant);
+    }
+    else if(ctx.interval()!=null){
+      TimePoint[] interval = buildIntervall(ctx.interval());
+      Duration lhs = new Duration(interval[0], interval[1]);
+      return new Comparison(rhs, GT, lhs);
+    }
+    return null;
   }
 
   private TimeConstant buildTimeConstant(GDLParser.TimeConstantContext ctx){
     int value = Integer.parseInt(ctx.IntegerLiteral().getText());
-    if(ctx.getText().contains("days")){
+    if(ctx.getText().startsWith("Days(")){
       return new TimeConstant(value,0,0,0,0);
     }
-    else if(ctx.getText().contains("hours")){
+    else if(ctx.getText().startsWith("Hours(")){
       return new TimeConstant(0, value, 0, 0, 0);
     }
-    else if(ctx.getText().contains("minutes")){
+    else if(ctx.getText().startsWith("Minutes(")){
       return new TimeConstant(0, 0, value, 0, 0);
     }
-    else if(ctx.getText().contains("seconds")){
+    else if(ctx.getText().startsWith("Seconds(")){
       return new TimeConstant(0, 0, 0, value, 0);
     }
-    else if(ctx.getText().contains("milliseconds") || ctx.getText().contains("millis")){
+    else if(ctx.getText().startsWith("Millis(")){
       return new TimeConstant(0, 0, 0, 0, value);
     }
     return null;

@@ -252,11 +252,15 @@ equalsOperator
     ;
 
 longerThanOperator
-    : 'longerThan(' timeConstant ')'
+    : 'longerThan(' (interval | timeConstant) ')'
     ;
 
 timeConstant
-    : IntegerLiteral ('days'|'hours'|'minutes'|'seconds'|'millis')
+    : 'Millis(' IntegerLiteral ')'
+    | 'Seconds(' IntegerLiteral ')'
+    | 'Minutes(' IntegerLiteral ')'
+    | 'Hours(' IntegerLiteral ')'
+    | 'Days(' IntegerLiteral ')'
     ;
 
 stampFunc
