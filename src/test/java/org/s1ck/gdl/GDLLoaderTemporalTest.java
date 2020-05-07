@@ -248,8 +248,12 @@ public class GDLLoaderTemporalTest {
         TimeSelector eFrom = new TimeSelector("e", TX_FROM);
         TimeSelector eTo = new TimeSelector("e", TX_TO);
 
-        TimeSelector globalFrom = new TimeSelector(TimeSelector.GLOBAL_SELECTOR, TX_FROM);
-        TimeSelector globalTo = new TimeSelector(TimeSelector.GLOBAL_SELECTOR, TX_TO);
+        MaxTimePoint globalFrom = new MaxTimePoint(
+                eFrom, aFrom, bFrom
+        );
+        MinTimePoint globalTo = new MinTimePoint(
+                eTo, aTo, bTo
+        );
         // only lhs global
         GDLLoader loaderDoProcess = getLoaderFromGDLString("MATCH (a)-[e]->(b) " +
                 "WHERE tx.between(1970-01-01, 2020-05-01)");
@@ -307,7 +311,9 @@ public class GDLLoaderTemporalTest {
         TimeSelector aValTo = new TimeSelector("a", VAL_TO);
         TimeSelector bValTo = new TimeSelector("b", VAL_TO);
         TimeSelector eValTo = new TimeSelector("e", VAL_TO);
-        TimeSelector globalValTo = new TimeSelector(TimeSelector.GLOBAL_SELECTOR, VAL_TO);
+        MinTimePoint globalValTo = new MinTimePoint(
+                eValTo, bValTo, eValTo
+        );
         Predicate resultProcessed3 = loaderDoProcess.getPredicates().get();
         Predicate expectedProcessed3 = new And(
                 new And(

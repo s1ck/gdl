@@ -81,6 +81,11 @@ public class Not implements Predicate {
   }
 
   @Override
+  public Predicate replaceGlobalByLocal(List<String> variables) {
+    return new Not(expression.replaceGlobalByLocal(variables));
+  }
+
+  @Override
   public boolean equals(Object o){
     if(o==null){
       return false;

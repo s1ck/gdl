@@ -83,6 +83,12 @@ public class And implements Predicate {
   }
 
   @Override
+  public Predicate replaceGlobalByLocal(List<String> variables) {
+    return new And(lhs.replaceGlobalByLocal(variables),
+            rhs.replaceGlobalByLocal(variables));
+  }
+
+  @Override
   public String toString() {
     return String.format("(%s AND %s)", lhs, rhs);
   }

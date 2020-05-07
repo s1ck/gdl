@@ -7,6 +7,9 @@ import org.s1ck.gdl.model.predicates.booleans.Or;
 import org.s1ck.gdl.model.predicates.expressions.Comparison;
 import org.s1ck.gdl.utils.Comparator;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+
 import static org.junit.Assert.*;
 
 public class MaxTimeTest {
@@ -303,9 +306,21 @@ public class MaxTimeTest {
     public void globalTest(){
         TimeSelector s1 = new TimeSelector("a", "val_to");
         TimeLiteral l = new TimeLiteral("2020-04-28");
-        TimeSelector global = new TimeSelector(TimeSelector.GLOBAL_SELECTOR, TimeSelector.TimeField.VAL_TO);
+        TimeSelector global = new TimeSelector(TimeSelector.GLOBAL_SELECTOR,
+                TimeSelector.TimeField.VAL_TO);
 
         assertTrue(new MaxTimePoint(s1, l, global).isGlobal());
         assertFalse(new MaxTimePoint(s1,l,l,s1).isGlobal());
+
+        ArrayList<String> variables = new ArrayList<>(Arrays.asList("a","b"));
+        MinTimePoint mn = new MinTimePoint(
+                new TimeSelector("a", TimeSelector.TimeField.VAL_TO),
+                new TimeSelector("b", TimeSelector.TimeField.VAL_TO)
+        );
+
+        MaxTimePoint test = new MaxTimePoint(global, l);
+        MaxTimePoint expected = new MaxTimePoint(mn, l);
+
+        assertEquals(expected, test.replaceGlobalByLocal(variables));
     }
 }

@@ -1,5 +1,6 @@
 package org.s1ck.gdl.model.comparables.time;
 
+import org.s1ck.gdl.model.comparables.ComparableExpression;
 import org.s1ck.gdl.model.predicates.Predicate;
 import org.s1ck.gdl.model.predicates.booleans.And;
 import org.s1ck.gdl.model.predicates.booleans.Not;
@@ -8,6 +9,7 @@ import org.s1ck.gdl.model.predicates.expressions.Comparison;
 import org.s1ck.gdl.utils.Comparator;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Represents a MAX(p1,...,pn) term, where p1...pn are TimePoints
@@ -68,6 +70,11 @@ public class MaxTimePoint extends TimeTerm{
             }
         }
         return res;
+    }
+
+    @Override
+    public String getVariable() {
+        return null;
     }
 
     @Override
@@ -184,6 +191,15 @@ public class MaxTimePoint extends TimeTerm{
             disjGt = new And(disjGt, new Comparison(args.get(i), Comparator.LTE, arg));
         }
         return disjGt;
+    }
+
+    @Override
+    public ComparableExpression replaceGlobalByLocal(List<String> variables) {
+        TimePoint[] newArgs = new TimePoint[args.size()];
+        for(int i=0; i<args.size(); i++){
+            newArgs[i] = (TimePoint) args.get(i).replaceGlobalByLocal(variables);
+        }
+        return new MaxTimePoint(newArgs);
     }
 
     @Override

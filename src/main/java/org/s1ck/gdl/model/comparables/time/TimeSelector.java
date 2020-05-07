@@ -8,7 +8,9 @@ import org.s1ck.gdl.model.predicates.expressions.Comparison;
 import org.s1ck.gdl.utils.Comparator;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import static org.s1ck.gdl.utils.Comparator.*;
 
@@ -82,16 +84,17 @@ public class TimeSelector extends TimeAtom{
         this(variable, stringToField(field));
     }
 
+
     @Override
-    public String getVariable() {
-        return variable;
+    public Set<String> getVariables(){
+        Set<String> ls = new HashSet<>();
+        ls.add(variable);
+        return ls;
     }
 
     @Override
-    public ArrayList<String> getVariables(){
-        ArrayList<String> ls = new ArrayList<>();
-        ls.add(variable);
-        return ls;
+    public String getVariable() {
+        return variable;
     }
 
     /**
@@ -330,6 +333,29 @@ public class TimeSelector extends TimeAtom{
         return variable.equals(GLOBAL_SELECTOR);
     }
 
+    @Override
+    public ComparableExpression replaceGlobalByLocal(List<String> variables) {
+        if(!variable.equals(GLOBAL_SELECTOR)){
+            return this;
+        }
+
+        TimeSelector[] selectors = new TimeSelector[variables.size()];
+        for(int i=0; i<variables.size(); i++){
+            selectors[i] = new TimeSelector(variables.get(i), timeProp);
+        }
+
+        if(selectors.length == 1){
+            return selectors[0];
+        }
+
+        if(timeProp.equals(TimeField.TX_FROM) || timeProp.equals(TimeField.VAL_FROM)){
+            return new MaxTimePoint(selectors);
+        }
+        else{
+            return new MinTimePoint(selectors);
+        }
+    }
+
     /**
      * Parses a string to a TimeField
      * @param field a string equal to "tx_from", "tx_to", "val_from", "val_to" (cases irrelevant)
@@ -365,7 +391,7 @@ public class TimeSelector extends TimeAtom{
 
         TimeSelector that = (TimeSelector) o;
 
-        if (variable != null ? !variable.equals(that.variable) : that.getVariable() != null) return false;
+        if (variable != null ? !variable.equals(that.variable) : that.variable != null) return false;
         return timeProp != null ? timeProp.equals(that.timeProp) : that.timeProp == null;
 
     }

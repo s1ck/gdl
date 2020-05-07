@@ -97,6 +97,13 @@ public class Comparison implements Predicate {
   }
 
   @Override
+  public Predicate replaceGlobalByLocal(List<String> variables) {
+    return new Comparison(lhs.replaceGlobalByLocal(variables),
+            comparator,
+            rhs.replaceGlobalByLocal(variables));
+  }
+
+  @Override
   public Predicate unfoldTemporalComparisonsLeft(){
     if (!isTemporal()){
       return this;
@@ -139,8 +146,8 @@ public class Comparison implements Predicate {
   @Override
   public Set<String> getVariables() {
     Set<String> variables = new HashSet<>();
-    if(lhs.getVariable() != null) variables.add(lhs.getVariable());
-    if(rhs.getVariable() != null) variables.add(rhs.getVariable());
+    if(lhs.getVariables() != null) variables.addAll(lhs.getVariables());
+    if(rhs.getVariables() != null) variables.addAll(rhs.getVariables());
 
     return variables;
   }

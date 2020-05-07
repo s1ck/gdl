@@ -175,4 +175,15 @@ public interface Predicate extends Serializable {
    */
   Predicate unfoldGlobalLeft(List<String> variables);
 
+  /**
+   * Replaces global selectors like __global.val_from by their equivalent expressions
+   * over all local variables.
+   * E.g., {@code __global.val_from} would be replaced by {@code MAX(v1.val_from,...,
+   * vn.val_from)} for variables {@code v1,...,vn}.
+   * @param variables all query variables
+   * @return predicate with global selectors replaced by their local variable equivalent
+   * expressions
+   */
+  Predicate replaceGlobalByLocal(List<String> variables);
+
 }

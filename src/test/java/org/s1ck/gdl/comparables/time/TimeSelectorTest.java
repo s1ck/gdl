@@ -1,5 +1,7 @@
 package org.s1ck.gdl.comparables.time;
 import org.junit.Test;
+import org.s1ck.gdl.model.comparables.time.MaxTimePoint;
+import org.s1ck.gdl.model.comparables.time.MinTimePoint;
 import org.s1ck.gdl.model.comparables.time.TimeLiteral;
 import org.s1ck.gdl.model.comparables.time.TimeSelector;
 import org.s1ck.gdl.model.predicates.Predicate;
@@ -9,6 +11,7 @@ import org.s1ck.gdl.model.predicates.expressions.Comparison;
 import org.s1ck.gdl.utils.Comparator;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import static org.junit.Assert.*;
 import static org.s1ck.gdl.utils.Comparator.*;
@@ -18,9 +21,9 @@ public class TimeSelectorTest {
     @Test
     public void selectorTest(){
         TimeSelector selector = new TimeSelector("var", TimeSelector.TimeField.TX_FROM);
-        assertEquals(selector.getVariable(), "var");
+        assertEquals(new ArrayList<String>(selector.getVariables()).get(0), "var");
         assertEquals(selector.getVariables().size(), 1);
-        assertEquals(selector.getVariables().get(0), "var");
+        assertEquals(new ArrayList<String>(selector.getVariables()).get(0), "var");
         assertEquals(selector.getLowerBound(), 0);
         assertEquals(selector.getUpperBound(), Long.MAX_VALUE);
         assertEquals(selector.getTimeProp(), TimeSelector.TimeField.TX_FROM);
@@ -224,7 +227,29 @@ public class TimeSelectorTest {
     public void globalTest(){
         TimeSelector valF = new TimeSelector("a", "val_from");
         assertFalse(valF.isGlobal());
+        assertEquals(valF.replaceGlobalByLocal(new ArrayList<>(Arrays.asList("a"))),
+                valF);
         TimeSelector global = new TimeSelector(TimeSelector.GLOBAL_SELECTOR, "val_to");
+        ArrayList<String> vars = new ArrayList<>(Arrays.asList("a", "b", "e"));
+        MinTimePoint expected = new MinTimePoint(
+                new TimeSelector("a", TimeSelector.TimeField.VAL_TO),
+                new TimeSelector("b", TimeSelector.TimeField.VAL_TO),
+                new TimeSelector("e", TimeSelector.TimeField.VAL_TO)
+        );
+        assertEquals(expected, global.replaceGlobalByLocal(vars));
+
+        TimeSelector global2 = new TimeSelector(TimeSelector.GLOBAL_SELECTOR, "tx_from");
+        MaxTimePoint expected2 = new MaxTimePoint(
+                new TimeSelector("a", TimeSelector.TimeField.TX_FROM),
+                new TimeSelector("b", TimeSelector.TimeField.TX_FROM),
+                new TimeSelector("e", TimeSelector.TimeField.TX_FROM)
+        );
+        assertEquals(expected2, global2.replaceGlobalByLocal(vars));
+        // only one variable -> no max/min, but single selector
+        ArrayList<String> singleVar = new ArrayList<>(Arrays.asList("a"));
+        TimeSelector expectedSingle = new TimeSelector("a", "tx_from");
+        assertEquals(global2.replaceGlobalByLocal(singleVar), expectedSingle);
         assertTrue(global.isGlobal());
     }
+
 }

@@ -352,6 +352,15 @@ class GDLLoader extends GDLBaseListener {
     if(processPredicates) {
       postprocessPredicates();
     }
+    ArrayList<String> vars = new ArrayList<>();
+    vars.addAll(userEdgeCache.keySet());
+    vars.addAll(userVertexCache.keySet());
+    vars.addAll(autoEdgeCache.keySet());
+    vars.addAll(autoVertexCache.keySet());
+    vars.remove(TimeSelector.GLOBAL_SELECTOR);
+    if(predicates!=null) {
+      predicates = predicates.replaceGlobalByLocal(vars);
+    }
     for(Vertex v : vertices) {
       addPredicates(Predicate.fromGraphElement(v, getDefaultVertexLabel()));
     }

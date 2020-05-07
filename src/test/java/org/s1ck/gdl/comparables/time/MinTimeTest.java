@@ -12,6 +12,9 @@ import org.s1ck.gdl.model.predicates.booleans.Or;
 import org.s1ck.gdl.model.predicates.expressions.Comparison;
 import org.s1ck.gdl.utils.Comparator;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+
 import static org.junit.Assert.*;
 
 public class MinTimeTest {
@@ -312,6 +315,17 @@ public class MinTimeTest {
         TimeSelector s1 = new TimeSelector("a", "val_to");
         TimeLiteral l = new TimeLiteral("2020-04-28");
         TimeSelector global = new TimeSelector(TimeSelector.GLOBAL_SELECTOR, "tx_from");
+
+        ArrayList<String> variables = new ArrayList<>(Arrays.asList("a","b"));
+        MaxTimePoint mx = new MaxTimePoint(
+                new TimeSelector("a", TimeSelector.TimeField.TX_FROM),
+                new TimeSelector("b", TimeSelector.TimeField.TX_FROM)
+        );
+
+        MinTimePoint test = new MinTimePoint(global, l);
+        MinTimePoint expected = new MinTimePoint(mx, l);
+
+        assertEquals(expected, test.replaceGlobalByLocal(variables));
 
         assertTrue(new MinTimePoint(s1,global, l, global).isGlobal());
         assertFalse(new MinTimePoint(s1,l).isGlobal());

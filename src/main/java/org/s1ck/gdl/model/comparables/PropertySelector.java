@@ -18,6 +18,11 @@ package org.s1ck.gdl.model.comparables;
 
 import org.s1ck.gdl.model.comparables.time.TimeSelector;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 /**
  * Selects a property of a variable
  */
@@ -47,10 +52,13 @@ public class PropertySelector implements ComparableExpression {
     return propertyName;
   }
 
-  /**
-   * Returns the variable which references the element
-   * @return variable name
-   */
+  @Override
+  public Set<String> getVariables() {
+    HashSet<String> var = new HashSet<>();
+    var.add(variable);
+    return var;
+  }
+
   @Override
   public String getVariable() {
     return this.variable;
@@ -64,6 +72,11 @@ public class PropertySelector implements ComparableExpression {
   @Override
   public boolean isGlobal(){
     return false;
+  }
+
+  @Override
+  public ComparableExpression replaceGlobalByLocal(List<String> variables) {
+    return this;
   }
 
   @Override
