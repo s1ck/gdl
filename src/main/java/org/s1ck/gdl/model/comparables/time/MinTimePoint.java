@@ -10,6 +10,7 @@ import org.s1ck.gdl.utils.Comparator;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Represents a MAX(p1,...,pn) term, where p1...pn are TimePoints
@@ -26,18 +27,18 @@ public class MinTimePoint extends TimeTerm {
     }
 
     @Override
-    public long evaluate(){
+    public Optional<Long> evaluate(){
         long mn = Long.MAX_VALUE;
         for (TimePoint p:args){
-            long eval = p.evaluate();
-            if (eval==UNDEFINED){
-                return UNDEFINED;
+            Optional<Long> eval = p.evaluate();
+            if (!eval.isPresent()){
+                return Optional.empty();
             }
-            if (eval < mn){
-                mn = eval;
+            if (eval.get() < mn){
+                mn = eval.get();
             }
         }
-        return mn;
+        return Optional.of(mn);
     }
 
     @Override
@@ -46,8 +47,8 @@ public class MinTimePoint extends TimeTerm {
         long res = Long.MAX_VALUE;
         for (TimePoint p: args){
             long val = p.getLowerBound();
-            if(val==0){
-                return 0;
+            if(val==Long.MIN_VALUE){
+                return Long.MIN_VALUE;
             }
             if(val< res){
                 res = val;
@@ -62,7 +63,7 @@ public class MinTimePoint extends TimeTerm {
         long res = Long.MAX_VALUE;
         for (TimePoint p: args){
             long val = p.getUpperBound();
-            if(val!=UNDEFINED && val < res){
+            if(val!=Long.MAX_VALUE && val < res){
                 res = val;
             }
         }

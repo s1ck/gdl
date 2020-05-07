@@ -22,7 +22,7 @@ import org.s1ck.gdl.exceptions.InvalidReferenceException;
 import org.s1ck.gdl.model.*;
 import org.s1ck.gdl.model.comparables.ElementSelector;
 import org.s1ck.gdl.model.comparables.time.*;
-import org.s1ck.gdl.model.comparables.time.util.TimeConstant;
+import org.s1ck.gdl.model.comparables.time.TimeConstant;
 import org.s1ck.gdl.model.predicates.booleans.And;
 import org.s1ck.gdl.model.predicates.expressions.Comparison;
 import org.s1ck.gdl.model.predicates.Predicate;
@@ -684,9 +684,8 @@ class GDLLoader extends GDLBaseListener {
 
   private Predicate createLongerThanPredicates(TimePoint from, TimePoint to, GDLParser.LongerThanOperatorContext ctx){
     TimeConstant constant = buildTimeConstant(ctx.timeConstant());
-    Comparison c = new Comparison(new PlusTimePoint(from, constant), LT, to);
     return new Comparison(
-            new PlusTimePoint(from, constant), LT, to
+            new Duration(from, to), GT, constant
     );
   }
 

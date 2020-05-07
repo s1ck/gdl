@@ -7,10 +7,7 @@ import org.s1ck.gdl.model.predicates.booleans.Or;
 import org.s1ck.gdl.model.predicates.expressions.Comparison;
 import org.s1ck.gdl.utils.Comparator;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import static org.s1ck.gdl.utils.Comparator.*;
 
@@ -106,13 +103,13 @@ public class TimeSelector extends TimeAtom{
     }
 
     @Override
-    public long evaluate(){
-        return UNDEFINED;
+    public Optional<Long> evaluate(){
+        return Optional.empty();
     }
 
     @Override
     public long getLowerBound(){
-        return 0;
+        return Long.MIN_VALUE;
     }
 
     @Override

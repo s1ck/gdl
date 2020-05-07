@@ -27,9 +27,9 @@ public class MinTimeTest {
         TimeLiteral l4 = new TimeLiteral("2019-04-05");
         TimeLiteral l5 = new TimeLiteral("2019-04-05T01:02:31");
         MinTimePoint mn = new MinTimePoint(l1,l2,l3,l4,l5);
-        assertEquals(mn.evaluate(), l3.evaluate());
+        assertEquals(mn.evaluate().get(), l3.evaluate().get());
         assertEquals(mn.getLowerBound(), mn.getUpperBound());
-        assertEquals(mn.getUpperBound(), mn.evaluate());
+        assertEquals(mn.getUpperBound(), (long)mn.evaluate().get());
     }
 
     @Test
@@ -39,15 +39,15 @@ public class MinTimeTest {
         TimeLiteral l3 = new TimeLiteral("2005-08-12T17:21:43");
         TimeSelector l4 = new TimeSelector("v", TimeSelector.TimeField.VAL_TO);
         MinTimePoint mn = new MinTimePoint(l1,l2,l3,l4);
-        assertEquals(mn.evaluate(),-1);
-        assertEquals(mn.getLowerBound(), 0);
-        assertEquals(mn.getUpperBound(), l3.evaluate());
+        assertFalse(mn.evaluate().isPresent());
+        assertEquals(mn.getLowerBound(), Long.MIN_VALUE);
+        assertEquals(mn.getUpperBound(), (long)l3.evaluate().get());
 
         // only selectors
         TimeSelector l5 = new TimeSelector("x",TimeSelector.TimeField.VAL_FROM);
         mn = new MinTimePoint(l4,l5);
-        assertEquals(mn.evaluate(),-1);
-        assertEquals(mn.getLowerBound(), 0);
+        assertFalse(mn.evaluate().isPresent());
+        assertEquals(mn.getLowerBound(), Long.MIN_VALUE);
         assertEquals(mn.getUpperBound(), Long.MAX_VALUE);
     }
 
@@ -62,9 +62,9 @@ public class MinTimeTest {
         MinTimePoint mn2 = new MinTimePoint(s2,l2);
 
         MinTimePoint mn3 = new MinTimePoint(mn1, mn2);
-        assertEquals(mn3.evaluate(),-1);
-        assertEquals(mn3.getLowerBound(), 0);
-        assertEquals(mn3.getUpperBound(), l2.evaluate());
+        assertFalse(mn3.evaluate().isPresent());
+        assertEquals(mn3.getLowerBound(), Long.MIN_VALUE);
+        assertEquals(mn3.getUpperBound(), (long)l2.evaluate().get());
 
         assertEquals(mn3.getVariables().size(),2);
         assertTrue(mn3.getVariables().contains("q"));
@@ -81,7 +81,7 @@ public class MinTimeTest {
         TimeLiteral l5 = new TimeLiteral("2019-04-05T01:02:31");
         MaxTimePoint mx2 = new MaxTimePoint(l3,l4,l5);
         MinTimePoint mn = new MinTimePoint(mx1,mx2);
-        assertEquals(mn.evaluate(), l2.evaluate());
+        assertEquals(mn.evaluate().get(), l2.evaluate().get());
     }
 
     @Test
@@ -94,7 +94,7 @@ public class MinTimeTest {
         TimeLiteral l5 = new TimeLiteral("2019-04-05T01:02:31");
         MinTimePoint mn1 = new MinTimePoint(l3,l4,l5);
         MinTimePoint mn = new MinTimePoint(mx1,mn1);
-        assertEquals(mn.evaluate(), l3.evaluate());
+        assertEquals(mn.evaluate().get(), l3.evaluate().get());
     }
 
     @Test
@@ -108,8 +108,8 @@ public class MinTimeTest {
         TimeSelector s2 = new TimeSelector("t", TimeSelector.TimeField.VAL_TO);
         MaxTimePoint mx2 = new MaxTimePoint(l3,l4,s2);
         MinTimePoint mn = new MinTimePoint(mx1,mx2);
-        assertEquals(mn.evaluate(), -1);
-        assertEquals(mn.getLowerBound(), l2.evaluate());
+        assertFalse(mn.evaluate().isPresent());
+        assertEquals(mn.getLowerBound(), (long)l2.evaluate().get());
         assertEquals(mn.getUpperBound(), Long.MAX_VALUE);
     }
 
@@ -125,9 +125,9 @@ public class MinTimeTest {
         TimeSelector s2 = new TimeSelector("t", TimeSelector.TimeField.VAL_TO);
         MaxTimePoint mx1 = new MaxTimePoint(l3,l4,l5,s2);
         MinTimePoint mn = new MinTimePoint(mn1,mx1);
-        assertEquals(mn.evaluate(), -1);
-        assertEquals(mn.getUpperBound(), l1.evaluate());
-        assertEquals(mn.getLowerBound(), 0);
+        assertFalse(mn.evaluate().isPresent());
+        assertEquals(mn.getUpperBound(), (long)l1.evaluate().get());
+        assertEquals(mn.getLowerBound(), Long.MIN_VALUE);
     }
 
     @Test

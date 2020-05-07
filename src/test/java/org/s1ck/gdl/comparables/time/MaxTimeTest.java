@@ -22,9 +22,9 @@ public class MaxTimeTest {
         TimeLiteral l4 = new TimeLiteral("2019-04-05");
         TimeLiteral l5 = new TimeLiteral("2019-04-05T01:02:31");
         MaxTimePoint mx = new MaxTimePoint(l1,l2,l3,l4,l5);
-        assertEquals(mx.evaluate(), l5.evaluate());
+        assertEquals(mx.evaluate().get(), l5.evaluate().get());
         assertEquals(mx.getLowerBound(), mx.getUpperBound());
-        assertEquals(mx.getUpperBound(), mx.evaluate());
+        assertEquals(mx.getUpperBound(), (long)mx.evaluate().get());
     }
 
     @Test
@@ -34,15 +34,15 @@ public class MaxTimeTest {
         TimeLiteral l3 = new TimeLiteral("2005-08-12T17:21:43");
         TimeSelector l4 = new TimeSelector("v", TimeSelector.TimeField.VAL_TO);
         MaxTimePoint mx = new MaxTimePoint(l1,l2,l3,l4);
-        assertEquals(mx.evaluate(),-1);
-        assertEquals(mx.getLowerBound(), l2.evaluate());
+        assertFalse(mx.evaluate().isPresent());
+        assertEquals(mx.getLowerBound(), (long)l2.evaluate().get());
         assertEquals(mx.getUpperBound(), Long.MAX_VALUE);
 
         // only selectors
         TimeSelector l5 = new TimeSelector("x",TimeSelector.TimeField.VAL_FROM);
         mx = new MaxTimePoint(l4,l5);
-        assertEquals(mx.evaluate(),-1);
-        assertEquals(mx.getLowerBound(), 0);
+        assertFalse(mx.evaluate().isPresent());
+        assertEquals(mx.getLowerBound(), Long.MIN_VALUE);
         assertEquals(mx.getUpperBound(), Long.MAX_VALUE);
     }
 
@@ -57,7 +57,7 @@ public class MaxTimeTest {
         MaxTimePoint mx2 = new MaxTimePoint(s2,l2);
 
         MaxTimePoint mx3 = new MaxTimePoint(mx1, mx2);
-        assertEquals(mx3.evaluate(),-1);
+        assertFalse(mx3.evaluate().isPresent());
         assertEquals(mx3.getLowerBound(), mx1.getLowerBound());
         assertEquals(mx3.getUpperBound(), Long.MAX_VALUE);
     }
@@ -73,7 +73,7 @@ public class MaxTimeTest {
         TimeLiteral l5 = new TimeLiteral("2019-04-05T01:02:31");
         MinTimePoint mn2 = new MinTimePoint(l3,l4,l5);
         MaxTimePoint mx = new MaxTimePoint(mn1,mn2);
-        assertEquals(mx.evaluate(), l1.evaluate());
+        assertEquals(mx.evaluate().get(), l1.evaluate().get());
     }
 
     @Test
@@ -86,7 +86,7 @@ public class MaxTimeTest {
         TimeLiteral l5 = new TimeLiteral("2019-04-05T01:02:31");
         MaxTimePoint mx1 = new MaxTimePoint(l3,l4,l5);
         MaxTimePoint mx = new MaxTimePoint(mn1,mx1);
-        assertEquals(mx.evaluate(), l5.evaluate());
+        assertEquals(mx.evaluate().get(), l5.evaluate().get());
     }
 
     @Test
@@ -100,9 +100,9 @@ public class MaxTimeTest {
         TimeSelector s2 = new TimeSelector("t", TimeSelector.TimeField.VAL_TO);
         MinTimePoint mn2 = new MinTimePoint(l3,l4,s2);
         MaxTimePoint mx = new MaxTimePoint(mn1,mn2);
-        assertEquals(mx.evaluate(), -1);
-        assertEquals(mx.getLowerBound(), 0);
-        assertEquals(mx.getUpperBound(), l1.evaluate());
+        assertFalse(mx.evaluate().isPresent());
+        assertEquals(mx.getLowerBound(), Long.MIN_VALUE);
+        assertEquals(mx.getUpperBound(), (long)l1.evaluate().get());
     }
 
     @Test
@@ -117,9 +117,9 @@ public class MaxTimeTest {
         TimeSelector s2 = new TimeSelector("t", TimeSelector.TimeField.VAL_TO);
         MaxTimePoint mx1 = new MaxTimePoint(l3,l4,l5,s2);
         MaxTimePoint mx = new MaxTimePoint(mn1,mx1);
-        assertEquals(mx.evaluate(), -1);
+        assertFalse(mx.evaluate().isPresent());
         assertEquals(mx.getUpperBound(), Long.MAX_VALUE);
-        assertEquals(mx.getLowerBound(), l5.evaluate());
+        assertEquals(mx.getLowerBound(), (long)l5.evaluate().get());
     }
 
     @Test

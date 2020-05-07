@@ -43,8 +43,8 @@ public class TimeLiteralTest {
         assertEquals(tl1.getSecond(), 0);
 
         assertEquals(tl1.getLowerBound(), tl1.getUpperBound());
-        assertEquals(tl1.getUpperBound(), tl1.evaluate());
-        assertEquals(tl1.evaluate(), tl1.getMilliseconds());
+        assertEquals(tl1.getUpperBound(), (long)tl1.evaluate().get());
+        assertEquals((long)tl1.evaluate().get(), tl1.getMilliseconds());
 
         TimeLiteral tl2 = new TimeLiteral("2020-04-05");
         assertEquals(tl2.getYear(), 2020);
