@@ -717,68 +717,77 @@ public class GDLLoaderTemporalTest {
 
     @Test
     public void longerThanTest(){
-//        GDLLoader loaderDoProcess = getLoaderFromGDLString("MATCH (a)-[e]->(b) " +
-//                "WHERE a.val.longerThan(10 days)");
-//        TimeSelector aValFrom = new TimeSelector("a", VAL_FROM);
-//        TimeSelector aValTo = new TimeSelector("a", VAL_TO);
-//        TimeSelector bValFrom = new TimeSelector("b", VAL_FROM);
-//        TimeSelector bValTo = new TimeSelector("b", VAL_TO);
-//        TimeSelector eValFrom = new TimeSelector("e", VAL_FROM);
-//        TimeSelector eValTo = new TimeSelector("e", VAL_TO);
-//        TimeConstant tenDays = new TimeConstant(10,0,0,0,0);
-//        Predicate expected = new Comparison(new PlusTimePoint(aValFrom, tenDays), LT, aValTo);
-//        assertPredicateEquals(loaderDoProcess.getPredicates().get(), expected);
-//
-//        loaderDoProcess = getLoaderFromGDLString("MATCH (a)-[e]->(b) " +
-//                "WHERE a.val.longerThan(12 hours)");
-//        TimeConstant twelveHours = new TimeConstant(0,12,0,0,0);
-//        expected = new Comparison(new PlusTimePoint(aValFrom, twelveHours), LT, aValTo);
-//        assertPredicateEquals(loaderDoProcess.getPredicates().get(), expected);
-//        System.out.println(loaderDoProcess.getPredicates());
-//
-//        loaderDoProcess = getLoaderFromGDLString("MATCH (a)-[e]->(b) " +
-//                "WHERE val.longerThan(5 minutes)");
-//        TimeConstant fiveMinutes = new TimeConstant(0,0,5,0,0);
-//        expected = new And(
-//                // <e.val_to, <a.val_to
-//                new And(
-//                        //e
-//                        new And(
-//                                // e,a
-//                                new And(
-//                                        new Comparison(
-//                                                new PlusTimePoint(eValFrom, fiveMinutes), LT, eValTo),
-//                                        new Comparison(new PlusTimePoint(aValFrom, fiveMinutes), LT, eValTo)
-//                                ),
-//                                //b
-//                                new Comparison(new PlusTimePoint(bValFrom, fiveMinutes), LT, eValTo)
-//                        ),
-//                        //a
-//                        new And(
-//                                // e,a
-//                                new And(
-//                                        new Comparison(new PlusTimePoint(eValFrom, fiveMinutes), LT, aValTo),
-//                                        new Comparison(new PlusTimePoint(aValFrom, fiveMinutes), LT, aValTo)
-//                                ),
-//                                //b
-//                                new Comparison(new PlusTimePoint(bValFrom, fiveMinutes), LT, aValTo)
-//                        )
-//                ),
-//                // <b.val_to
-//                new And(
-//                        // e,a
-//                        new And(
-//                            new Comparison(new PlusTimePoint(eValFrom, fiveMinutes), LT, bValTo),
-//                                new Comparison(new PlusTimePoint(aValFrom, fiveMinutes), LT, bValTo)
-//                        ),
-//                        //b
-//                        new Comparison(new PlusTimePoint(bValFrom, fiveMinutes), LT, bValTo)
-//                )
-//        );
-//        System.out.println(expected);
-//        System.out.println(loaderDoProcess.getPredicates().get());
-//        assertPredicateEquals(loaderDoProcess.getPredicates().get(), expected);
-//        System.out.println(loaderDoProcess.getPredicates());
+        GDLLoader loader = getLoaderFromGDLString("MATCH (a)-[e]->(b) " +
+                "WHERE a.val.longerThan(Days(10))", false);
+
+        TimeSelector aValFrom = new TimeSelector("a", VAL_FROM);
+        TimeSelector aValTo = new TimeSelector("a", VAL_TO);
+        TimeSelector bValFrom = new TimeSelector("b", VAL_FROM);
+        TimeSelector bValTo = new TimeSelector("b", VAL_TO);
+        TimeSelector eValFrom = new TimeSelector("e", VAL_FROM);
+        TimeSelector eValTo = new TimeSelector("e", VAL_TO);
+        TimeConstant tenDays = new TimeConstant(10,0,0,0,0);
+
+        Duration valDuration = new Duration(aValFrom, aValTo);
+
+        Predicate expected = new Comparison(valDuration, GT, tenDays);
+        assertPredicateEquals(loader.getPredicates().get(), expected);
+
+        loader = getLoaderFromGDLString("MATCH (a)-[e]->(b) " +
+                "WHERE a.val.longerThan(Hours(12))", false);
+        TimeConstant twelveHours = new TimeConstant(0,12,0,0,0);
+        expected = new Comparison(valDuration, GT, twelveHours);
+        assertPredicateEquals(loader.getPredicates().get(), expected);
+        System.out.println(loader.getPredicates());
+
+        loader = getLoaderFromGDLString("MATCH (a)-[e]->(b) " +
+                "WHERE val.longerThan(Minutes(5))", false);
+        TimeConstant fiveMinutes = new TimeConstant(0,0,5,0,0);
+        MaxTimePoint globalValFrom = new MaxTimePoint(eValFrom, aValFrom, bValFrom);
+        MinTimePoint globalValTo = new MinTimePoint(eValTo, aValTo, bValTo);
+        Duration globalValDuration = new Duration(globalValFrom, globalValTo);
+        expected = new Comparison(globalValDuration, GT, fiveMinutes);
+        assertPredicateEquals(loader.getPredicates().get(), expected);
+
+        loader = getLoaderFromGDLString("MATCH (a)-[e]->(b) " +
+                "WHERE a.val.merge(b.val).longerThan(Hours(20))", false);
+        TimeConstant twentyHours = new TimeConstant(0,20,0,0,0);
+        MaxTimePoint mergeFrom = new MaxTimePoint(aValFrom, bValFrom);
+        MinTimePoint mergeTo = new MinTimePoint(aValTo, bValTo);
+        Duration mergeDuration = new Duration(mergeFrom, mergeTo);
+        expected = new And(
+                new Comparison(mergeDuration, GT, twentyHours),
+                new Comparison(mergeFrom, LTE, mergeTo)
+                );
+        assertPredicateEquals(loader.getPredicates().get(), expected);
+
+        loader = getLoaderFromGDLString("MATCH (a)-[e]->(b) " +
+                "WHERE Interval(a.val_from, b.val_to).longerThan(Days(4))", false);
+        TimeConstant fourDays = new TimeConstant(4,0,0,0,0);
+        Duration intervalDuration = new Duration(aValFrom, bValTo);
+        expected = new Comparison(intervalDuration, GT, fourDays);
+        assertPredicateEquals(loader.getPredicates().get(), expected);
+
+        loader = getLoaderFromGDLString("MATCH (a)-[e]->(b) " +
+                "WHERE a.val.longerThan(b.val)", false);
+        Duration aVal = new Duration(aValFrom, aValTo);
+        Duration bVal = new Duration(bValFrom, bValTo);
+        expected = new Comparison(aVal, GT, bVal);
+        assertPredicateEquals(loader.getPredicates().get(), expected);
+
+        loader = getLoaderFromGDLString("MATCH (a)-[e]->(b) " +
+                "WHERE val.longerThan(tx)", false);
+        TimeSelector eTxFrom = new TimeSelector("e", TX_FROM);
+        TimeSelector aTxFrom = new TimeSelector("a", TX_FROM);
+        TimeSelector bTxFrom = new TimeSelector("b", TX_FROM);
+        TimeSelector eTxTo = new TimeSelector("e", TX_TO);
+        TimeSelector aTxTo = new TimeSelector("a", TX_TO);
+        TimeSelector bTxTo = new TimeSelector("b", TX_TO);
+        MaxTimePoint globalTxFrom = new MaxTimePoint(eTxFrom, aTxFrom, bTxFrom);
+        MinTimePoint globalTxTo = new MinTimePoint(eTxTo, aTxTo, bTxTo);
+        Duration globalTxDuration = new Duration(globalTxFrom, globalTxTo);
+        expected = new Comparison(globalValDuration, GT, globalTxDuration);
+        assertPredicateEquals(loader.getPredicates().get(), expected);
     }
 
     /**

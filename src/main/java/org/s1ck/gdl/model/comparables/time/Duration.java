@@ -2,6 +2,7 @@ package org.s1ck.gdl.model.comparables.time;
 
 import org.s1ck.gdl.model.comparables.ComparableExpression;
 import org.s1ck.gdl.model.predicates.Predicate;
+import org.s1ck.gdl.model.predicates.expressions.Comparison;
 
 import java.util.List;
 import java.util.Optional;
@@ -136,5 +137,19 @@ public class Duration extends TimePoint {
     @Override
     protected Predicate unfoldLTE(TimePoint arg) {
         return null;
+    }
+
+    @Override
+    public String toString(){
+        return "Duration("+from.toString()+", "+to.toString()+")";
+    }
+
+    @Override
+    public boolean equals(Object o){
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Duration that = (Duration) o;
+        return that.from.equals(from) && that.to.equals(to);
     }
 }
