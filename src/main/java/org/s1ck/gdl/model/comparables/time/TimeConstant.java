@@ -1,13 +1,18 @@
-package org.s1ck.gdl.model.comparables.time.util;
+package org.s1ck.gdl.model.comparables.time;
 
-import org.s1ck.gdl.model.comparables.time.MinTimePoint;
-import org.s1ck.gdl.model.comparables.time.TimePoint;
+import org.s1ck.gdl.model.comparables.ComparableExpression;
+import org.s1ck.gdl.model.predicates.Predicate;
+
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 /**
  * Represents a constant duration via a fixed number of milliseconds
  * Not really a timestamp, but needed for certain related computations (e.g. deltas)
  */
-public class TimeConstant{
+public class TimeConstant extends TimePoint {
 
     /**
      * The number of milliseconds wrapped by this class
@@ -65,4 +70,73 @@ public class TimeConstant{
         return getMillis()==that.getMillis();
     }
 
+    @Override
+    public Optional<Long> evaluate() {
+        return Optional.of(getMillis());
+    }
+
+    @Override
+    public long getLowerBound() {
+        return getMillis();
+    }
+
+    @Override
+    public long getUpperBound() {
+        return getMillis();
+    }
+
+    @Override
+    protected Predicate unfoldEQ(TimePoint arg) {
+        return null;
+    }
+
+    @Override
+    protected Predicate unfoldNEQ(TimePoint arg) {
+        return null;
+    }
+
+    @Override
+    protected Predicate unfoldGT(TimePoint arg) {
+        return null;
+    }
+
+    @Override
+    protected Predicate unfoldGTE(TimePoint arg) {
+        return null;
+    }
+
+    @Override
+    protected Predicate unfoldLT(TimePoint arg) {
+        return null;
+    }
+
+    @Override
+    protected Predicate unfoldLTE(TimePoint arg) {
+        return null;
+    }
+
+    @Override
+    public Set<String> getVariables() {
+        return new HashSet<>();
+    }
+
+    @Override
+    public String getVariable() {
+        return null;
+    }
+
+    @Override
+    public boolean containsSelectorType(TimeSelector.TimeField type) {
+        return false;
+    }
+
+    @Override
+    public boolean isGlobal() {
+        return false;
+    }
+
+    @Override
+    public ComparableExpression replaceGlobalByLocal(List<String> variables) {
+        return this;
+    }
 }

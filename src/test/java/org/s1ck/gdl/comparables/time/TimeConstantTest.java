@@ -1,7 +1,6 @@
-package org.s1ck.gdl.comparables.time.util;
+package org.s1ck.gdl.comparables.time;
 import org.junit.Test;
-import org.s1ck.gdl.model.comparables.time.util.TimeConstant;
-import org.s1ck.gdl.model.comparables.time.TimeLiteral;
+import org.s1ck.gdl.model.comparables.time.TimeConstant;
 
 import static org.junit.Assert.assertEquals;
 
@@ -22,6 +21,10 @@ public class TimeConstantTest {
         int expected_millis = millis + 1000*seconds + (1000*60)*minutes + (1000*60*60)*hours +
                 (1000*60*60*24)*days;
         assertEquals(expected_millis, c2.getMillis());
+
+        assertEquals(c2.getMillis(), (long)c2.evaluate().get());
+        assertEquals(c2.getMillis(), c2.getUpperBound());
+        assertEquals(c2.getMillis(), c2.getLowerBound());
 
     }
 }

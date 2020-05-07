@@ -5,10 +5,7 @@ import org.s1ck.gdl.model.predicates.Predicate;
 import org.s1ck.gdl.model.predicates.expressions.Comparison;
 
 import java.time.*;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import org.s1ck.gdl.utils.Comparator;
 
@@ -136,8 +133,8 @@ public class TimeLiteral extends TimeAtom {
     }
 
     @Override
-    public long evaluate(){
-        return getMilliseconds();
+    public Optional<Long> evaluate(){
+        return Optional.of(getMilliseconds());
     }
 
     @Override

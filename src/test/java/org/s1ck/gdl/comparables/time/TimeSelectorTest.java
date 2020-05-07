@@ -24,8 +24,9 @@ public class TimeSelectorTest {
         assertEquals(new ArrayList<String>(selector.getVariables()).get(0), "var");
         assertEquals(selector.getVariables().size(), 1);
         assertEquals(new ArrayList<String>(selector.getVariables()).get(0), "var");
-        assertEquals(selector.getLowerBound(), 0);
+        assertEquals(selector.getLowerBound(), Long.MIN_VALUE);
         assertEquals(selector.getUpperBound(), Long.MAX_VALUE);
+        assertFalse(selector.evaluate().isPresent());
         assertEquals(selector.getTimeProp(), TimeSelector.TimeField.TX_FROM);
     }
 
