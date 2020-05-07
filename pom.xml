@@ -36,11 +36,11 @@
 
     <distributionManagement>
         <snapshotRepository>
-            <id>release_artifacts_gdl</id>
+            <id>release_artifacts</id>
             <url>https://oss.sonatype.org/content/repositories/snapshots</url>
         </snapshotRepository>
         <repository>
-            <id>release_artifacts_gdl</id>
+            <id>release_artifacts</id>
             <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
         </repository>
     </distributionManagement>
@@ -73,67 +73,6 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
-
-    <profiles>
-        <profile>
-            <id>release</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-gpg-plugin</artifactId>
-                        <version>${plugin.maven-gpg.version}</version>
-                        <executions>
-                            <execution>
-                                <id>sign_artifacts_gdl</id>
-                                <phase>verify</phase>
-                                <goals>
-                                    <goal>sign</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-javadoc-plugin</artifactId>
-                        <version>${plugin.maven-javadoc.version}</version>
-                        <executions>
-                            <execution>
-                                <id>attach-javadocs</id>
-                                <goals>
-                                    <goal>jar</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-source-plugin</artifactId>
-                        <version>${plugin.maven-source.version}</version>
-                        <executions>
-                            <execution>
-                                <id>attach-sources</id>
-                                <goals>
-                                    <goal>jar-no-fork</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.sonatype.plugins</groupId>
-                        <artifactId>nexus-staging-maven-plugin</artifactId>
-                        <version>${plugin.maven-nexus-staging.version}</version>
-                        <extensions>true</extensions>
-                        <configuration>
-                            <serverId>release_artifacts_gdl</serverId>
-                            <nexusUrl>https://oss.sonatype.org/</nexusUrl>
-                            <autoReleaseAfterClose>false</autoReleaseAfterClose>
-                        </configuration>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-    </profiles>
 
     <build>
         <plugins>
@@ -206,7 +145,7 @@
                 <version>${plugin.maven-gpg.version}</version>
                 <executions>
                     <execution>
-                        <id>sign_artifacts_gdl</id>
+                        <id>sign_artifacts</id>
                         <phase>deploy</phase>
                         <goals>
                             <goal>sign</goal>
@@ -220,7 +159,7 @@
                 <version>${plugin.maven-nexus-staging.version}</version>
                 <extensions>true</extensions>
                 <configuration>
-                    <serverId>release_artifacts_gdl</serverId>
+                    <serverId>release_artifacts</serverId>
                     <nexusUrl>https://oss.sonatype.org/</nexusUrl>
                     <autoReleaseAfterClose>false</autoReleaseAfterClose>
                 </configuration>
