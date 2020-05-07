@@ -200,6 +200,11 @@ public class GDLHandler {
     private boolean useDefaultEdgeLabel = true;
 
     /**
+     * Flag to indicate if the query should be postprocessed, i.e. reduced to simple comparisons.
+     */
+    private boolean processQuery = true;
+
+    /**
      * Strategy for handling parser errors.
      */
     private ANTLRErrorStrategy errorStrategy = new DefaultErrorStrategy();
@@ -309,6 +314,17 @@ public class GDLHandler {
     }
 
     /**
+     * Sets the processQuery parameter for the {@link GDLLoader}.
+     *
+     * @param processQuery processQuery flag (true iff query should be postprocessed)
+     * @return builder
+     */
+    public Builder setProcessQuery(boolean processQuery){
+      this.processQuery = processQuery;
+      return this;
+    }
+
+    /**
      * Initialize GDL Handler from given ASCII String.
      *
      * @param asciiString GDL string (must not be {@code null}).
@@ -367,7 +383,7 @@ public class GDLHandler {
       parser.setErrorHandler(errorStrategy);
 
       GDLLoader loader = new GDLLoader(graphLabel, vertexLabel, edgeLabel,
-        useDefaultGraphLabel, useDefaultVertexLabel, useDefaultEdgeLabel);
+        useDefaultGraphLabel, useDefaultVertexLabel, useDefaultEdgeLabel, processQuery);
       new ParseTreeWalker().walk(loader, parser.database());
       return new GDLHandler(loader);
     }

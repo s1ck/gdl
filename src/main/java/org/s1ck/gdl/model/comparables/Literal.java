@@ -18,6 +18,11 @@ package org.s1ck.gdl.model.comparables;
 
 import org.s1ck.gdl.model.comparables.time.TimeSelector;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 /**
  * Represents a literal like String, Integer, ...
  */
@@ -41,10 +46,17 @@ public class Literal implements ComparableExpression {
     return value;
   }
 
-  /**
-   * Returns null since this does not reference a variable
-   * @return null
-   */
+
+  @Override
+  public Set<String> getVariables() {
+    return new HashSet<String>();
+  }
+
+  @Override
+  public ComparableExpression replaceGlobalByLocal(List<String> variables) {
+    return this;
+  }
+
   @Override
   public String getVariable() {
     return null;

@@ -10,6 +10,7 @@ import org.s1ck.gdl.utils.Comparator;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import static org.s1ck.gdl.model.comparables.time.TimeSelector.GLOBAL_SELECTOR;
 import static org.s1ck.gdl.utils.Comparator.*;
@@ -41,8 +42,13 @@ public class PlusTimePoint extends TimeAtom{
     }
 
     @Override
-    public ArrayList<String> getVariables() {
+    public Set<String> getVariables() {
         return timePoint.getVariables();
+    }
+
+    @Override
+    public String getVariable() {
+        return timePoint.getVariable();
     }
 
     @Override
@@ -292,5 +298,10 @@ public class PlusTimePoint extends TimeAtom{
     @Override
     public boolean isGlobal(){
         return timePoint.isGlobal();
+    }
+
+    @Override
+    public ComparableExpression replaceGlobalByLocal(List<String> variables) {
+        return new PlusTimePoint((TimePoint)timePoint.replaceGlobalByLocal(variables), constant);
     }
 }

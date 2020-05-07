@@ -8,6 +8,8 @@ import org.s1ck.gdl.utils.Comparator;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 
 import static org.junit.Assert.*;
@@ -100,5 +102,7 @@ public class TimeLiteralTest {
         TimeLiteral literal1 = new TimeLiteral();
         TimeLiteral literal2 = new TimeLiteral("2020-05-06");
         assertFalse(literal1.isGlobal() || literal2.isGlobal());
+        assertEquals(literal1.replaceGlobalByLocal(new ArrayList<>(Arrays.asList("a"))),
+                literal1);
     }
 }

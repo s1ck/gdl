@@ -6,6 +6,9 @@ import org.s1ck.gdl.model.comparables.time.util.TimeConstant;
 import org.s1ck.gdl.model.predicates.expressions.Comparison;
 import org.s1ck.gdl.utils.Comparator;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+
 import static org.junit.Assert.*;
 
 public class PlusTimeTest {
@@ -35,7 +38,7 @@ public class PlusTimeTest {
         assertEquals(p.getUpperBound(), Long.MAX_VALUE);
 
         assertEquals(p.getVariables().size(),1);
-        assertEquals(p.getVariables().get(0), "p");
+        assertEquals(new ArrayList<String>(p.getVariables()).get(0), "p");
     }
 
     @Test
@@ -120,6 +123,22 @@ public class PlusTimeTest {
         TimeConstant c = new TimeConstant(1000);
         TimeSelector s1 = new TimeSelector("a", "val_from");
         TimeSelector global = new TimeSelector(TimeSelector.GLOBAL_SELECTOR, "val_to");
+
+        ArrayList<String> variables = new ArrayList<>(Arrays.asList("a","b"));
+
+        assertEquals(new PlusTimePoint(s1, c).replaceGlobalByLocal(variables),
+                new PlusTimePoint(s1,c));
+
+        PlusTimePoint expectedGlobal = new PlusTimePoint(
+                new MinTimePoint(
+                        new TimeSelector("a", TimeSelector.TimeField.VAL_TO),
+                        new TimeSelector("b", TimeSelector.TimeField.VAL_TO)
+                ),
+                c
+        );
+
+        assertEquals(new PlusTimePoint(global, c).replaceGlobalByLocal(variables),
+                expectedGlobal);
 
         assertFalse(new PlusTimePoint(s1,c).isGlobal());
         assertTrue(new PlusTimePoint(global, c).isGlobal());

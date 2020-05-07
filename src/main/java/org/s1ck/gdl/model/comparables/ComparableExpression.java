@@ -17,12 +17,22 @@
 package org.s1ck.gdl.model.comparables;
 
 import org.s1ck.gdl.model.comparables.time.TimeSelector;
+import org.s1ck.gdl.model.predicates.Predicate;
 
 import java.io.Serializable;
+import java.util.List;
+import java.util.Set;
 
 public interface ComparableExpression extends Serializable{
   /**
+   * Returns the variables of the expression
+   * @return variable
+   */
+  public Set<String> getVariables();
+
+  /**
    * Returns the variable of the expression
+   * Same functionality is given by {@code getVariables}, kept for downward compatibility
    * @return variable
    */
   public String getVariable();
@@ -39,5 +49,16 @@ public interface ComparableExpression extends Serializable{
    * @return true iff a global time selector is contained
    */
   boolean isGlobal();
+
+  /**
+   * Replaces global time selectors like __global.val_from by their equivalent expressions
+   * over all local variables.
+   * E.g., {@code __global.val_from} would be replaced by {@code MAX(v1.val_from,...,
+   * vn.val_from)} for variables {@code v1,...,vn}.
+   * @param variables all query variables
+   * @return comparable with global selector replaced by their local variable equivalent
+   * expressions. If comparable is not a global time selector, identity function.
+   */
+  ComparableExpression replaceGlobalByLocal(List<String> variables);
 
 }

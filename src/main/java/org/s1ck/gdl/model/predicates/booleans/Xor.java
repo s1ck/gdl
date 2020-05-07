@@ -78,6 +78,12 @@ public class Xor implements Predicate {
   }
 
   @Override
+  public Predicate replaceGlobalByLocal(List<String> variables) {
+    return new Xor(lhs.replaceGlobalByLocal(variables),
+            rhs.replaceGlobalByLocal(variables));
+  }
+
+  @Override
   public boolean isGlobal(){
     return lhs.isGlobal() || rhs.isGlobal();
   }

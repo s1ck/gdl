@@ -1,10 +1,10 @@
 package org.s1ck.gdl.model.comparables.time;
 
+import org.s1ck.gdl.model.comparables.ComparableExpression;
 import org.s1ck.gdl.model.predicates.Predicate;
 import org.s1ck.gdl.utils.Comparator;
 
-import java.util.ArrayList;
-import java.util.Collections;
+import java.util.*;
 
 /**
  * Base class for more abstract TimestampExpressions that may combine several timestamps,
@@ -55,13 +55,14 @@ public abstract class TimeTerm extends TimePoint {
     }
 
     @Override
-    public ArrayList<String> getVariables(){
-        ArrayList<String> vars = new ArrayList<>();
+    public Set<String> getVariables(){
+        HashSet<String> vars = new HashSet<>();
         for (TimePoint tp: args){
             vars.addAll(tp.getVariables());
         }
         return vars;
     }
+
 
     /**
      * String representation of the operator (e.g. "MIN", "MAX",...)

@@ -78,6 +78,12 @@ public class Or implements Predicate {
   }
 
   @Override
+  public Predicate replaceGlobalByLocal(List<String> variables) {
+    return new Or(lhs.replaceGlobalByLocal(variables),
+            rhs.replaceGlobalByLocal(variables));
+  }
+
+  @Override
   public boolean isGlobal(){
     return lhs.isGlobal() || rhs.isGlobal();
   }

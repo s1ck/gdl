@@ -6,7 +6,9 @@ import org.s1ck.gdl.model.predicates.expressions.Comparison;
 
 import java.time.*;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.s1ck.gdl.utils.Comparator;
 
@@ -124,8 +126,13 @@ public class TimeLiteral extends TimeAtom {
 
 
     @Override
-    public ArrayList<String> getVariables(){
-        return new ArrayList<>();
+    public Set<String> getVariables(){
+        return new HashSet<>();
+    }
+
+    @Override
+    public String getVariable() {
+        return null;
     }
 
     @Override
@@ -181,5 +188,10 @@ public class TimeLiteral extends TimeAtom {
     @Override
     public boolean isGlobal(){
         return false;
+    }
+
+    @Override
+    public ComparableExpression replaceGlobalByLocal(List<String> variables) {
+        return this;
     }
 }
