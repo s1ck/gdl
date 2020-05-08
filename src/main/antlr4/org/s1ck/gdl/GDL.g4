@@ -217,6 +217,8 @@ intervalFunc
             | equalsOperator
             | longerThanOperator
             | shorterThanOperator
+            | lengthAtLeastOperator
+            | lengthAtMostOperator
             ;
 overlapsIntervallOperator
     : 'overlaps(' interval ')'
@@ -262,6 +264,14 @@ longerThanOperator
 
 shorterThanOperator
     : 'shorterThan(' (interval | timeConstant) ')'
+    ;
+
+lengthAtLeastOperator
+    : 'lengthAtLeast(' (interval | timeConstant) ')'
+    ;
+
+lengthAtMostOperator
+    : 'lengthAtMost(' (interval | timeConstant) ')'
     ;
 
 timeConstant

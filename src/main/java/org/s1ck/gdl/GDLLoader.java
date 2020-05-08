@@ -556,6 +556,12 @@ class GDLLoader extends GDLBaseListener {
     else if(intervalFunc.shorterThanOperator()!=null){
       return createShorterThanPredicates(from, to, intervalFunc.shorterThanOperator());
     }
+    else if(intervalFunc.lengthAtLeastOperator()!=null){
+      return createLengthAtLeastPredicates(from, to, intervalFunc.lengthAtLeastOperator());
+    }
+    else if(intervalFunc.lengthAtMostOperator()!=null){
+      return createLengthAtMostPredicates(from, to, intervalFunc.lengthAtMostOperator());
+    }
     return null;
   }
 
@@ -744,6 +750,50 @@ class GDLLoader extends GDLBaseListener {
       TimePoint[] interval = buildIntervall(ctx.interval());
       Duration lhs = new Duration(interval[0], interval[1]);
       return new Comparison(rhs, LT, lhs);
+    }
+    return null;
+  }
+
+  /**
+   * Creates a predicate a.lengthAtLeast(b) = (length(a) >= length(b))
+   * @param from from value of the calling interval
+   * @param to to value of the calling interval
+   * @param ctx context containing the callee interval
+   * @return lengthAtLeast predicate
+   */
+  private Predicate createLengthAtLeastPredicates(TimePoint from, TimePoint to,
+                                                  GDLParser.LengthAtLeastOperatorContext ctx){
+    Duration rhs = new Duration(from, to);
+    if(ctx.timeConstant()!=null) {
+      TimeConstant constant = buildTimeConstant(ctx.timeConstant());
+      return new Comparison(rhs, GTE, constant);
+    }
+    else if(ctx.interval()!=null){
+      TimePoint[] interval = buildIntervall(ctx.interval());
+      Duration lhs = new Duration(interval[0], interval[1]);
+      return new Comparison(rhs, GTE, lhs);
+    }
+    return null;
+  }
+
+  /**
+   * Creates a predicate a.lengthAtMost(b) = (length(a) <= length(b))
+   * @param from from value of the calling interval
+   * @param to to value of the calling interval
+   * @param ctx context containing the callee interval
+   * @return lengthAtMost predicate
+   */
+  private Predicate createLengthAtMostPredicates(TimePoint from, TimePoint to,
+                                                  GDLParser.LengthAtMostOperatorContext ctx){
+    Duration rhs = new Duration(from, to);
+    if(ctx.timeConstant()!=null) {
+      TimeConstant constant = buildTimeConstant(ctx.timeConstant());
+      return new Comparison(rhs, LTE, constant);
+    }
+    else if(ctx.interval()!=null){
+      TimePoint[] interval = buildIntervall(ctx.interval());
+      Duration lhs = new Duration(interval[0], interval[1]);
+      return new Comparison(rhs, LTE, lhs);
     }
     return null;
   }
