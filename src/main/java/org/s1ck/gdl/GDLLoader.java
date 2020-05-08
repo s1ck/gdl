@@ -553,6 +553,9 @@ class GDLLoader extends GDLBaseListener {
     else if(intervalFunc.longerThanOperator()!=null){
       return createLongerThanPredicates(from, to, intervalFunc.longerThanOperator());
     }
+    else if(intervalFunc.shorterThanOperator()!=null){
+      return createShorterThanPredicates(from, to, intervalFunc.shorterThanOperator());
+    }
     return null;
   }
 
@@ -606,7 +609,7 @@ class GDLLoader extends GDLBaseListener {
   }
 
   /**
-   * Creates a predicate a.precedes(b) = a <= b.
+   * Creates a predicate a.precedes(b) = a.to <= b.from.
    * Function is used for interval and timestamp function {@code precedes}, as they both
    * only compare two time stamps
    * @param to the time stamp of the caller to compare
@@ -619,6 +622,12 @@ class GDLLoader extends GDLBaseListener {
     return new Comparison(to, LTE, arg_from);
   }
 
+  /**
+   * Creates a predicate a.immediatelyPrecedes(b) = (a.to == b.from).
+   * @param to the time stamp of the caller to compare
+   * @param ctx the context containing the from value to be compared
+   * @return immediatelyPrecedes predicate
+   */
   private Predicate createImmediatelyPrecedesPredicates(TimePoint to, GDLParser.ImmediatelyPrecedesOperatorContext ctx){
     TimePoint[] arg = buildIntervall(ctx.interval());
     TimePoint arg_from = arg[0];
@@ -639,6 +648,14 @@ class GDLLoader extends GDLBaseListener {
     return new Comparison(point, GTE, arg_to);
   }
 
+  /**
+   * Creates a predicate a.immediatelySucceeds(b) = (a.from == b.to).
+   * Function is used for interval and timestamp function {@code precedes}, as they both
+   * only compare two time stamps
+   * @param from the from value of the caller interval
+   * @param ctx the context containing the to value of the interval to be compared
+   * @return immediatelySucceeds predicate
+   */
   private Predicate createImmediatelySucceedsPredicates(TimePoint from,
                                                         GDLParser.ImmediatelySucceedsOperatorContext ctx){
     TimePoint[] arg = buildIntervall(ctx.interval());
@@ -672,6 +689,13 @@ class GDLLoader extends GDLBaseListener {
     }
   }
 
+  /**
+   * Creates a predicate a.equals(b) = (a.from = b.from AND a.to = b.to).
+   * @param from from value of the calling interval
+   * @param to to value of the calling interval
+   * @param ctx context containing the callee interval
+   * @return equals predicate
+   */
   private Predicate createEqualsPredicates(TimePoint from, TimePoint to, GDLParser.EqualsOperatorContext ctx){
     TimePoint[] arg = buildIntervall(ctx.interval());
     TimePoint arg_from = arg[0];
@@ -682,6 +706,13 @@ class GDLLoader extends GDLBaseListener {
     );
   }
 
+  /**
+   * Creates a predicate a.longerThan(b) = (length(a) > length(b))
+   * @param from from value of the calling interval
+   * @param to to value of the calling interval
+   * @param ctx context containing the callee interval
+   * @return longerThan predicate
+   */
   private Predicate createLongerThanPredicates(TimePoint from, TimePoint to, GDLParser.LongerThanOperatorContext ctx){
     Duration rhs = new Duration(from, to);
     if(ctx.timeConstant()!=null) {
@@ -696,6 +727,34 @@ class GDLLoader extends GDLBaseListener {
     return null;
   }
 
+  /**
+   * Creates a predicate a.shorterThan(b) = (length(a) < length(b))
+   * @param from from value of the calling interval
+   * @param to to value of the calling interval
+   * @param ctx context containing the callee interval
+   * @return shorterThan predicate
+   */
+  private Predicate createShorterThanPredicates(TimePoint from, TimePoint to, GDLParser.ShorterThanOperatorContext ctx){
+    Duration rhs = new Duration(from, to);
+    if(ctx.timeConstant()!=null) {
+      TimeConstant constant = buildTimeConstant(ctx.timeConstant());
+      return new Comparison(rhs, LT, constant);
+    }
+    else if(ctx.interval()!=null){
+      TimePoint[] interval = buildIntervall(ctx.interval());
+      Duration lhs = new Duration(interval[0], interval[1]);
+      return new Comparison(rhs, LT, lhs);
+    }
+    return null;
+  }
+
+  /**
+   * Creates a TimeConstant given a suitable context. Constants can be a constant number
+   * of days ({@code Days(n)}), hours ({@code Hours(n)}), minutes ({@code Minutes(n)}),
+   * seconds ({@code Seconds(n)}) or milliseconds ({@code Millis(n)}).
+   * @param ctx the context containing the constant.
+   * @return time constant
+   */
   private TimeConstant buildTimeConstant(GDLParser.TimeConstantContext ctx){
     int value = Integer.parseInt(ctx.IntegerLiteral().getText());
     if(ctx.getText().startsWith("Days(")){
@@ -878,6 +937,13 @@ class GDLLoader extends GDLBaseListener {
     return new Comparison(from, Comparator.LT, x);
   }
 
+  /**
+   * Creates a after {@code Predicate} given the caller (a timestamp) and its context
+   *
+   * @param from the caller
+   * @param ctx context including the argument
+   * @return a {@code Predicate} encoding the after function: from>x
+   */
   private Predicate createAfterPredicates(TimePoint from, GDLParser.AfterPointOperatorContext ctx){
     TimePoint x = buildTimePoint(ctx.timePoint());
     return new Comparison(from, Comparator.GT, x);
@@ -902,10 +968,20 @@ class GDLLoader extends GDLBaseListener {
     return null;
   }
 
+  /**
+   * Builds a TimeLiteral given a context.
+   * @param ctx context containing the literal
+   * @return TimeLiteral
+   */
   private TimeLiteral buildTimeLiteral(GDLParser.TimeLiteralContext ctx){
     return new TimeLiteral(ctx.getText().trim());
   }
 
+  /**
+   * Builds a TimeSelector (variable.field, where field in {TX_FROM, TX_TO, VAL_FROM, VAL_TO})
+   * @param ctx context containing the selector
+   * @return TimeSelector
+   */
   private TimeSelector buildTimeSelector(GDLParser.TimeSelectorContext ctx){
     // checks whether ID is even there (is a vertex or edge) and returns its variable
     String var = ctx.Identifier()!=null ?
@@ -914,6 +990,12 @@ class GDLLoader extends GDLBaseListener {
     return new TimeSelector(var, field);
   }
 
+  /**
+   * Builds a "complex" time point, i.e. a time point described by a {@code MAX(...)} or
+   * {@code MIN(...)} expression.
+   * @param ctx context containing the time point
+   * @return complex time point
+   */
   private TimePoint buildComplexTimePoint(GDLParser.ComplexTimePointContext ctx){
 
     List<GDLParser.ComplexTimePointArgumentContext> argumentContexts =
@@ -960,7 +1042,7 @@ class GDLLoader extends GDLBaseListener {
    * Creates the default asOf conditions, that ensure that every element's transaction time is
    * as of now. This is only done if no other constraints on transaction times' ends
    * are specified in the query.
-   * @return
+   * @return default asOf predicates
    */
   private Predicate createDefaultAsOf(){
       Set<String> vars = new HashSet<>();

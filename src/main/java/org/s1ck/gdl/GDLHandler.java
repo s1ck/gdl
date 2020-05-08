@@ -202,7 +202,7 @@ public class GDLHandler {
     /**
      * Flag to indicate if the query should be postprocessed, i.e. reduced to simple comparisons.
      */
-    private boolean processQuery = true;
+    private boolean processQuery = false;
 
     /**
      * Strategy for handling parser errors.

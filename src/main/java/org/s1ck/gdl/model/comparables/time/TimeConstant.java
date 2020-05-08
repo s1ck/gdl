@@ -18,8 +18,7 @@ public class TimeConstant extends TimePoint {
     /**
      * The number of milliseconds wrapped by this class
      */
-    private long millis;
-
+    private Long millis;
 
     /**
      * Create a constant of size days+hours+minutes+seconds+millis (in millis)
@@ -30,14 +29,11 @@ public class TimeConstant extends TimePoint {
      * @param millis number of millis [0-999]
      */
     public TimeConstant(int days, int hours, int minutes, int seconds, int millis){
-        if( (hours<0 || hours>23) || (minutes<0 || minutes>59) || (seconds<0||seconds>59) || (millis <0 || millis >999)){
-            throw new IllegalArgumentException("not a valid timestamp");
-        }
-        long sum = millis;
-        sum +=1000*seconds;
-        sum +=1000*60*minutes;
-        sum +=1000*60*60*hours;
-        sum +=1000*60*60*24*days;
+        long sum = (long)millis;
+        sum +=1000L*(long)seconds;
+        sum +=1000L*60L*(long)minutes;
+        sum +=1000L*60L*60L*(long)hours;
+        sum +=1000*60L*60L*24L*(long)days;
         this.millis = sum;
     }
 
