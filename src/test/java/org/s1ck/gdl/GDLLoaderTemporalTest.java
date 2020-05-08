@@ -725,6 +725,16 @@ public class GDLLoaderTemporalTest {
         lengthComparisonTest("shorterThan", LT);
     }
 
+    @Test
+    public void lengthAtLeastTest(){
+        lengthComparisonTest("lengthAtLeast", GTE);
+    }
+
+    @Test
+    public void lengthAtMostTest(){
+        lengthComparisonTest("lengthAtMost", LTE);
+    }
+
     private void lengthComparisonTest(String operator, Comparator comparator){
         GDLLoader loader = getLoaderFromGDLString("MATCH (a)-[e]->(b) " +
                 "WHERE a.val."+operator+"(Days(80))", false);
