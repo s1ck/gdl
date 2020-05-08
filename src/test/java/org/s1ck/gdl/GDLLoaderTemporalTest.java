@@ -717,8 +717,17 @@ public class GDLLoaderTemporalTest {
 
     @Test
     public void longerThanTest(){
+        lengthComparisonTest("longerThan", GT);
+    }
+
+    @Test
+    public void shorterThanTest(){
+        lengthComparisonTest("shorterThan", LT);
+    }
+
+    private void lengthComparisonTest(String operator, Comparator comparator){
         GDLLoader loader = getLoaderFromGDLString("MATCH (a)-[e]->(b) " +
-                "WHERE a.val.longerThan(Days(10))", false);
+                "WHERE a.val."+operator+"(Days(80))", false);
 
         TimeSelector aValFrom = new TimeSelector("a", VAL_FROM);
         TimeSelector aValTo = new TimeSelector("a", VAL_TO);
@@ -726,57 +735,73 @@ public class GDLLoaderTemporalTest {
         TimeSelector bValTo = new TimeSelector("b", VAL_TO);
         TimeSelector eValFrom = new TimeSelector("e", VAL_FROM);
         TimeSelector eValTo = new TimeSelector("e", VAL_TO);
-        TimeConstant tenDays = new TimeConstant(10,0,0,0,0);
+        TimeConstant eightyDays = new TimeConstant(80,0,0,0,0);
 
         Duration valDuration = new Duration(aValFrom, aValTo);
 
-        Predicate expected = new Comparison(valDuration, GT, tenDays);
+        Predicate expected = new Comparison(valDuration, comparator, eightyDays);
         assertPredicateEquals(loader.getPredicates().get(), expected);
 
         loader = getLoaderFromGDLString("MATCH (a)-[e]->(b) " +
-                "WHERE a.val.longerThan(Hours(12))", false);
+                "WHERE a.val."+operator+"(Hours(12))", false);
         TimeConstant twelveHours = new TimeConstant(0,12,0,0,0);
-        expected = new Comparison(valDuration, GT, twelveHours);
+        expected = new Comparison(valDuration, comparator, twelveHours);
         assertPredicateEquals(loader.getPredicates().get(), expected);
-        System.out.println(loader.getPredicates());
 
         loader = getLoaderFromGDLString("MATCH (a)-[e]->(b) " +
-                "WHERE val.longerThan(Minutes(5))", false);
+                "WHERE val."+operator+"(Minutes(5))", false);
         TimeConstant fiveMinutes = new TimeConstant(0,0,5,0,0);
         MaxTimePoint globalValFrom = new MaxTimePoint(eValFrom, aValFrom, bValFrom);
         MinTimePoint globalValTo = new MinTimePoint(eValTo, aValTo, bValTo);
         Duration globalValDuration = new Duration(globalValFrom, globalValTo);
-        expected = new Comparison(globalValDuration, GT, fiveMinutes);
+        expected = new Comparison(globalValDuration, comparator, fiveMinutes);
         assertPredicateEquals(loader.getPredicates().get(), expected);
 
         loader = getLoaderFromGDLString("MATCH (a)-[e]->(b) " +
-                "WHERE a.val.merge(b.val).longerThan(Hours(20))", false);
+                "WHERE a.val.merge(b.val)."+operator+"(Hours(20))", false);
         TimeConstant twentyHours = new TimeConstant(0,20,0,0,0);
         MaxTimePoint mergeFrom = new MaxTimePoint(aValFrom, bValFrom);
         MinTimePoint mergeTo = new MinTimePoint(aValTo, bValTo);
         Duration mergeDuration = new Duration(mergeFrom, mergeTo);
         expected = new And(
-                new Comparison(mergeDuration, GT, twentyHours),
+                new Comparison(mergeDuration, comparator, twentyHours),
                 new Comparison(mergeFrom, LTE, mergeTo)
-                );
+        );
         assertPredicateEquals(loader.getPredicates().get(), expected);
 
         loader = getLoaderFromGDLString("MATCH (a)-[e]->(b) " +
-                "WHERE Interval(a.val_from, b.val_to).longerThan(Days(4))", false);
+                "WHERE a.val.merge(b.val)."+operator+"(e.val.join(b.val))", false);
+        MinTimePoint joinFrom = new MinTimePoint(eValFrom, bValFrom);
+        MaxTimePoint joinTo = new MaxTimePoint(eValTo, bValTo);
+        Duration joinDuration = new Duration(joinFrom, joinTo);
+        Comparison ebOverlap = new Comparison(new MaxTimePoint(eValFrom, bValFrom), LTE,
+                new MinTimePoint(eValTo, bValTo));
+        expected = new And(
+                new And(
+                new Comparison(mergeDuration, comparator, joinDuration),
+                        ebOverlap),
+                new Comparison(mergeFrom, LTE, mergeTo)
+        );
+        System.out.println(loader.getPredicates().get());
+        System.out.println(expected);
+        assertPredicateEquals(loader.getPredicates().get(), expected);
+
+        loader = getLoaderFromGDLString("MATCH (a)-[e]->(b) " +
+                "WHERE Interval(a.val_from, b.val_to)."+operator+"(Days(4))", false);
         TimeConstant fourDays = new TimeConstant(4,0,0,0,0);
         Duration intervalDuration = new Duration(aValFrom, bValTo);
-        expected = new Comparison(intervalDuration, GT, fourDays);
+        expected = new Comparison(intervalDuration, comparator, fourDays);
         assertPredicateEquals(loader.getPredicates().get(), expected);
 
         loader = getLoaderFromGDLString("MATCH (a)-[e]->(b) " +
-                "WHERE a.val.longerThan(b.val)", false);
+                "WHERE a.val."+operator+"(b.val)", false);
         Duration aVal = new Duration(aValFrom, aValTo);
         Duration bVal = new Duration(bValFrom, bValTo);
-        expected = new Comparison(aVal, GT, bVal);
+        expected = new Comparison(aVal, comparator, bVal);
         assertPredicateEquals(loader.getPredicates().get(), expected);
 
         loader = getLoaderFromGDLString("MATCH (a)-[e]->(b) " +
-                "WHERE val.longerThan(tx)", false);
+                "WHERE val."+operator+"(tx)", false);
         TimeSelector eTxFrom = new TimeSelector("e", TX_FROM);
         TimeSelector aTxFrom = new TimeSelector("a", TX_FROM);
         TimeSelector bTxFrom = new TimeSelector("b", TX_FROM);
@@ -786,7 +811,16 @@ public class GDLLoaderTemporalTest {
         MaxTimePoint globalTxFrom = new MaxTimePoint(eTxFrom, aTxFrom, bTxFrom);
         MinTimePoint globalTxTo = new MinTimePoint(eTxTo, aTxTo, bTxTo);
         Duration globalTxDuration = new Duration(globalTxFrom, globalTxTo);
-        expected = new Comparison(globalValDuration, GT, globalTxDuration);
+        expected = new Comparison(globalValDuration, comparator, globalTxDuration);
+        assertPredicateEquals(loader.getPredicates().get(), expected);
+
+        loader = getLoaderFromGDLString("MATCH (a)-[e]->(b) " +
+                "WHERE val."+operator+"(Interval(2020-05-01, 2020-05-05))", false);
+        TimeLiteral l1 = new TimeLiteral("2020-05-01");
+        TimeLiteral l2 = new TimeLiteral("2020-05-05");
+        Duration constantInterval = new Duration(l1, l2);
+        expected = new Comparison(globalValDuration, comparator, constantInterval);
+        System.out.println(loader.getPredicates().get());
         assertPredicateEquals(loader.getPredicates().get(), expected);
     }
 

@@ -212,6 +212,7 @@ intervalFunc
             | immediatelySucceedsOperator
             | equalsOperator
             | longerThanOperator
+            | shorterThanOperator
             ;
 overlapsIntervallOperator
     : 'overlaps(' interval ')'
@@ -253,6 +254,10 @@ equalsOperator
 
 longerThanOperator
     : 'longerThan(' (interval | timeConstant) ')'
+    ;
+
+shorterThanOperator
+    : 'shorterThan(' (interval | timeConstant) ')'
     ;
 
 timeConstant
