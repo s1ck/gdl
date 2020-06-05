@@ -18,7 +18,6 @@ package org.s1ck.gdl.model.comparables;
 
 import org.s1ck.gdl.model.comparables.time.TimeSelector;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -31,7 +30,7 @@ public class ElementSelector implements ComparableExpression {
   /**
    * Variable which identifies the element
    */
-  private String variable;
+  private final String variable;
 
   /**
    * Creates a new element selector

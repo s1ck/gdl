@@ -21,7 +21,7 @@ import java.util.Set;
 
 public class GraphElement extends Element {
 
-  private Set<Long> graphs;
+  private final Set<Long> graphs;
 
   public GraphElement() {
     graphs = new HashSet<>();

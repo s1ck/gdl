@@ -17,8 +17,6 @@ public class DurationTest {
         TimeLiteral l2 = new TimeLiteral("1970-01-01T00:00:01");
         Duration duration = new Duration(l1, l2);
         assertEquals((long) duration.evaluate().get(), 1000L);
-        assertEquals(duration.getLowerBound(), 1000);
-        assertEquals(duration.getUpperBound(), 1000);
     }
 
     @Test
@@ -27,8 +25,6 @@ public class DurationTest {
         TimeSelector s1 = new TimeSelector("a", TX_TO);
         Duration duration = new Duration(l1, s1);
         assertFalse(duration.evaluate().isPresent());
-        assertEquals(duration.getLowerBound(), 0L);
-        assertEquals(duration.getUpperBound(), Long.MAX_VALUE);
         assertEquals(duration.getVariables().size(), 1);
         assertEquals(duration.getVariables().toArray()[0], "a");
         assertFalse(duration.isGlobal());

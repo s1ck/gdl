@@ -19,12 +19,12 @@ public class TimeSelector extends TimeAtom{
     /**
      * The variable name
      */
-    private String variable;
+    private final String variable;
 
     /**
      * The time property selected (VAL_FROM, VAL_TO, TX_FROM, TX_TO)
      */
-    private TimeField timeProp;
+    private final TimeField timeProp;
 
     /**
      * Variable name that indicates a global time selector, referring to the whole pattern
@@ -107,7 +107,7 @@ public class TimeSelector extends TimeAtom{
         return Optional.empty();
     }
 
-    @Override
+    /*@Override
     public long getLowerBound(){
         return Long.MIN_VALUE;
     }
@@ -115,7 +115,7 @@ public class TimeSelector extends TimeAtom{
     @Override
     public long getUpperBound(){
         return Long.MAX_VALUE;
-    }
+    }*/
 
     @Override
     public boolean containsSelectorType(TimeSelector.TimeField type){
@@ -295,7 +295,7 @@ public class TimeSelector extends TimeAtom{
         return forall;
     }
 
-    @Override
+    /*@Override
     protected Predicate unfoldEQ(TimePoint arg){
         return new Comparison(this, EQ, arg);
     }
@@ -323,7 +323,7 @@ public class TimeSelector extends TimeAtom{
     @Override
     protected Predicate unfoldLTE(TimePoint arg){
         return new Comparison(this, Comparator.LTE, arg);
-    }
+    }*/
 
     @Override
     public boolean isGlobal(){

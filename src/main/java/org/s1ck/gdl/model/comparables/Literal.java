@@ -18,7 +18,6 @@ package org.s1ck.gdl.model.comparables;
 
 import org.s1ck.gdl.model.comparables.time.TimeSelector;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -31,7 +30,7 @@ public class Literal implements ComparableExpression {
   /**
    * literal value
    */
-  private Object value;
+  private final Object value;
 
   /**
    * Creates a new Literal
@@ -49,7 +48,7 @@ public class Literal implements ComparableExpression {
 
   @Override
   public Set<String> getVariables() {
-    return new HashSet<String>();
+    return new HashSet<>();
   }
 
   @Override

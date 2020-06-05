@@ -24,7 +24,7 @@ import java.util.Set;
 
 public class Not implements Predicate {
 
-  private Predicate expression;
+  private final Predicate expression;
 
   public Not(Predicate expression) {
     this.expression = expression;
@@ -32,8 +32,7 @@ public class Not implements Predicate {
 
   @Override
   public Predicate[] getArguments() {
-    Predicate[] arguments = {expression};
-    return arguments;
+      return new Predicate[]{expression};
   }
 
   /**
@@ -45,11 +44,11 @@ public class Not implements Predicate {
     return expression.getVariables();
   }
 
-  @Override
+  /*@Override
   public Predicate unfoldTemporalComparisonsLeft(){
     return new Not(expression.unfoldTemporalComparisonsLeft());
   }
-
+*/
   @Override
   public Predicate switchSides(){
     return new Not(expression.switchSides());

@@ -12,6 +12,7 @@ import org.s1ck.gdl.utils.Comparator;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 
 import static org.junit.Assert.*;
 import static org.s1ck.gdl.utils.Comparator.*;
@@ -21,11 +22,9 @@ public class TimeSelectorTest {
     @Test
     public void selectorTest(){
         TimeSelector selector = new TimeSelector("var", TimeSelector.TimeField.TX_FROM);
-        assertEquals(new ArrayList<String>(selector.getVariables()).get(0), "var");
+        assertEquals(new ArrayList<>(selector.getVariables()).get(0), "var");
         assertEquals(selector.getVariables().size(), 1);
-        assertEquals(new ArrayList<String>(selector.getVariables()).get(0), "var");
-        assertEquals(selector.getLowerBound(), Long.MIN_VALUE);
-        assertEquals(selector.getUpperBound(), Long.MAX_VALUE);
+        assertEquals(new ArrayList<>(selector.getVariables()).get(0), "var");
         assertFalse(selector.evaluate().isPresent());
         assertEquals(selector.getTimeProp(), TimeSelector.TimeField.TX_FROM);
     }
@@ -228,7 +227,7 @@ public class TimeSelectorTest {
     public void globalTest(){
         TimeSelector valF = new TimeSelector("a", "val_from");
         assertFalse(valF.isGlobal());
-        assertEquals(valF.replaceGlobalByLocal(new ArrayList<>(Arrays.asList("a"))),
+        assertEquals(valF.replaceGlobalByLocal(new ArrayList<>(Collections.singletonList("a"))),
                 valF);
         TimeSelector global = new TimeSelector(TimeSelector.GLOBAL_SELECTOR, "val_to");
         ArrayList<String> vars = new ArrayList<>(Arrays.asList("a", "b", "e"));
@@ -247,7 +246,7 @@ public class TimeSelectorTest {
         );
         assertEquals(expected2, global2.replaceGlobalByLocal(vars));
         // only one variable -> no max/min, but single selector
-        ArrayList<String> singleVar = new ArrayList<>(Arrays.asList("a"));
+        ArrayList<String> singleVar = new ArrayList<>(Collections.singletonList("a"));
         TimeSelector expectedSingle = new TimeSelector("a", "tx_from");
         assertEquals(global2.replaceGlobalByLocal(singleVar), expectedSingle);
         assertTrue(global.isGlobal());

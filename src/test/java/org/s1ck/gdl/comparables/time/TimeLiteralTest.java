@@ -5,12 +5,11 @@ import org.s1ck.gdl.model.comparables.time.TimeSelector;
 import org.s1ck.gdl.model.predicates.expressions.Comparison;
 import org.s1ck.gdl.utils.Comparator;
 
-import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
+import java.util.Collections;
 
 import static org.junit.Assert.*;
 import static org.s1ck.gdl.utils.Comparator.NEQ;
@@ -20,7 +19,6 @@ public class TimeLiteralTest {
     @Test
     public void millisInitTest(){
         TimeLiteral tl1 = new TimeLiteral(0);
-        System.out.println(tl1.toString());
         assertEquals(tl1.getMilliseconds(),0);
         assertEquals(tl1.getYear(), 1970);
         assertEquals(tl1.getMonth(),1 );
@@ -29,12 +27,19 @@ public class TimeLiteralTest {
         assertEquals(tl1.getMinute(),0);
         assertEquals(tl1.getSecond(), 0);
 
+        TimeLiteral tl2 = new TimeLiteral(-1000);
+        assertEquals(tl2.getMilliseconds(),-1000);
+        assertEquals(tl2.getYear(), 1969);
+        assertEquals(tl2.getMonth(),12);
+        assertEquals(tl2.getDay(), 31);
+        assertEquals(tl2.getHour(),23);
+        assertEquals(tl2.getMinute(),59);
+        assertEquals(tl2.getSecond(), 59);
     }
 
     @Test
     public void stringInitTest(){
         TimeLiteral tl1 = new TimeLiteral("2020-04-06T15:33:00");
-        System.out.println(tl1.toString());
         assertEquals(tl1.getYear(), 2020);
         assertEquals(tl1.getMonth(),4 );
         assertEquals(tl1.getDay(), 6);
@@ -42,8 +47,6 @@ public class TimeLiteralTest {
         assertEquals(tl1.getMinute(),33);
         assertEquals(tl1.getSecond(), 0);
 
-        assertEquals(tl1.getLowerBound(), tl1.getUpperBound());
-        assertEquals(tl1.getUpperBound(), (long)tl1.evaluate().get());
         assertEquals((long)tl1.evaluate().get(), tl1.getMilliseconds());
 
         TimeLiteral tl2 = new TimeLiteral("2020-04-05");
@@ -55,9 +58,8 @@ public class TimeLiteralTest {
         assertEquals(tl2.getSecond(), 0);
 
         TimeLiteral tl3 = new TimeLiteral("now");
-        System.out.println(tl3.getMilliseconds());
         long millis = LocalDateTime.now().toInstant(ZoneOffset.ofTotalSeconds(0)).toEpochMilli();
-        //should work...
+
         assertTrue(millis - tl3.getMilliseconds() > 0);
         assertTrue(millis - tl3.getMilliseconds() < 5000);
     }
@@ -90,19 +92,11 @@ public class TimeLiteralTest {
     }
 
     @Test
-    public void unfoldGlobalTest(){
-        TimeLiteral literal = new TimeLiteral();
-        TimeSelector s = new TimeSelector("a", TimeSelector.TimeField.TX_TO);
-        Comparison c = new Comparison(literal, NEQ, s);
-        assertEquals(c.unfoldTemporalComparisonsLeft(), c);
-    }
-
-    @Test
     public void globalTest(){
         TimeLiteral literal1 = new TimeLiteral();
         TimeLiteral literal2 = new TimeLiteral("2020-05-06");
         assertFalse(literal1.isGlobal() || literal2.isGlobal());
-        assertEquals(literal1.replaceGlobalByLocal(new ArrayList<>(Arrays.asList("a"))),
+        assertEquals(literal1.replaceGlobalByLocal(new ArrayList<>(Collections.singletonList("a"))),
                 literal1);
     }
 }

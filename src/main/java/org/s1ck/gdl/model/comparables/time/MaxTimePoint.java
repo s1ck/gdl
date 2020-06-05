@@ -3,7 +3,6 @@ package org.s1ck.gdl.model.comparables.time;
 import org.s1ck.gdl.model.comparables.ComparableExpression;
 import org.s1ck.gdl.model.predicates.Predicate;
 import org.s1ck.gdl.model.predicates.booleans.And;
-import org.s1ck.gdl.model.predicates.booleans.Not;
 import org.s1ck.gdl.model.predicates.booleans.Or;
 import org.s1ck.gdl.model.predicates.expressions.Comparison;
 import org.s1ck.gdl.utils.Comparator;
@@ -44,7 +43,7 @@ public class MaxTimePoint extends TimeTerm{
         return Optional.of(mx);
     }
 
-    @Override
+    /*@Override
     public long getLowerBound(){
         // lower bound of a max term is the maximal lower bound of all its arguments
         long res = Long.MIN_VALUE;
@@ -55,9 +54,9 @@ public class MaxTimePoint extends TimeTerm{
             }
         }
         return res;
-    }
+    }*/
 
-    @Override
+    /*@Override
     public long getUpperBound(){
         // upper bound of a max term is the maximal upper bound of all its arguments
         long res = Long.MIN_VALUE;
@@ -71,7 +70,7 @@ public class MaxTimePoint extends TimeTerm{
             }
         }
         return res;
-    }
+    }*/
 
     @Override
     public String getVariable() {

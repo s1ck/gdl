@@ -25,10 +25,10 @@ import java.util.Set;
 public class Or implements Predicate {
 
   // left hand side
-  private Predicate lhs;
+  private final Predicate lhs;
 
   // right hand side
-  private Predicate rhs;
+  private final Predicate rhs;
 
   public Or(Predicate lhs, Predicate rhs) {
     this.lhs = lhs;
@@ -52,10 +52,10 @@ public class Or implements Predicate {
     return variables;
   }
 
-  @Override
+  /*@Override
   public Predicate unfoldTemporalComparisonsLeft(){
     return new Or(lhs.unfoldTemporalComparisonsLeft(), rhs.unfoldTemporalComparisonsLeft());
-  }
+  }*/
 
   @Override
   public Predicate switchSides(){

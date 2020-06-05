@@ -2,7 +2,6 @@ package org.s1ck.gdl.model.comparables.time;
 
 import org.s1ck.gdl.model.comparables.ComparableExpression;
 import org.s1ck.gdl.model.predicates.Predicate;
-import org.s1ck.gdl.model.predicates.expressions.Comparison;
 
 import java.util.HashSet;
 import java.util.List;
@@ -18,7 +17,7 @@ public class TimeConstant extends TimePoint {
     /**
      * The number of milliseconds wrapped by this class
      */
-    private Long millis;
+    private final Long millis;
 
     /**
      * Create a constant of size days+hours+minutes+seconds+millis (in millis)
@@ -29,7 +28,7 @@ public class TimeConstant extends TimePoint {
      * @param millis number of millis [0-999]
      */
     public TimeConstant(int days, int hours, int minutes, int seconds, int millis){
-        long sum = (long)millis;
+        long sum = millis;
         sum +=1000L*(long)seconds;
         sum +=1000L*60L*(long)minutes;
         sum +=1000L*60L*60L*(long)hours;
@@ -72,7 +71,7 @@ public class TimeConstant extends TimePoint {
         return Optional.of(getMillis());
     }
 
-    @Override
+    /*@Override
     public long getLowerBound() {
         return getMillis();
     }
@@ -80,7 +79,7 @@ public class TimeConstant extends TimePoint {
     @Override
     public long getUpperBound() {
         return getMillis();
-    }
+    }*/
 
     @Override
     protected Predicate unfoldEQ(TimePoint arg) {

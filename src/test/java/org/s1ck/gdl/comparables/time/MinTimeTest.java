@@ -7,7 +7,6 @@ import org.s1ck.gdl.model.comparables.time.TimeLiteral;
 import org.s1ck.gdl.model.comparables.time.TimeSelector;
 import org.s1ck.gdl.model.predicates.Predicate;
 import org.s1ck.gdl.model.predicates.booleans.And;
-import org.s1ck.gdl.model.predicates.booleans.Not;
 import org.s1ck.gdl.model.predicates.booleans.Or;
 import org.s1ck.gdl.model.predicates.expressions.Comparison;
 import org.s1ck.gdl.utils.Comparator;
@@ -28,8 +27,6 @@ public class MinTimeTest {
         TimeLiteral l5 = new TimeLiteral("2019-04-05T01:02:31");
         MinTimePoint mn = new MinTimePoint(l1,l2,l3,l4,l5);
         assertEquals(mn.evaluate().get(), l3.evaluate().get());
-        assertEquals(mn.getLowerBound(), mn.getUpperBound());
-        assertEquals(mn.getUpperBound(), (long)mn.evaluate().get());
     }
 
     @Test
@@ -40,15 +37,11 @@ public class MinTimeTest {
         TimeSelector l4 = new TimeSelector("v", TimeSelector.TimeField.VAL_TO);
         MinTimePoint mn = new MinTimePoint(l1,l2,l3,l4);
         assertFalse(mn.evaluate().isPresent());
-        assertEquals(mn.getLowerBound(), Long.MIN_VALUE);
-        assertEquals(mn.getUpperBound(), (long)l3.evaluate().get());
 
         // only selectors
         TimeSelector l5 = new TimeSelector("x",TimeSelector.TimeField.VAL_FROM);
         mn = new MinTimePoint(l4,l5);
         assertFalse(mn.evaluate().isPresent());
-        assertEquals(mn.getLowerBound(), Long.MIN_VALUE);
-        assertEquals(mn.getUpperBound(), Long.MAX_VALUE);
     }
 
     @Test
@@ -63,8 +56,6 @@ public class MinTimeTest {
 
         MinTimePoint mn3 = new MinTimePoint(mn1, mn2);
         assertFalse(mn3.evaluate().isPresent());
-        assertEquals(mn3.getLowerBound(), Long.MIN_VALUE);
-        assertEquals(mn3.getUpperBound(), (long)l2.evaluate().get());
 
         assertEquals(mn3.getVariables().size(),2);
         assertTrue(mn3.getVariables().contains("q"));
@@ -109,8 +100,6 @@ public class MinTimeTest {
         MaxTimePoint mx2 = new MaxTimePoint(l3,l4,s2);
         MinTimePoint mn = new MinTimePoint(mx1,mx2);
         assertFalse(mn.evaluate().isPresent());
-        assertEquals(mn.getLowerBound(), (long)l2.evaluate().get());
-        assertEquals(mn.getUpperBound(), Long.MAX_VALUE);
     }
 
     @Test
@@ -126,8 +115,6 @@ public class MinTimeTest {
         MaxTimePoint mx1 = new MaxTimePoint(l3,l4,l5,s2);
         MinTimePoint mn = new MinTimePoint(mn1,mx1);
         assertFalse(mn.evaluate().isPresent());
-        assertEquals(mn.getUpperBound(), (long)l1.evaluate().get());
-        assertEquals(mn.getLowerBound(), Long.MIN_VALUE);
     }
 
     @Test
@@ -166,7 +153,6 @@ public class MinTimeTest {
                 );
 
         Predicate unfolded = mn.unfoldComparison(Comparator.EQ, arg);
-        System.out.println(unfolded);
         assertEquals(expected, unfolded);
     }
 
@@ -206,7 +192,6 @@ public class MinTimeTest {
                 );
 
         Predicate unfolded = mn.unfoldComparison(Comparator.NEQ, arg);
-        System.out.println(unfolded);
         assertEquals(expected, unfolded);
     }
 
@@ -228,7 +213,6 @@ public class MinTimeTest {
                 );
 
         Predicate unfolded = mn.unfoldComparison(Comparator.GT, arg);
-        System.out.println(unfolded);
         assertEquals(expected, unfolded);
     }
 
@@ -250,7 +234,6 @@ public class MinTimeTest {
                 );
 
         Predicate unfolded = mn.unfoldComparison(Comparator.GTE, arg);
-        System.out.println(unfolded);
         assertEquals(expected, unfolded);
     }
 
@@ -272,7 +255,6 @@ public class MinTimeTest {
                 );
 
         Predicate unfolded = mn.unfoldComparison(Comparator.LT, arg);
-        System.out.println(unfolded);
         assertEquals(expected, unfolded);
     }
 
@@ -294,7 +276,6 @@ public class MinTimeTest {
                 );
 
         Predicate unfolded = mn.unfoldComparison(Comparator.LTE, arg);
-        System.out.println(unfolded);
         assertEquals(expected, unfolded);
     }
 

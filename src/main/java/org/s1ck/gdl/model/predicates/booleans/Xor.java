@@ -25,10 +25,10 @@ import java.util.Set;
 public class Xor implements Predicate {
 
   // left hand side
-  private Predicate lhs;
+  private final Predicate lhs;
 
   // right hand side
-  private Predicate rhs;
+  private final Predicate rhs;
 
   public Xor(Predicate lhs, Predicate rhs) {
     this.lhs = lhs;
@@ -40,10 +40,10 @@ public class Xor implements Predicate {
     return new Predicate[] { lhs, rhs };
   }
 
-  @Override
+  /*@Override
   public Predicate unfoldTemporalComparisonsLeft(){
     return new Xor(lhs.unfoldTemporalComparisonsLeft(), rhs.unfoldTemporalComparisonsLeft());
-  }
+  }*/
 
   @Override
   public Predicate switchSides(){

@@ -135,6 +135,8 @@ literal
 // time-related 
 //________________________
 
+// temporal query constraints
+
 temporalComparison
     : timePoint ComparisonOP timePoint
     ;
@@ -145,12 +147,13 @@ timeFunc
     | Identifier '.asOf(' timePoint ')'   #asOf
     ;
 
+// intervals
+
 interval
     : intervalSelector
     | intervalFromStamps
     | complexInterval
     ;
-
 
 intervalSelector
     : Identifier '.' IntervalConst
@@ -161,7 +164,6 @@ intervalFromStamps
     : 'Interval(' timePoint ',' timePoint ')'
     ;
 
-// TODO: change (only placeholder yet)
 complexInterval
     : complexIntervalArgument '.merge(' complexIntervalArgument ')'
     | complexIntervalArgument '.join(' complexIntervalArgument ')'
@@ -172,7 +174,8 @@ complexIntervalArgument
     | intervalFromStamps
     ;
 
-// TODO: add functions that yield timePoint
+// time points
+
 timePoint
     : timeLiteral
     | timeSelector
@@ -201,6 +204,9 @@ complexTimePointArgument
     | timeSelector
     ;
 
+
+// interval functions
+
 intervalFunc
             : overlapsIntervallOperator
             | fromToOperator
@@ -216,10 +222,10 @@ intervalFunc
             | lengthAtLeastOperator
             | lengthAtMostOperator
             ;
+
 overlapsIntervallOperator
     : 'overlaps(' interval ')'
     ;
-
 
 fromToOperator
     : 'fromTo(' timePoint ',' timePoint ')'
@@ -277,6 +283,9 @@ timeConstant
     | 'Hours(' IntegerLiteral ')'
     | 'Days(' IntegerLiteral ')'
     ;
+
+
+// time stamp/point functions
 
 stampFunc
     : beforePointOperator
