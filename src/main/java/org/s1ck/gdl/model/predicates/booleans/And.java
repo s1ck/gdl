@@ -25,10 +25,10 @@ import java.util.Set;
 public class And implements Predicate {
 
   // left hand side
-  private Predicate lhs;
+  private final Predicate lhs;
 
   // right hand side
-  private Predicate rhs;
+  private final Predicate rhs;
 
   public And(Predicate lhs, Predicate rhs) {
     this.lhs = lhs;
@@ -57,10 +57,10 @@ public class And implements Predicate {
     return new And(lhs.switchSides(), rhs.switchSides());
   }
 
-  @Override
+  /*@Override
   public Predicate unfoldTemporalComparisonsLeft(){
     return new And(lhs.unfoldTemporalComparisonsLeft(), rhs.unfoldTemporalComparisonsLeft());
-  }
+  }*/
 
   @Override
   public boolean containsSelectorType(TimeSelector.TimeField type){

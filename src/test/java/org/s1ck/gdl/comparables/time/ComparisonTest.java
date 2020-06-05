@@ -1,6 +1,5 @@
 package org.s1ck.gdl.comparables.time;
 import org.junit.Test;
-import org.junit.experimental.theories.FromDataPoints;
 import org.s1ck.gdl.model.comparables.PropertySelector;
 import org.s1ck.gdl.model.comparables.time.MaxTimePoint;
 import org.s1ck.gdl.model.comparables.time.MinTimePoint;

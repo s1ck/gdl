@@ -1,9 +1,5 @@
 package org.s1ck.gdl.model.comparables.time;
 
-import org.s1ck.gdl.model.comparables.ComparableExpression;
-import org.s1ck.gdl.model.predicates.Predicate;
-import org.s1ck.gdl.utils.Comparator;
-
 import java.util.*;
 
 /**

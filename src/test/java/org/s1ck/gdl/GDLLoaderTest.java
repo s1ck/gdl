@@ -180,7 +180,7 @@ public class GDLLoaderTest {
   }
 
   @Test
-  public void readEdgeWithNoLabelTest() throws Exception {
+  public void readEdgeWithNoLabelTest() {
     GDLLoader loader = getLoaderFromGDLString("()-[e]->()");
     Edge e = loader.getEdgeCache().get("e");
     assertEquals("edge has wrong label", loader.getDefaultEdgeLabel(), e.getLabel());
@@ -436,7 +436,7 @@ public class GDLLoaderTest {
   // --------------------------------------------------------------------------------------------
 
   @Test
-  public void testNonPredicateMatch() throws Exception {
+  public void testNonPredicateMatch() {
     String query = "MATCH (n)-[e]->(m)";
 
     GDLLoader loader = getLoaderFromGDLString(query);
@@ -691,7 +691,7 @@ public class GDLLoaderTest {
   }
 
   // string representation of all valid properties
-  private static String PROPERTIES_STRING;
+  private static final String PROPERTIES_STRING;
 
   // contains all valid properties
   private static final List<PropertyTriple<?>> PROPERTIES_LIST = new ArrayList<>();
@@ -702,9 +702,9 @@ public class GDLLoaderTest {
    * @param <T>
    */
   private static class PropertyTriple<T> {
-    private String key;
-    private String value;
-    private T expected;
+    private final String key;
+    private final String value;
+    private final T expected;
 
     public PropertyTriple(String key, String value, T expected) {
       this.key = key;

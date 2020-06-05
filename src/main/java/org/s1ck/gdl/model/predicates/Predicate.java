@@ -71,54 +71,6 @@ public interface Predicate extends Serializable {
   }
 
   /**
-   * Unfolds a predicate, i.e. reduces complex temporal predicates to simple comparisons
-   * This is needed for predicates containing complex temporal elements like e.g. MIN, MAX.
-   * These elements can be reduced to simple comparisons, thus yielding a predicate only
-   * consisting of comparisons between literals.
-   * e.g. [(MAX(a,b)> t1) AND (t2<MIN(c,d))] is equal to [((a>t1) OR (b>t1)) AND ((t2<c) AND (t2<d))]
-   * @param p predicate to unfold
-   * @return unfolded predicate
-   */
-  static Predicate unfoldTemporalComparisons(Predicate p){
-    Predicate unfolded_old = null;
-    Predicate unfolded_new = p.unfoldTemporalComparisonsLeft();
-    // unfold LHSs until there are only atoms on left hand sides anymore
-    while(!unfolded_new.equals(unfolded_old)){
-      unfolded_old = unfolded_new;
-      unfolded_new = unfolded_new.unfoldTemporalComparisonsLeft();
-    }
-    // now unfold RHSs until there are only atoms left on right hand sides anymore
-    unfolded_new = unfolded_new.switchSides();
-    while(!unfolded_new.equals(unfolded_old)){
-      unfolded_old = unfolded_new;
-      unfolded_new = unfolded_new.unfoldTemporalComparisonsLeft();
-    }
-    return unfolded_new;
-  }
-
-  /**
-   * "Translates" a predicate possibly containing global time predicates to a predicate
-   * containing only local time comparisons.
-   * E.g., for a pattern {@code (a)-->(b)}, the global predicate {@code tx_to >= 2020-04-28)} would be
-   * reduced to {@code a.tx_to>=2020-04-28 AND b.tx_to>=2020-04-28}
-   * while {@code tx_to <= 2020-04-28)} is reduced to
-   * {@code @code a.tx_to<=2020-04-28 OR b.tx_to<=2020-04-28}
-   * @param predicate the predicate whose global time predicates should be translated
-   * @param unfoldedComparisons indicates whether complex time predicates were already reduced to
-   *                            simple comparisons. If so, this flag should be set to {@code true}
-   *                            to avoid unnecessary work.
-   * @return equivalent predicate consisting only of primitive local time value comparisons
-   */
-  static Predicate translateGlobalPredicates(Predicate predicate, ArrayList<String> vars, boolean unfoldedComparisons){
-    if(!unfoldedComparisons){
-      predicate = Predicate.unfoldTemporalComparisons(predicate);
-    }
-    predicate = predicate.unfoldGlobalLeft(vars);
-    predicate = predicate.switchSides();
-    return predicate.unfoldGlobalLeft(vars);
-  }
-
-  /**
    * Returns the predicates arguments
    *
    * @return The predicates arguments
@@ -131,15 +83,6 @@ public interface Predicate extends Serializable {
    * @return referenced variables
    */
   Set<String> getVariables();
-
-
-
-  /**
-   * Unfolds a predicate, but only the left hand side of each temporal comparison.
-   * e.g. [(MAX(a,b)> t1) AND (t2<MIN(c,d))] would yield [((a>t1) OR (b>t1)) AND ((t2<MIN(c,d))]
-   * @return unfolded (only LHSs) expression
-   */
-  Predicate unfoldTemporalComparisonsLeft();
 
   /**
    * Returns an equivalent predicate, but arguments in each comparison are switched

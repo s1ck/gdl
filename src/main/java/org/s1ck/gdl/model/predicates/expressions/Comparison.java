@@ -34,15 +34,15 @@ public class Comparison implements Predicate {
   /**
    * Left hand side value
    */
-  private ComparableExpression lhs;
+  private final ComparableExpression lhs;
   /**
    * Right hand side value
    */
-  private ComparableExpression rhs;
+  private final ComparableExpression rhs;
   /**
    * The comparator used to compare a the values
    */
-  private Comparator comparator;
+  private final Comparator comparator;
 
   /**
    * Creates a new comparison operator
@@ -58,8 +58,7 @@ public class Comparison implements Predicate {
 
   @Override
   public Predicate[] getArguments() {
-    Predicate[] arguments = {};
-    return arguments;
+      return new Predicate[]{};
   }
 
   /**
@@ -75,8 +74,7 @@ public class Comparison implements Predicate {
    * @return lhs and rhs values
    */
   public ComparableExpression[] getComparableExpressions() {
-    ComparableExpression[] list = {lhs, rhs};
-    return list;
+      return new ComparableExpression[]{lhs, rhs};
   }
 
   @Override
@@ -103,20 +101,20 @@ public class Comparison implements Predicate {
             rhs.replaceGlobalByLocal(variables));
   }
 
-  @Override
+  /*@Override
   public Predicate unfoldTemporalComparisonsLeft(){
     if (!isTemporal()){
       return this;
     }
     return ((TimePoint)lhs).unfoldComparison(comparator, (TimePoint)rhs);
-  }
+  }*/
 
   @Override
   public Comparison switchSides(){
     if(!isTemporal()){
       return this;
     }
-    Comparator newComp = null;
+    Comparator newComp;
     if(comparator == Comparator.EQ){
       newComp = Comparator.EQ;
     }

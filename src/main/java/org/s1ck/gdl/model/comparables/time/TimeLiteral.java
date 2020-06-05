@@ -17,19 +17,14 @@ public class TimeLiteral extends TimeAtom {
     /**
      * The wrapped LocalDateTime
      */
-    private LocalDateTime time;
+    private final LocalDateTime time;
 
     /**
      * Construct a Literal from UNIX epoch milliseconds
      * @param millis milliseconds since 1970-01-01T00:00
      */
     public TimeLiteral(long millis){
-        if (millis>=0){
-            this.time = LocalDateTime.ofInstant(Instant.ofEpochMilli(millis), ZoneId.of("Z"));
-        }
-        else{
-            throw new IllegalArgumentException("millis must be positive");
-        }
+        this.time = LocalDateTime.ofInstant(Instant.ofEpochMilli(millis), ZoneId.of("Z"));
     }
 
     /**
@@ -137,7 +132,7 @@ public class TimeLiteral extends TimeAtom {
         return Optional.of(getMilliseconds());
     }
 
-    @Override
+    /*@Override
     public long getLowerBound(){
         return getMilliseconds();
     }
@@ -145,7 +140,7 @@ public class TimeLiteral extends TimeAtom {
     @Override
     public long getUpperBound(){
         return getMilliseconds();
-    }
+    }*/
 
     @Override
     public boolean containsSelectorType(TimeSelector.TimeField type){
@@ -159,7 +154,7 @@ public class TimeLiteral extends TimeAtom {
 
         TimeLiteral that = (TimeLiteral) o;
 
-        return evaluate()==that.evaluate();
+        return getMilliseconds()==that.getMilliseconds();
     }
 
 

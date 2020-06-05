@@ -23,8 +23,5 @@ public class TimeConstantTest {
         assertEquals(expected_millis, c2.getMillis());
 
         assertEquals(c2.getMillis(), (long)c2.evaluate().get());
-        assertEquals(c2.getMillis(), c2.getUpperBound());
-        assertEquals(c2.getMillis(), c2.getLowerBound());
-
     }
 }

@@ -17,7 +17,6 @@
 package org.s1ck.gdl.model.comparables;
 
 import org.s1ck.gdl.model.comparables.time.TimeSelector;
-import org.s1ck.gdl.model.predicates.Predicate;
 
 import java.io.Serializable;
 import java.util.List;
@@ -28,14 +27,14 @@ public interface ComparableExpression extends Serializable{
    * Returns the variables of the expression
    * @return variable
    */
-  public Set<String> getVariables();
+  Set<String> getVariables();
 
   /**
    * Returns the variable of the expression
    * Same functionality is given by {@code getVariables}, kept for downward compatibility
    * @return variable
    */
-  public String getVariable();
+  String getVariable();
 
   /**
    * Checks whether a certain type of selector (val_from, val_to, tx_from, tx_to) is contained

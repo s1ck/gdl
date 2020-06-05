@@ -18,7 +18,6 @@ package org.s1ck.gdl.model.comparables;
 
 import org.s1ck.gdl.model.comparables.time.TimeSelector;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -31,12 +30,12 @@ public class PropertySelector implements ComparableExpression {
   /**
    * Elements variable
    */
-  private String variable;
+  private final String variable;
 
   /**
    * Elements property name
    */
-  private String propertyName;
+  private final String propertyName;
 
   public PropertySelector(String variable, String propertyName) {
     this.variable = variable;

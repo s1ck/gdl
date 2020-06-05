@@ -2,7 +2,6 @@ package org.s1ck.gdl.model.comparables.time;
 
 import org.s1ck.gdl.model.comparables.ComparableExpression;
 import org.s1ck.gdl.model.predicates.Predicate;
-import org.s1ck.gdl.model.predicates.expressions.Comparison;
 
 import java.util.List;
 import java.util.Optional;
@@ -16,12 +15,12 @@ public class Duration extends TimePoint {
     /**
      * The from value of the interval
      */
-    private TimePoint from;
+    private final TimePoint from;
 
     /**
      * The to value of the interval
      */
-    private TimePoint to;
+    private final TimePoint to;
 
     /**
      * Creates duration of an interval represented by {@code from} and {@code to}
@@ -89,7 +88,7 @@ public class Duration extends TimePoint {
         }
     }
 
-    @Override
+    /*@Override
     public long getLowerBound() {
         long toLowerBound = to.getLowerBound();
         long fromUpperBound = from.getUpperBound();
@@ -107,7 +106,7 @@ public class Duration extends TimePoint {
             return Long.MAX_VALUE;
         }
         return toUpperBound - fromLowerBound;
-    }
+    }*/
 
     @Override
     protected Predicate unfoldEQ(TimePoint arg) {

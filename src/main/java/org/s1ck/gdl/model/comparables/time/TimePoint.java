@@ -4,7 +4,6 @@ import org.s1ck.gdl.model.comparables.ComparableExpression;
 import org.s1ck.gdl.model.predicates.Predicate;
 import org.s1ck.gdl.utils.Comparator;
 
-import java.util.ArrayList;
 import java.util.Optional;
 
 /**
@@ -25,17 +24,6 @@ public abstract class TimePoint implements ComparableExpression {
      */
     public abstract Optional<Long> evaluate();
 
-    /**
-     * calculates a lower bound for the timestamp (UNIX epoch long)
-     * @return lower bound as UNIX epoch long
-     */
-    public abstract long getLowerBound();
-
-    /**
-     * calculates a upper bound for the timestamp (UNIX epoch long)
-     * @return upper bound as UNIX epoch long
-     */
-    public abstract long getUpperBound();
 
     /**
      * Translates a term "this comparator arg" into a Predicate over comparisons.
