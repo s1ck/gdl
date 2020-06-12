@@ -40,11 +40,6 @@ public class Xor implements Predicate {
     return new Predicate[] { lhs, rhs };
   }
 
-  /*@Override
-  public Predicate unfoldTemporalComparisonsLeft(){
-    return new Xor(lhs.unfoldTemporalComparisonsLeft(), rhs.unfoldTemporalComparisonsLeft());
-  }*/
-
   @Override
   public Predicate switchSides(){
     return new Xor(lhs.switchSides(), rhs.switchSides());

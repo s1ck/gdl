@@ -1,7 +1,6 @@
 package org.s1ck.gdl.model.comparables.time;
 
 import org.s1ck.gdl.model.comparables.ComparableExpression;
-import org.s1ck.gdl.model.predicates.Predicate;
 
 import java.util.List;
 import java.util.Optional;
@@ -86,56 +85,6 @@ public class Duration extends TimePoint {
         else{
             return Optional.of(evalTo.get() - evalFrom.get());
         }
-    }
-
-    /*@Override
-    public long getLowerBound() {
-        long toLowerBound = to.getLowerBound();
-        long fromUpperBound = from.getUpperBound();
-        if(toLowerBound == Long.MIN_VALUE || fromUpperBound==Long.MAX_VALUE){
-            return 0;
-        }
-        return toLowerBound - fromUpperBound;
-    }
-
-    @Override
-    public long getUpperBound() {
-        long toUpperBound = to.getUpperBound();
-        long fromLowerBound = from.getLowerBound();
-        if(toUpperBound==Long.MAX_VALUE || fromLowerBound == Long.MIN_VALUE){
-            return Long.MAX_VALUE;
-        }
-        return toUpperBound - fromLowerBound;
-    }*/
-
-    @Override
-    protected Predicate unfoldEQ(TimePoint arg) {
-        return null;
-    }
-
-    @Override
-    protected Predicate unfoldNEQ(TimePoint arg) {
-        return null;
-    }
-
-    @Override
-    protected Predicate unfoldGT(TimePoint arg) {
-        return null;
-    }
-
-    @Override
-    protected Predicate unfoldGTE(TimePoint arg) {
-        return null;
-    }
-
-    @Override
-    protected Predicate unfoldLT(TimePoint arg) {
-        return null;
-    }
-
-    @Override
-    protected Predicate unfoldLTE(TimePoint arg) {
-        return null;
     }
 
     @Override

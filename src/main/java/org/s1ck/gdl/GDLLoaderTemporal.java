@@ -13,6 +13,9 @@ import java.util.List;
 
 import static org.s1ck.gdl.utils.Comparator.*;
 
+/**
+ * Responsible for processing the temporal aspects of a query within {@link GDLLoader}
+ */
 public class GDLLoaderTemporal {
 
     /**
@@ -129,7 +132,7 @@ public class GDLLoaderTemporal {
      */
     Predicate buildIntervalFunction(GDLParser.IntvFContext ctx) {
         int predicateSizeBefore = predicateStack.size();
-        TimePoint[] intv = buildIntervall(ctx.interval());
+        TimePoint[] intv = buildInterval(ctx.interval());
         TimePoint from = intv[0];
         TimePoint to = intv[1];
         Predicate predicate = createIntervalPredicates(from, to, ctx.intervalFunc());
@@ -142,13 +145,13 @@ public class GDLLoaderTemporal {
     }
 
     /**
-     * Creates a new predicate about an interval. There are different types of intervall predicates/
+     * Creates a new predicate about an interval. There are different types of interval predicates/
      * functions: precedes, fromTo,...
      *
-     * @param from         represents the start time (from value) of the intervall
-     * @param to           represents the end time (to value) of the intervall
+     * @param from         represents the start time (from value) of the interval
+     * @param to           represents the end time (to value) of the interval
      * @param intervalFunc contains the context information needed to create the correct predicate
-     * @return new predicate (according to {@code intervalFunc}) about the intervall represented by
+     * @return new predicate (according to {@code intervalFunc}) about the interval represented by
      * {@code from} and {@code to}.
      */
     private Predicate createIntervalPredicates(TimePoint from, TimePoint to, GDLParser.IntervalFuncContext intervalFunc) {
@@ -191,7 +194,7 @@ public class GDLLoaderTemporal {
      * @return overlaps predicate
      */
     private Predicate createOverlapsPredicates(TimePoint from, TimePoint to, GDLParser.OverlapsIntervallOperatorContext ctx) {
-        TimePoint[] arg = buildIntervall(ctx.interval());
+        TimePoint[] arg = buildInterval(ctx.interval());
         TimePoint arg_from = arg[0];
         TimePoint arg_to = arg[1];
         TimePoint mx = new MaxTimePoint(from, arg_from);
@@ -244,7 +247,7 @@ public class GDLLoaderTemporal {
      * @return precedes predicate
      */
     private Predicate createPrecedesPredicates(TimePoint to, GDLParser.PrecedesOperatorContext ctx) {
-        TimePoint[] arg = buildIntervall(ctx.interval());
+        TimePoint[] arg = buildInterval(ctx.interval());
         TimePoint arg_from = arg[0];
         return new Comparison(to, LTE, arg_from);
     }
@@ -257,7 +260,7 @@ public class GDLLoaderTemporal {
      * @return immediatelyPrecedes predicate
      */
     private Predicate createImmediatelyPrecedesPredicates(TimePoint to, GDLParser.ImmediatelyPrecedesOperatorContext ctx) {
-        TimePoint[] arg = buildIntervall(ctx.interval());
+        TimePoint[] arg = buildInterval(ctx.interval());
         TimePoint arg_from = arg[0];
         return new Comparison(to, EQ, arg_from);
     }
@@ -272,7 +275,7 @@ public class GDLLoaderTemporal {
      * @return succeeds predicate
      */
     private Predicate createSucceedsPredicates(TimePoint point, GDLParser.SucceedsOperatorContext ctx) {
-        TimePoint[] arg = buildIntervall(ctx.interval());
+        TimePoint[] arg = buildInterval(ctx.interval());
         TimePoint arg_to = arg[1];
         return new Comparison(point, GTE, arg_to);
     }
@@ -288,7 +291,7 @@ public class GDLLoaderTemporal {
      */
     private Predicate createImmediatelySucceedsPredicates(TimePoint from,
                                                           GDLParser.ImmediatelySucceedsOperatorContext ctx) {
-        TimePoint[] arg = buildIntervall(ctx.interval());
+        TimePoint[] arg = buildInterval(ctx.interval());
         TimePoint arg_to = arg[1];
         return new Comparison(from, EQ, arg_to);
     }
@@ -303,7 +306,7 @@ public class GDLLoaderTemporal {
      */
     private Predicate createContainsPredicates(TimePoint from, TimePoint to, GDLParser.ContainsOperatorContext ctx) {
         if (ctx.interval() != null) {
-            TimePoint[] arg = buildIntervall(ctx.interval());
+            TimePoint[] arg = buildInterval(ctx.interval());
             TimePoint arg_from = arg[0];
             TimePoint arg_to = arg[1];
             return new And(
@@ -329,7 +332,7 @@ public class GDLLoaderTemporal {
      * @return equals predicate
      */
     private Predicate createEqualsPredicates(TimePoint from, TimePoint to, GDLParser.EqualsOperatorContext ctx) {
-        TimePoint[] arg = buildIntervall(ctx.interval());
+        TimePoint[] arg = buildInterval(ctx.interval());
         TimePoint arg_from = arg[0];
         TimePoint arg_to = arg[1];
         return new And(
@@ -356,7 +359,7 @@ public class GDLLoaderTemporal {
             durationPredicate = new And(durationPredicate,
                     new Comparison(rhs, GT, constant));
         } else if (ctx.interval() != null) {
-            TimePoint[] interval = buildIntervall(ctx.interval());
+            TimePoint[] interval = buildInterval(ctx.interval());
             Duration lhs = new Duration(interval[0], interval[1]);
             durationPredicate = new And(durationPredicate,
                     new Comparison(interval[0], LTE, interval[1]));
@@ -365,7 +368,6 @@ public class GDLLoaderTemporal {
         }
         return durationPredicate;
     }
-
 
     /**
      * Creates a predicate a.shorterThan(b) = (length(a) < length(b))
@@ -385,7 +387,7 @@ public class GDLLoaderTemporal {
             durationPredicate = new And(durationPredicate,
                     new Comparison(rhs, LT, constant));
         } else if (ctx.interval() != null) {
-            TimePoint[] interval = buildIntervall(ctx.interval());
+            TimePoint[] interval = buildInterval(ctx.interval());
             Duration lhs = new Duration(interval[0], interval[1]);
             durationPredicate = new And(durationPredicate,
                     new Comparison(interval[0], LTE, interval[1]));
@@ -414,7 +416,7 @@ public class GDLLoaderTemporal {
             durationPredicate = new And(durationPredicate,
                     new Comparison(rhs, GTE, constant));
         } else if (ctx.interval() != null) {
-            TimePoint[] interval = buildIntervall(ctx.interval());
+            TimePoint[] interval = buildInterval(ctx.interval());
             Duration lhs = new Duration(interval[0], interval[1]);
             durationPredicate = new And(durationPredicate,
                     new Comparison(interval[0], LTE, interval[1]));
@@ -443,7 +445,7 @@ public class GDLLoaderTemporal {
             durationPredicate = new And(durationPredicate,
                     new Comparison(rhs, LTE, constant));
         } else if (ctx.interval() != null) {
-            TimePoint[] interval = buildIntervall(ctx.interval());
+            TimePoint[] interval = buildInterval(ctx.interval());
             Duration lhs = new Duration(interval[0], interval[1]);
             durationPredicate = new And(durationPredicate,
                     new Comparison(interval[0], LTE, interval[1]));
@@ -483,14 +485,17 @@ public class GDLLoaderTemporal {
      * @param ctx context from which to derive {@code from} and {@code to}
      * @return {@code {from, to}} representing an interval
      */
-    private TimePoint[] buildIntervall(GDLParser.IntervalContext ctx) {
+    private TimePoint[] buildInterval(GDLParser.IntervalContext ctx) {
         if (ctx.intervalSelector() != null) {
             GDLParser.IntervalSelectorContext selector = ctx.intervalSelector();
             // throws exception, if variable invalid
             return buildIntervalFromSelector(selector);
         } else if (ctx.intervalFromStamps() != null) {
             GDLParser.IntervalFromStampsContext fs = ctx.intervalFromStamps();
-            return buildIntervalFromStamps(fs);
+            TimePoint[] intv = buildIntervalFromStamps(fs);
+            // custom interval: make sure that from <= to
+            predicateStack.add(new Comparison(intv[0], LTE, intv[1]));
+            return intv;
         } else if (ctx.complexInterval() != null) {
             GDLParser.ComplexIntervalArgumentContext arg1 = ctx.complexInterval()
                     .complexIntervalArgument(0);
@@ -504,7 +509,7 @@ public class GDLLoaderTemporal {
 
     /**
      * Creates an interval as an array {@code {from, to}} from a selector context.
-     * I.e., a intervall like {@code a.val} would result in {@code {a.val_from, a.val_to}}.
+     * I.e., a interval like {@code a.val} would result in {@code {a.val_from, a.val_to}}.
      * What is more, {@code val} results in {@code GLOBAL_SELECTOR.val_from, GLOBAL_SELECTOR.val_to}
      *
      * @param ctx context from which to derive the interval
@@ -521,7 +526,7 @@ public class GDLLoaderTemporal {
 
     /**
      * Creates an interval as an array {@code {from, to}} from a interval constant context.
-     * I.e., a intervall like {@code Interval(1970-01-01, 2020-01-01)} would result in
+     * I.e., a interval like {@code Interval(1970-01-01, 2020-01-01)} would result in
      * {@code {1970-01-01, 2020-01-01}}.
      *
      * @param ctx context from which to derive the interval
@@ -566,7 +571,7 @@ public class GDLLoaderTemporal {
                 new MaxTimePoint(i1[0], i2[0]), LTE, new MinTimePoint(i1[1], i2[1])
         );
         predicateStack.addFirst(constraint);
-        // now build complex intervall from i1, i2
+        // now build complex interval from i1, i2
         if (join) {
             TimePoint start = new MinTimePoint(i1[0], i2[0]);
             TimePoint end = new MaxTimePoint(i1[1], i2[1]);
@@ -637,6 +642,11 @@ public class GDLLoaderTemporal {
         return new Comparison(from, Comparator.GT, x);
     }
 
+    /**
+     * Create asOf predicate: a.tx_from<=point AND a.tx_to>= point
+     * @param ctx asOf context
+     * @return asOf predicate
+     */
     Predicate createAsOf(GDLParser.AsOfContext ctx) {
         TimePoint tp = buildTimePoint(ctx.timePoint());
         String identifier = loader.resolveIdentifier(ctx.Identifier().getText());

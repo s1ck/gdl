@@ -1,7 +1,6 @@
 package org.s1ck.gdl.model.comparables.time;
 
 import org.s1ck.gdl.model.comparables.ComparableExpression;
-import org.s1ck.gdl.model.predicates.Predicate;
 
 import java.util.HashSet;
 import java.util.List;
@@ -69,46 +68,6 @@ public class TimeConstant extends TimePoint {
     @Override
     public Optional<Long> evaluate() {
         return Optional.of(getMillis());
-    }
-
-    /*@Override
-    public long getLowerBound() {
-        return getMillis();
-    }
-
-    @Override
-    public long getUpperBound() {
-        return getMillis();
-    }*/
-
-    @Override
-    protected Predicate unfoldEQ(TimePoint arg) {
-        return null;
-    }
-
-    @Override
-    protected Predicate unfoldNEQ(TimePoint arg) {
-        return null;
-    }
-
-    @Override
-    protected Predicate unfoldGT(TimePoint arg) {
-        return null;
-    }
-
-    @Override
-    protected Predicate unfoldGTE(TimePoint arg) {
-        return null;
-    }
-
-    @Override
-    protected Predicate unfoldLT(TimePoint arg) {
-        return null;
-    }
-
-    @Override
-    protected Predicate unfoldLTE(TimePoint arg) {
-        return null;
     }
 
     @Override

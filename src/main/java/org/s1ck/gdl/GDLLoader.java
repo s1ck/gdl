@@ -436,6 +436,12 @@ class GDLLoader extends GDLBaseListener {
         currentPredicates.add(temporalLoader.buildStampFunction(ctx));
     }
 
+    /**
+     * Builds a asOf {@code Predicate}.
+     * E.g.a.asOf(now) = a.tx_from<=now AND a.tx_from>=now
+     *
+     * @param ctx asOf context
+     */
     @Override
     public void enterAsOf(GDLParser.AsOfContext ctx) {
         currentPredicates.add(temporalLoader.createAsOf(ctx));

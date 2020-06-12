@@ -57,11 +57,6 @@ public class And implements Predicate {
     return new And(lhs.switchSides(), rhs.switchSides());
   }
 
-  /*@Override
-  public Predicate unfoldTemporalComparisonsLeft(){
-    return new And(lhs.unfoldTemporalComparisonsLeft(), rhs.unfoldTemporalComparisonsLeft());
-  }*/
-
   @Override
   public boolean containsSelectorType(TimeSelector.TimeField type){
     return lhs.containsSelectorType(type) || rhs.containsSelectorType(type);
