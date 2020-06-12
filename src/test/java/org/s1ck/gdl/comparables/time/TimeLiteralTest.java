@@ -2,17 +2,13 @@ package org.s1ck.gdl.comparables.time;
 import org.junit.Test;
 import org.s1ck.gdl.model.comparables.time.TimeLiteral;
 import org.s1ck.gdl.model.comparables.time.TimeSelector;
-import org.s1ck.gdl.model.predicates.expressions.Comparison;
-import org.s1ck.gdl.utils.Comparator;
 
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 
 import static org.junit.Assert.*;
-import static org.s1ck.gdl.utils.Comparator.NEQ;
 
 public class TimeLiteralTest {
 
@@ -62,27 +58,6 @@ public class TimeLiteralTest {
 
         assertTrue(millis - tl3.getMilliseconds() > 0);
         assertTrue(millis - tl3.getMilliseconds() < 5000);
-    }
-
-    @Test
-    public void unfoldPredicateTest(){
-        TimeLiteral literal = new TimeLiteral("1970-02-01T15:23:05");
-        TimeSelector s = new TimeSelector("x", TimeSelector.TimeField.VAL_TO);
-        //expected values
-        Comparison cEq = new Comparison(literal, Comparator.EQ, s);
-        Comparison cNeq = new Comparison(literal, NEQ, s);
-        Comparison cGt = new Comparison(literal, Comparator.GT, s);
-        Comparison cGte = new Comparison(literal, Comparator.GTE, s);
-        Comparison cLt = new Comparison(literal, Comparator.LT, s);
-        Comparison cLte = new Comparison(literal, Comparator.LTE, s);
-
-        assertEquals(literal.unfoldComparison(Comparator.EQ, s), cEq);
-        assertEquals(literal.unfoldComparison(NEQ, s), cNeq);
-        assertEquals(literal.unfoldComparison(Comparator.GT, s), cGt);
-        assertEquals(literal.unfoldComparison(Comparator.GTE, s), cGte);
-        assertEquals(literal.unfoldComparison(Comparator.LT, s), cLt);
-        assertEquals(literal.unfoldComparison(Comparator.LTE, s), cLte);
-
     }
 
     @Test

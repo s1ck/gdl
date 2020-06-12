@@ -81,7 +81,6 @@ public class ElementSelector implements ComparableExpression {
     ElementSelector that = (ElementSelector) o;
 
     return variable != null ? variable.equals(that.variable) : that.variable == null;
-
   }
 
   @Override

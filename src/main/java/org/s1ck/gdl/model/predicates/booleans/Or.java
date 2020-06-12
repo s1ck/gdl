@@ -52,11 +52,6 @@ public class Or implements Predicate {
     return variables;
   }
 
-  /*@Override
-  public Predicate unfoldTemporalComparisonsLeft(){
-    return new Or(lhs.unfoldTemporalComparisonsLeft(), rhs.unfoldTemporalComparisonsLeft());
-  }*/
-
   @Override
   public Predicate switchSides(){
     return new Or(lhs.switchSides(), rhs.switchSides());

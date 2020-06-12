@@ -107,16 +107,6 @@ public class TimeSelector extends TimeAtom{
         return Optional.empty();
     }
 
-    /*@Override
-    public long getLowerBound(){
-        return Long.MIN_VALUE;
-    }
-
-    @Override
-    public long getUpperBound(){
-        return Long.MAX_VALUE;
-    }*/
-
     @Override
     public boolean containsSelectorType(TimeSelector.TimeField type){
         return timeProp.equals(type);
@@ -294,36 +284,6 @@ public class TimeSelector extends TimeAtom{
 
         return forall;
     }
-
-    /*@Override
-    protected Predicate unfoldEQ(TimePoint arg){
-        return new Comparison(this, EQ, arg);
-    }
-
-    @Override
-    protected Predicate unfoldNEQ(TimePoint arg){
-        return new Comparison(this, Comparator.NEQ, arg);
-    }
-
-    @Override
-    protected Predicate unfoldGT(TimePoint arg){
-        return new Comparison(this, Comparator.GT, arg);
-    }
-
-    @Override
-    protected Predicate unfoldGTE(TimePoint arg){
-        return new Comparison(this, Comparator.GTE, arg);
-    }
-
-    @Override
-    protected Predicate unfoldLT(TimePoint arg){
-        return new Comparison(this, Comparator.LT, arg);
-    }
-
-    @Override
-    protected Predicate unfoldLTE(TimePoint arg){
-        return new Comparison(this, Comparator.LTE, arg);
-    }*/
 
     @Override
     public boolean isGlobal(){

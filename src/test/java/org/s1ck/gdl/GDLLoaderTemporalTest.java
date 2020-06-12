@@ -20,15 +20,19 @@ public class GDLLoaderTemporalTest {
     public void periodLiteralTest(){
         GDLLoader loader = getLoaderFromGDLString("MATCH (a)-->(b) " +
                 "WHERE a.tx.overlaps(Interval(1970-01-01,1970-01-02))");
+        TimeLiteral tl1 = new TimeLiteral("1970-01-01");
+        TimeLiteral tl2 = new TimeLiteral("1970-01-02");
 
         assertPredicateEquals(loader.getPredicates().get(),
+                new And(
                 new Comparison(
                         new MaxTimePoint(new TimeSelector("a", TX_FROM),
-                                new TimeLiteral("1970-01-01")),
+                                tl1),
                         LT,
                         new MinTimePoint(new TimeSelector("a", TX_TO),
-                                new TimeLiteral("1970-01-02"))
-                ));
+                                tl2)
+                ),
+                        new Comparison(tl1, LTE, tl2)));
     }
 
     @Test
@@ -211,9 +215,11 @@ public class GDLLoaderTemporalTest {
         TimeLiteral tl2 = new TimeLiteral("2020-05-01");
 
         Predicate expected = new And(
+                new And(
                 new Comparison(new MaxTimePoint(aTxFrom, bTxFrom), GTE, tl2),
                 new Comparison(new MaxTimePoint(aTxFrom, bTxFrom), LTE,
-                        new MinTimePoint(aTxTo, bTxTo))
+                        new MinTimePoint(aTxTo, bTxTo))),
+                new Comparison(tl1, LTE, tl2)
         );
         assertPredicateEquals(expected, loader.getPredicates().get());
 
@@ -223,9 +229,11 @@ public class GDLLoaderTemporalTest {
         loader = getLoaderFromGDLString("MATCH (a)-[e]->(b) " +
                 "WHERE a.tx.join(b.tx).succeeds(Interval(1970-01-01, 2020-05-01))");
         expected = new And(
+                new And(
                 new Comparison(new MinTimePoint(aTxFrom, bTxFrom), GTE, tl2),
                 new Comparison(new MaxTimePoint(aTxFrom, bTxFrom), LTE,
-                        new MinTimePoint(aTxTo, bTxTo))
+                        new MinTimePoint(aTxTo, bTxTo))),
+                new Comparison(tl1, LTE, tl2)
         );
         assertPredicateEquals(expected, loader.getPredicates().get());
 
@@ -469,8 +477,10 @@ public class GDLLoaderTemporalTest {
         Duration intervalDuration = new Duration(aValFrom, bValTo);
         Comparison intervalDurationPred = new Comparison(aValFrom, LTE, bValTo);
         expected = new And(
-                intervalDurationPred,
-                new Comparison(intervalDuration, comparator, fourDays));
+                new And(
+                    intervalDurationPred,
+                    new Comparison(intervalDuration, comparator, fourDays)),
+                new Comparison(aValFrom, LTE, bValTo));
         assertPredicateEquals(loader.getPredicates().get(), expected);
 
         loader = getLoaderFromGDLString("MATCH (a)-[e]->(b) " +
@@ -512,8 +522,10 @@ public class GDLLoaderTemporalTest {
         Duration constantInterval = new Duration(l1, l2);
         Comparison constantPred = new Comparison(l1, LTE, l2);
         expected = new And(
+                new And(
                 new And(globalValPred, constantPred),
-        new Comparison(globalValDuration, comparator, constantInterval));
+        new Comparison(globalValDuration, comparator, constantInterval)),
+        new Comparison(l1, LTE, l2));
         assertPredicateEquals(loader.getPredicates().get(), expected);
     }
 

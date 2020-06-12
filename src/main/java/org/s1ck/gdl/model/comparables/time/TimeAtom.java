@@ -2,7 +2,6 @@ package org.s1ck.gdl.model.comparables.time;
 
 import org.s1ck.gdl.model.comparables.ComparableExpression;
 import org.s1ck.gdl.model.predicates.Predicate;
-import org.s1ck.gdl.model.predicates.expressions.Comparison;
 import org.s1ck.gdl.utils.Comparator;
 
 import java.util.List;
@@ -22,47 +21,4 @@ public abstract class TimeAtom extends TimePoint {
      * @return equivalent containing only local selectors/intervals
      */
     public abstract Predicate unfoldGlobal(Comparator comp, ComparableExpression rhs, List<String> variables);
-
-
-    @Override
-    public Predicate unfoldComparison(Comparator comparator, TimePoint arg){
-        // nothing to unfold here
-        return new Comparison(this, comparator, arg);
-    }
-
-    @Override
-    protected Predicate unfoldEQ(TimePoint arg){
-        // nothing to unfold here
-        return new Comparison(this, Comparator.EQ, arg);
-    }
-
-    @Override
-    protected Predicate unfoldNEQ(TimePoint arg){
-        // nothing to unfold here
-        return new Comparison(this, Comparator.NEQ, arg);
-    }
-
-    @Override
-    protected Predicate unfoldGT(TimePoint arg){
-        // nothing to unfold here
-        return new Comparison(this, Comparator.GT, arg);
-    }
-
-    @Override
-    protected Predicate unfoldGTE(TimePoint arg){
-        // nothing to unfold here
-        return new Comparison(this, Comparator.GTE, arg);
-    }
-
-    @Override
-    protected Predicate unfoldLT(TimePoint arg){
-        // nothing to unfold here
-        return new Comparison(this, Comparator.LT, arg);
-    }
-
-    @Override
-    protected Predicate unfoldLTE(TimePoint arg){
-        // nothing to unfold here
-        return new Comparison(this, Comparator.LTE, arg);
-    }
 }

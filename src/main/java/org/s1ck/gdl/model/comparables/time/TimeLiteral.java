@@ -132,16 +132,6 @@ public class TimeLiteral extends TimeAtom {
         return Optional.of(getMilliseconds());
     }
 
-    /*@Override
-    public long getLowerBound(){
-        return getMilliseconds();
-    }
-
-    @Override
-    public long getUpperBound(){
-        return getMilliseconds();
-    }*/
-
     @Override
     public boolean containsSelectorType(TimeSelector.TimeField type){
         return false;

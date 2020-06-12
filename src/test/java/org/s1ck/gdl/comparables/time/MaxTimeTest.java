@@ -1,11 +1,6 @@
 package org.s1ck.gdl.comparables.time;
 import org.junit.Test;
 import org.s1ck.gdl.model.comparables.time.*;
-import org.s1ck.gdl.model.predicates.Predicate;
-import org.s1ck.gdl.model.predicates.booleans.And;
-import org.s1ck.gdl.model.predicates.booleans.Or;
-import org.s1ck.gdl.model.predicates.expressions.Comparison;
-import org.s1ck.gdl.utils.Comparator;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -35,15 +30,11 @@ public class MaxTimeTest {
         TimeSelector l4 = new TimeSelector("v", TimeSelector.TimeField.VAL_TO);
         MaxTimePoint mx = new MaxTimePoint(l1,l2,l3,l4);
         assertFalse(mx.evaluate().isPresent());
-/*        assertEquals(mx.getLowerBound(), (long)l2.evaluate().get());
-        assertEquals(mx.getUpperBound(), Long.MAX_VALUE);*/
 
         // only selectors
         TimeSelector l5 = new TimeSelector("x",TimeSelector.TimeField.VAL_FROM);
         mx = new MaxTimePoint(l4,l5);
         assertFalse(mx.evaluate().isPresent());
-/*        assertEquals(mx.getLowerBound(), Long.MIN_VALUE);
-        assertEquals(mx.getUpperBound(), Long.MAX_VALUE);*/
     }
 
     @Test
@@ -58,8 +49,6 @@ public class MaxTimeTest {
 
         MaxTimePoint mx3 = new MaxTimePoint(mx1, mx2);
         assertFalse(mx3.evaluate().isPresent());
-/*        assertEquals(mx3.getLowerBound(), mx1.getLowerBound());
-        assertEquals(mx3.getUpperBound(), Long.MAX_VALUE);*/
     }
 
 
@@ -116,168 +105,6 @@ public class MaxTimeTest {
         MaxTimePoint mx1 = new MaxTimePoint(l3,l4,l5,s2);
         MaxTimePoint mx = new MaxTimePoint(mn1,mx1);
         assertFalse(mx.evaluate().isPresent());
-    }
-
-    @Test
-    public void unfoldEQTest(){
-        TimeLiteral p1 = new TimeLiteral("2020-04-10T12:30:00");
-        TimeSelector p2 = new TimeSelector("var", TimeSelector.TimeField.VAL_TO);
-        TimeLiteral p3 = new TimeLiteral("1970-01-01T01:01:01");
-        MaxTimePoint mn = new MaxTimePoint(p1, p2, p3);
-        TimeLiteral arg = new TimeLiteral("2020-04-10T12:28:45");
-
-        Predicate expected =
-                new Or(
-                        new Or(
-                                new And(
-                                        new And(
-                                                new Comparison(p1, Comparator.EQ, arg),
-                                                new Comparison(p1, Comparator.GTE, p2)
-                                        ),
-                                        new Comparison(p1, Comparator.GTE, p3)
-                                ),
-                                new And(
-                                        new And(
-                                                new Comparison(p2, Comparator.EQ, arg),
-                                                new Comparison(p2, Comparator.GTE, p1)
-                                        ),
-                                        new Comparison(p2, Comparator.GTE, p3)
-                                )
-                        ),
-                        new And(
-                                new And(
-                                        new Comparison(p3, Comparator.EQ, arg),
-                                        new Comparison(p3, Comparator.GTE, p1)
-                                ),
-                                new Comparison(p3, Comparator.GTE, p2)
-                        )
-                );
-
-        Predicate unfolded = mn.unfoldComparison(Comparator.EQ, arg);
-        assertEquals(expected, unfolded);
-    }
-
-    @Test
-    public void unfoldNEQTest(){
-        TimeLiteral p1 = new TimeLiteral("2020-04-10T12:30:00");
-        TimeSelector p2 = new TimeSelector("var", TimeSelector.TimeField.VAL_TO);
-        TimeLiteral p3 = new TimeLiteral("1970-01-01T01:01:01");
-        MaxTimePoint mn = new MaxTimePoint(p1, p2, p3);
-        TimeLiteral arg = new TimeLiteral("2020-04-10T12:28:45");
-
-        Predicate expected =
-                new And(
-                        new And(
-                                new Or(
-                                        new Or(
-                                                new Comparison(p1, Comparator.NEQ, arg),
-                                                new Comparison(p1, Comparator.LT, p2)
-                                        ),
-                                        new Comparison(p1, Comparator.LT, p3)
-                                ),
-                                new Or(
-                                        new Or(
-                                                new Comparison(p2, Comparator.NEQ, arg),
-                                                new Comparison(p2, Comparator.LT, p1)
-                                        ),
-                                        new Comparison(p2, Comparator.LT, p3)
-                                )
-                        ),
-                        new Or(
-                                new Or(
-                                        new Comparison(p3, Comparator.NEQ, arg),
-                                        new Comparison(p3, Comparator.LT, p1)
-                                ),
-                                new Comparison(p3, Comparator.LT,p2)
-                        )
-                );
-
-        Predicate unfolded = mn.unfoldComparison(Comparator.NEQ, arg);
-        assertEquals(expected, unfolded);
-    }
-
-    @Test
-    public void unfoldGTTest(){
-        TimeLiteral p1 = new TimeLiteral("2020-04-10T12:30:00");
-        TimeSelector p2 = new TimeSelector("var", TimeSelector.TimeField.VAL_TO);
-        TimeLiteral p3 = new TimeLiteral("1970-01-01T01:01:01");
-        MaxTimePoint mn = new MaxTimePoint(p1, p2, p3);
-        TimeLiteral arg = new TimeLiteral("2020-04-10T12:28:45");
-
-        Predicate expected =
-                new Or(
-                        new Or(
-                                new Comparison(p1, Comparator.GT, arg),
-                                new Comparison(p2, Comparator.GT, arg)
-                        ),
-                        new Comparison(p3, Comparator.GT, arg)
-                );
-
-        Predicate unfolded = mn.unfoldComparison(Comparator.GT, arg);
-        assertEquals(expected, unfolded);
-    }
-
-    @Test
-    public void unfoldGTETest(){
-        TimeLiteral p1 = new TimeLiteral("2020-04-10T12:30:00");
-        TimeSelector p2 = new TimeSelector("var", TimeSelector.TimeField.VAL_TO);
-        TimeLiteral p3 = new TimeLiteral("1970-01-01T01:01:01");
-        MaxTimePoint mn = new MaxTimePoint(p1, p2, p3);
-        TimeLiteral arg = new TimeLiteral("2020-04-10T12:28:45");
-
-        Predicate expected =
-                new Or(
-                        new Or(
-                                new Comparison(p1, Comparator.GTE, arg),
-                                new Comparison(p2, Comparator.GTE, arg)
-                        ),
-                        new Comparison(p3, Comparator.GTE, arg)
-                );
-
-        Predicate unfolded = mn.unfoldComparison(Comparator.GTE, arg);
-        assertEquals(expected, unfolded);
-    }
-
-    @Test
-    public void unfoldLTTest(){
-        TimeLiteral p1 = new TimeLiteral("2020-04-10T12:30:00");
-        TimeSelector p2 = new TimeSelector("var", TimeSelector.TimeField.VAL_TO);
-        TimeLiteral p3 = new TimeLiteral("1970-01-01T01:01:01");
-        MaxTimePoint mn = new MaxTimePoint(p1, p2, p3);
-        TimeLiteral arg = new TimeLiteral("2020-04-10T12:28:45");
-
-        Predicate expected =
-                new And(
-                        new And(
-                                new Comparison(p1, Comparator.LT, arg),
-                                new Comparison(p2, Comparator.LT, arg)
-                        ),
-                        new Comparison(p3, Comparator.LT, arg)
-                );
-
-        Predicate unfolded = mn.unfoldComparison(Comparator.LT, arg);
-        assertEquals(expected, unfolded);
-    }
-
-    @Test
-    public void unfoldLTETest(){
-        TimeLiteral p1 = new TimeLiteral("2020-04-10T12:30:00");
-        TimeSelector p2 = new TimeSelector("var", TimeSelector.TimeField.VAL_TO);
-        TimeLiteral p3 = new TimeLiteral("1970-01-01T01:01:01");
-        MaxTimePoint mn = new MaxTimePoint(p1, p2, p3);
-        TimeLiteral arg = new TimeLiteral("2020-04-10T12:28:45");
-
-        Predicate expected =
-                new And(
-                        new And(
-                                new Comparison(p1, Comparator.LTE, arg),
-                                new Comparison(p2, Comparator.LTE, arg)
-                        ),
-                        new Comparison(p3, Comparator.LTE, arg)
-                );
-
-        Predicate unfolded = mn.unfoldComparison(Comparator.LTE, arg);
-        assertEquals(expected, unfolded);
     }
 
     @Test

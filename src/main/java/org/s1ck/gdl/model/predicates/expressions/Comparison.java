@@ -101,14 +101,6 @@ public class Comparison implements Predicate {
             rhs.replaceGlobalByLocal(variables));
   }
 
-  /*@Override
-  public Predicate unfoldTemporalComparisonsLeft(){
-    if (!isTemporal()){
-      return this;
-    }
-    return ((TimePoint)lhs).unfoldComparison(comparator, (TimePoint)rhs);
-  }*/
-
   @Override
   public Comparison switchSides(){
     if(!isTemporal()){

@@ -44,11 +44,6 @@ public class Not implements Predicate {
     return expression.getVariables();
   }
 
-  /*@Override
-  public Predicate unfoldTemporalComparisonsLeft(){
-    return new Not(expression.unfoldTemporalComparisonsLeft());
-  }
-*/
   @Override
   public Predicate switchSides(){
     return new Not(expression.switchSides());

@@ -59,7 +59,6 @@ public abstract class TimeTerm extends TimePoint {
         return vars;
     }
 
-
     /**
      * String representation of the operator (e.g. "MIN", "MAX",...)
      * @return operator string
