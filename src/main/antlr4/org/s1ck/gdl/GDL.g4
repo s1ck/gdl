@@ -189,7 +189,6 @@ timePoint
 timeLiteral
     : Datetime
     | Date
-    | IntegerLiteral
     | Now;
 
 timeSelector
@@ -421,7 +420,7 @@ Datetime
     ;
 
 Date
-    : Digit Digit Digit Digit '-' Digit Digit('-' Digit Digit)?
+    : Digit Digit Digit Digit '-' Digit Digit '-' Digit Digit?
     ;
 
 Time
