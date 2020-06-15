@@ -185,7 +185,6 @@ timePoint
 timeLiteral
     : Datetime
     | Date
-    | Time
     | IntegerLiteral
     | Now;
 
