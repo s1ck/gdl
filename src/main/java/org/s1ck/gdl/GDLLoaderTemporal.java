@@ -29,6 +29,11 @@ public class GDLLoaderTemporal {
     private final GDLLoader loader;
 
     /**
+     * Used as value for all "Now" literals in the query
+     */
+    private final TimeLiteral nowLit;
+
+    /**
      * Creates a new instance
      *
      * @param loader loader that processes the whole query
@@ -36,6 +41,7 @@ public class GDLLoaderTemporal {
     public GDLLoaderTemporal(GDLLoader loader) {
         this.predicateStack = new ArrayDeque<>();
         this.loader = loader;
+        this.nowLit = new TimeLiteral("Now");
     }
 
     /**
@@ -76,7 +82,11 @@ public class GDLLoaderTemporal {
      * @return TimeLiteral
      */
     private TimeLiteral buildTimeLiteral(GDLParser.TimeLiteralContext ctx) {
-        return new TimeLiteral(ctx.getText().trim());
+        if(ctx.getText().trim().toLowerCase().equals("now")){
+            return new TimeLiteral(nowLit.getMilliseconds());
+        } else{
+            return new TimeLiteral(ctx.getText().trim());
+        }
     }
 
     /**
@@ -661,5 +671,13 @@ public class GDLLoaderTemporal {
                                 tp)
 
         );
+    }
+
+    /**
+     * Returns the literal for all "Now" literals in the query
+     * @return literal for all "Now" literals in the query
+     */
+    public TimeLiteral getNowLit(){
+        return nowLit;
     }
 }

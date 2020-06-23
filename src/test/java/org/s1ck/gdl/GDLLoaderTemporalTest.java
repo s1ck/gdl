@@ -9,6 +9,7 @@ import org.s1ck.gdl.model.predicates.booleans.And;
 import org.s1ck.gdl.model.predicates.expressions.Comparison;
 import org.s1ck.gdl.utils.Comparator;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.s1ck.gdl.model.comparables.time.TimeSelector.TimeField.*;
 import static org.s1ck.gdl.utils.Comparator.*;
@@ -527,6 +528,17 @@ public class GDLLoaderTemporalTest {
         new Comparison(globalValDuration, comparator, constantInterval)),
         new Comparison(l1, LTE, l2));
         assertPredicateEquals(loader.getPredicates().get(), expected);
+    }
+
+    @Test
+    public void timeLitNowTest(){
+        GDLLoader loader = getLoaderFromGDLString("MATCH (a)-[e]->(b) " +
+                "WHERE Now<=Now");
+        System.out.println(loader.getPredicates());
+        Comparison comp = (Comparison) loader.getPredicates().get();
+        // all "Now"s should have the exact same value
+        assertEquals(comp.getComparableExpressions()[0], comp.getComparableExpressions()[1]);
+        assertEquals(loader.getNowLit(), comp.getComparableExpressions()[0]);
     }
 
     /**

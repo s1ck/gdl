@@ -448,6 +448,14 @@ class GDLLoader extends GDLBaseListener {
     }
 
     /**
+     * Returns the literal for all "Now" literals in the query
+     * @return literal for all "Now" literals in the query
+     */
+    public TimeLiteral getNowLit(){
+        return temporalLoader.getNowLit();
+    }
+
+    /**
      * Called when we leave an NotExpression.
      *
      * Checks if the expression is preceded by a Not and adds the filter in that case.
