@@ -96,10 +96,21 @@ public class GDLLoaderTemporal {
      * @return TimeSelector
      */
     private TimeSelector buildTimeSelector(GDLParser.TimeSelectorContext ctx) {
+        boolean global = ctx.Identifier() == null;
         // checks whether ID is even there (is a vertex or edge) and returns its variable
-        String var = ctx.Identifier() != null ?
-                loader.resolveIdentifier(ctx.Identifier().getText()) : TimeSelector.GLOBAL_SELECTOR;
+        String var = global ?
+            TimeSelector.GLOBAL_SELECTOR : loader.resolveIdentifier(ctx.Identifier().getText());
         String field = ctx.TimeProp().getText();
+        if(global){
+            boolean tx = field.trim().startsWith("tx");
+            TimeSelector.TimeField from = tx ?
+                TimeSelector.TimeField.TX_FROM : TimeSelector.TimeField.VAL_FROM;
+            TimeSelector.TimeField to = tx ?
+                TimeSelector.TimeField.TX_TO : TimeSelector.TimeField.VAL_TO;
+            TimePoint global_from = new TimeSelector(var, from);
+            TimePoint global_to = new TimeSelector(var, to);
+            predicateStack.addFirst(new Comparison(global_from, LTE, global_to));
+        }
         return new TimeSelector(var, field);
     }
 
@@ -504,7 +515,7 @@ public class GDLLoaderTemporal {
             GDLParser.IntervalFromStampsContext fs = ctx.intervalFromStamps();
             TimePoint[] intv = buildIntervalFromStamps(fs);
             // custom interval: make sure that from <= to
-            predicateStack.add(new Comparison(intv[0], LTE, intv[1]));
+            predicateStack.addFirst(new Comparison(intv[0], LTE, intv[1]));
             return intv;
         } else if (ctx.complexInterval() != null) {
             GDLParser.ComplexIntervalArgumentContext arg1 = ctx.complexInterval()
@@ -526,11 +537,16 @@ public class GDLLoaderTemporal {
      * @return {@code {from, to}} representing the interval
      */
     private TimePoint[] buildIntervalFromSelector(GDLParser.IntervalSelectorContext ctx) {
-        String var = ctx.Identifier() != null ?
-                loader.resolveIdentifier(ctx.Identifier().getText()) : TimeSelector.GLOBAL_SELECTOR;
+        boolean global = ctx.Identifier() == null;
+        String var = global ?
+            TimeSelector.GLOBAL_SELECTOR : loader.resolveIdentifier(ctx.Identifier().getText());
         String intId = ctx.IntervalConst().getText();
         TimePoint from = new TimeSelector(var, intId + "_from");
         TimePoint to = new TimeSelector(var, intId + "_to");
+        if(global){
+            // make sure that global from <= global to
+            predicateStack.addFirst(new Comparison(from, LTE, to));
+        }
         return new TimePoint[]{from, to};
     }
 
@@ -603,8 +619,15 @@ public class GDLLoaderTemporal {
      * @return (potentially complex) {@code Predicate} that encodes the time stamp function. Atoms are time stamp comparisons
      */
     Predicate buildStampFunction(GDLParser.StmpFContext ctx) {
+        int predicateSizeBefore = predicateStack.size();
         TimePoint tp = buildTimePoint(ctx.timePoint());
-        return createStampPredicates(tp, ctx.stampFunc());
+        Predicate predicate = createStampPredicates(tp, ctx.stampFunc());
+        // implicit constraints for global val, tx
+        int countConstraints = predicateStack.size() - predicateSizeBefore;
+        for (int i = 0; i < countConstraints; i++) {
+            predicate = new And(predicate, predicateStack.removeFirst());
+        }
+        return predicate;
     }
 
     /**

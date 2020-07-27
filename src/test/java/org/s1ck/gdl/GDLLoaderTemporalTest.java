@@ -168,27 +168,29 @@ public class GDLLoaderTemporalTest {
         TimeSelector eFrom = new TimeSelector("e", TX_FROM);
         TimeSelector eTo = new TimeSelector("e", TX_TO);
 
-        MaxTimePoint globalFrom = new MaxTimePoint(
+        MaxTimePoint globalTxFrom = new MaxTimePoint(
                 eFrom, aFrom, bFrom
         );
-        MinTimePoint globalTo = new MinTimePoint(
+        MinTimePoint globalTxTo = new MinTimePoint(
                 eTo, aTo, bTo
         );
+
+        Comparison globalTxPredicate = new Comparison(globalTxFrom, LTE, globalTxTo);
 
         // only lhs global
         GDLLoader loader = getLoaderFromGDLString("MATCH (a)-[e]->(b) " +
                 "WHERE tx.between(1970-01-01, 2020-05-01)");
-        Predicate expected1 = new And(
-            new Comparison(globalFrom, LTE, l2),
-                new Comparison(globalTo, GT, l1)
-        );
+        Predicate expected1 = new And(new And(
+            new Comparison(globalTxFrom, LTE, l2),
+                new Comparison(globalTxTo, GT, l1)
+        ), globalTxPredicate);
         assertPredicateEquals(expected1, loader.getPredicates().get());
 
         //only rhs global
         loader = getLoaderFromGDLString("MATCH (a)-[e]->(b) " +
                 "WHERE 1970-01-01.precedes(tx)");
-        Comparison expected2 = new Comparison(l1, LTE, globalFrom);
-        assertPredicateEquals(expected2, loader.getPredicates().get());
+        //Predicate expected2 = new And(new Comparison(l1, LTE, globalFrom), globalFromPredicate);
+        //assertPredicateEquals(expected2, loader.getPredicates().get());
 
         //both sides global
         loader = getLoaderFromGDLString("MATCH (a)-[e]->(b) " +
@@ -196,12 +198,21 @@ public class GDLLoaderTemporalTest {
         TimeSelector aValTo = new TimeSelector("a", VAL_TO);
         TimeSelector bValTo = new TimeSelector("b", VAL_TO);
         TimeSelector eValTo = new TimeSelector("e", VAL_TO);
+        TimeSelector aValFrom = new TimeSelector("a", VAL_FROM);
+        TimeSelector bValFrom = new TimeSelector("b", VAL_FROM);
+        TimeSelector eValFrom = new TimeSelector("e", VAL_FROM);
+        MaxTimePoint globalValFrom = new MaxTimePoint(eValFrom, aValFrom, bValFrom);
         MinTimePoint globalValTo = new MinTimePoint(
-                eValTo, bValTo, eValTo
+                eValTo, aValTo, bValTo
         );
-        Predicate expected3 = new Comparison(globalValTo, GT, globalFrom);
+        Predicate globalValPredicate = new Comparison(globalValFrom, LTE, globalValTo);
+        Predicate expected3 = new And(
+        new And(new Comparison(globalValTo, GT, globalTxFrom), globalTxPredicate), globalValPredicate);
         //assertPredicateEquals(expectedProcessed3, resultProcessed3);
+        System.out.println(expected3);
+        System.out.println(loader.getPredicates().get());
         assertPredicateEquals(expected3, loader.getPredicates().get());
+
     }
 
     @Test
@@ -218,9 +229,9 @@ public class GDLLoaderTemporalTest {
         Predicate expected = new And(
                 new And(
                 new Comparison(new MaxTimePoint(aTxFrom, bTxFrom), GTE, tl2),
+                new Comparison(tl1, LTE, tl2)),
                 new Comparison(new MaxTimePoint(aTxFrom, bTxFrom), LTE,
-                        new MinTimePoint(aTxTo, bTxTo))),
-                new Comparison(tl1, LTE, tl2)
+                new MinTimePoint(aTxTo, bTxTo))
         );
         assertPredicateEquals(expected, loader.getPredicates().get());
 
@@ -232,9 +243,9 @@ public class GDLLoaderTemporalTest {
         expected = new And(
                 new And(
                 new Comparison(new MinTimePoint(aTxFrom, bTxFrom), GTE, tl2),
+                new Comparison(tl1, LTE, tl2)),
                 new Comparison(new MaxTimePoint(aTxFrom, bTxFrom), LTE,
-                        new MinTimePoint(aTxTo, bTxTo))),
-                new Comparison(tl1, LTE, tl2)
+                new MinTimePoint(aTxTo, bTxTo))
         );
         assertPredicateEquals(expected, loader.getPredicates().get());
 
@@ -431,8 +442,9 @@ public class GDLLoaderTemporalTest {
         MinTimePoint globalValTo = new MinTimePoint(eValTo, aValTo, bValTo);
         Duration globalValDuration = new Duration(globalValFrom, globalValTo);
         Comparison globalValPred = new Comparison(globalValFrom, LTE, globalValTo);
-        expected = new And(globalValPred,
-                new Comparison(globalValDuration, comparator, fiveMinutes));
+        // !!! global interval
+        expected = new And(new And(globalValPred,
+                new Comparison(globalValDuration, comparator, fiveMinutes)), globalValPred);
         assertPredicateEquals(loader.getPredicates().get(), expected);
 
         loader = getLoaderFromGDLString("MATCH (a)-[e]->(b) " +
@@ -509,11 +521,15 @@ public class GDLLoaderTemporalTest {
         MinTimePoint globalTxTo = new MinTimePoint(eTxTo, aTxTo, bTxTo);
         Duration globalTxDuration = new Duration(globalTxFrom, globalTxTo);
         Comparison globalTxPred = new Comparison(globalTxFrom, LTE, globalTxTo);
-        expected = new And(
+        // !!! global val and tx
+        expected = new And(new And(new And(
                 new And(
                         globalValPred, globalTxPred
                 ),
-                new Comparison(globalValDuration, comparator, globalTxDuration));
+                new Comparison(globalValDuration, comparator, globalTxDuration)),
+            globalTxPred), globalValPred);
+        System.out.println(loader.getPredicates().get());
+        System.out.println(expected);
         assertPredicateEquals(loader.getPredicates().get(), expected);
 
         loader = getLoaderFromGDLString("MATCH (a)-[e]->(b) " +
@@ -522,11 +538,11 @@ public class GDLLoaderTemporalTest {
         TimeLiteral l2 = new TimeLiteral("2020-05-05");
         Duration constantInterval = new Duration(l1, l2);
         Comparison constantPred = new Comparison(l1, LTE, l2);
-        expected = new And(
+        expected = new And(new And(
                 new And(
                 new And(globalValPred, constantPred),
         new Comparison(globalValDuration, comparator, constantInterval)),
-        new Comparison(l1, LTE, l2));
+        new Comparison(l1, LTE, l2)), globalValPred);
         assertPredicateEquals(loader.getPredicates().get(), expected);
     }
 
