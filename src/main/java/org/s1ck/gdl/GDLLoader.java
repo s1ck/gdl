@@ -19,17 +19,20 @@ package org.s1ck.gdl;
 import org.antlr.v4.runtime.RuleContext;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import org.s1ck.gdl.exceptions.InvalidReferenceException;
-import org.s1ck.gdl.model.*;
+import org.s1ck.gdl.model.Edge;
+import org.s1ck.gdl.model.Graph;
+import org.s1ck.gdl.model.GraphElement;
+import org.s1ck.gdl.model.Vertex;
+import org.s1ck.gdl.model.comparables.ComparableExpression;
 import org.s1ck.gdl.model.comparables.ElementSelector;
-import org.s1ck.gdl.model.predicates.booleans.And;
-import org.s1ck.gdl.model.predicates.expressions.Comparison;
+import org.s1ck.gdl.model.comparables.Literal;
+import org.s1ck.gdl.model.comparables.PropertySelector;
 import org.s1ck.gdl.model.predicates.Predicate;
+import org.s1ck.gdl.model.predicates.booleans.And;
 import org.s1ck.gdl.model.predicates.booleans.Not;
 import org.s1ck.gdl.model.predicates.booleans.Or;
 import org.s1ck.gdl.model.predicates.booleans.Xor;
-import org.s1ck.gdl.model.comparables.ComparableExpression;
-import org.s1ck.gdl.model.comparables.Literal;
-import org.s1ck.gdl.model.comparables.PropertySelector;
+import org.s1ck.gdl.model.predicates.expressions.Comparison;
 import org.s1ck.gdl.utils.Comparator;
 
 import java.util.*;
@@ -627,7 +630,15 @@ class GDLLoader extends GDLBaseListener {
     if (propertiesContext != null) {
       Map<String, Object> properties = new HashMap<>();
       for (GDLParser.PropertyContext property : propertiesContext.property()) {
-        properties.put(property.Identifier().getText(), getPropertyValue(property.literal()));
+        if (property.listLiteral() != null) {
+          List<Object> list = property.listLiteral().literalList().literal()
+                  .stream()
+                  .map(this::getPropertyValue)
+                  .collect(Collectors.toList());
+          properties.put(property.Identifier().getText(), list);
+        } else {
+          properties.put(property.Identifier().getText(), getPropertyValue(property.literal()));
+        }
       }
       return properties;
     }

@@ -775,6 +775,14 @@ public class GDLLoaderTest {
     PROPERTIES_LIST.add(new PropertyTriple<>("k38", "-3.14d", -3.14d));
     PROPERTIES_LIST.add(new PropertyTriple<>("k39", "-3.14D", -3.14D));
     PROPERTIES_LIST.add(new PropertyTriple<>("k40", "NaN", Double.NaN));
+    PROPERTIES_LIST.add(new PropertyTriple<>("k41", "[1, 3, 3, 7]", new ArrayList<>(Arrays.asList(1, 3, 3, 7))));
+    PROPERTIES_LIST.add(new PropertyTriple<>("k42", "[1L, 3L, 3L, 7L]", new ArrayList<>(Arrays.asList(1L, 3L, 3L, 7L))));
+    PROPERTIES_LIST.add(new PropertyTriple<>("k43", "[1.0F, 3.0f, 3.0F, 7.0f]", new ArrayList<>(Arrays.asList(1f, 3f, 3f, 7f))));
+    PROPERTIES_LIST.add(new PropertyTriple<>("k44", "[1.0D, 3.0d, 3.0D, 7.0d]", new ArrayList<>(Arrays.asList(1d, 3d, 3d, 7d))));
+    PROPERTIES_LIST.add(new PropertyTriple<>("k45", "[1.0, 3.0, 3, 7L]", new ArrayList<>(Arrays.asList(1.0f, 3.0f, 3, 7L))));
+    PROPERTIES_LIST.add(new PropertyTriple<>("k46", "[]", new ArrayList<>()));
+    PROPERTIES_LIST.add(new PropertyTriple<>("k47", "[ ]", new ArrayList<>()));
+    PROPERTIES_LIST.add(new PropertyTriple<>("k48", "[NaN, NULL]", new ArrayList<>(Arrays.asList(Double.NaN, null))));
 
     Iterator<PropertyTriple<?>> iterator = PROPERTIES_LIST.iterator();
     StringBuilder sb = new StringBuilder();
