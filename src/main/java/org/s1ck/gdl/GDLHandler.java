@@ -26,12 +26,14 @@ import org.s1ck.gdl.model.Edge;
 import org.s1ck.gdl.model.Graph;
 import org.s1ck.gdl.model.Vertex;
 import org.s1ck.gdl.model.predicates.Predicate;
+import org.s1ck.gdl.utils.ContinuousId;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 /**
  * Helper class that wraps ANTLR initialization logic.
@@ -200,6 +202,21 @@ public class GDLHandler {
     private boolean useDefaultEdgeLabel = true;
 
     /**
+     * Id supplier for graphs.
+     */
+    private Supplier<Long> nextGraphId = new ContinuousId();
+
+    /**
+     * Id supplier for vertices.
+     */
+    private Supplier<Long> nextVertexId = new ContinuousId();
+
+    /**
+     * Id supplier for edges.
+     */
+    private Supplier<Long> nextEdgeId = new ContinuousId();
+
+    /**
      * Strategy for handling parser errors.
      */
     private ANTLRErrorStrategy errorStrategy = new DefaultErrorStrategy();
@@ -298,6 +315,39 @@ public class GDLHandler {
     }
 
     /**
+     * Sets the id generation function for graphs.
+     *
+     * @param nextGraphId graph id function (must not be {@code null})
+     * @return builder
+     */
+    public Builder setNextGraphId(Supplier<Long> nextGraphId) {
+      this.nextGraphId = nextGraphId;
+      return this;
+    }
+
+    /**
+     * Sets the id generation function for vertices.
+     *
+     * @param nextVertexId vertex id function (must not be {@code null})
+     * @return builder
+     */
+    public Builder setNextVertexId(Supplier<Long> nextVertexId) {
+      this.nextVertexId = nextVertexId;
+      return this;
+    }
+
+    /**
+     * Sets the id generation function for edges.
+     *
+     * @param nextEdgeId edge id function (must not be {@code null})
+     * @return builder
+     */
+    public Builder setNextEdgeId(Supplier<Long> nextEdgeId) {
+      this.nextEdgeId = nextEdgeId;
+      return this;
+    }
+
+    /**
      * Set the error handler strategy for ANTLR. If not set, {@link DefaultErrorStrategy} is used.
      *
      * @param errorStrategy ANTLR error strategy
@@ -361,13 +411,25 @@ public class GDLHandler {
       if (errorStrategy == null) {
         throw new IllegalArgumentException("Error handler must not be null.");
       }
+      if (nextGraphId == null) {
+        throw new IllegalArgumentException("Graph id function must not be null.");
+      }
+      if (nextVertexId == null) {
+        throw new IllegalArgumentException("Vertex id function must not be null.");
+      }
+      if (nextEdgeId == null) {
+        throw new IllegalArgumentException("Edge id function must not be null.");
+      }
 
       GDLLexer lexer = new GDLLexer(antlrInputStream);
       GDLParser parser = new GDLParser(new CommonTokenStream(lexer));
       parser.setErrorHandler(errorStrategy);
 
-      GDLLoader loader = new GDLLoader(graphLabel, vertexLabel, edgeLabel,
-        useDefaultGraphLabel, useDefaultVertexLabel, useDefaultEdgeLabel);
+      GDLLoader loader = new GDLLoader(
+              graphLabel, vertexLabel, edgeLabel,
+              useDefaultGraphLabel, useDefaultVertexLabel, useDefaultEdgeLabel,
+              nextGraphId, nextVertexId, nextEdgeId
+      );
       new ParseTreeWalker().walk(loader, parser.database());
       return new GDLHandler(loader);
     }

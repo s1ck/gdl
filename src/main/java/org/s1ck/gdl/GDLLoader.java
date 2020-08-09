@@ -34,8 +34,10 @@ import org.s1ck.gdl.model.predicates.booleans.Or;
 import org.s1ck.gdl.model.predicates.booleans.Xor;
 import org.s1ck.gdl.model.predicates.expressions.Comparison;
 import org.s1ck.gdl.utils.Comparator;
+import org.s1ck.gdl.utils.ContinuousId;
 
 import java.util.*;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 class GDLLoader extends GDLBaseListener {
@@ -67,9 +69,9 @@ class GDLLoader extends GDLBaseListener {
   private final String defaultEdgeLabel;
 
   // used to generate sequential ids
-  private long nextGraphId = 0L;
-  private long nextVertexId = 0L;
-  private long nextEdgeId = 0L;
+  private final Supplier<Long> nextGraphId;
+  private final Supplier<Long> nextVertexId;
+  private final Supplier<Long> nextEdgeId;
 
   // flag that tells if the parser is inside a logical graph
   private boolean inGraph = false;
@@ -96,8 +98,11 @@ class GDLLoader extends GDLBaseListener {
    * @param defaultEdgeLabel    edge label to be used if no label is given in the GDL script
    */
   GDLLoader(String defaultGraphLabel, String defaultVertexLabel, String defaultEdgeLabel) {
-    this(defaultGraphLabel, defaultVertexLabel, defaultEdgeLabel,
-      true, true, true);
+    this(
+            defaultGraphLabel, defaultVertexLabel, defaultEdgeLabel,
+            true, true, true,
+            new ContinuousId(), new ContinuousId(), new ContinuousId()
+    );
   }
 
   /**
@@ -111,7 +116,8 @@ class GDLLoader extends GDLBaseListener {
    * @param useDefaultEdgeLabel   enable default edge label
    */
   GDLLoader(String defaultGraphLabel, String defaultVertexLabel, String defaultEdgeLabel,
-    boolean useDefaultGraphLabel, boolean useDefaultVertexLabel, boolean useDefaultEdgeLabel) {
+            boolean useDefaultGraphLabel, boolean useDefaultVertexLabel, boolean useDefaultEdgeLabel,
+            Supplier<Long> nextGraphId, Supplier<Long> nextVertexId, Supplier<Long> nextEdgeId) {
 
     this.useDefaultGraphLabel = useDefaultGraphLabel;
     this.useDefaultVertexLabel = useDefaultVertexLabel;
@@ -120,6 +126,10 @@ class GDLLoader extends GDLBaseListener {
     this.defaultGraphLabel  = defaultGraphLabel;
     this.defaultVertexLabel = defaultVertexLabel;
     this.defaultEdgeLabel   = defaultEdgeLabel;
+
+    this.nextGraphId = nextGraphId;
+    this.nextVertexId = nextVertexId;
+    this.nextEdgeId = nextEdgeId;
 
     userGraphCache = new HashMap<>();
     userVertexCache = new HashMap<>();
@@ -782,7 +792,7 @@ class GDLLoader extends GDLBaseListener {
    * @return new graph identifier
    */
   private Long getNewGraphId() {
-    return nextGraphId++;
+    return nextGraphId.get();
   }
 
   /**
@@ -791,7 +801,7 @@ class GDLLoader extends GDLBaseListener {
    * @return new vertex identifier
    */
   private Long getNewVertexId() {
-    return nextVertexId++;
+    return nextVertexId.get();
   }
 
   /**
@@ -800,7 +810,7 @@ class GDLLoader extends GDLBaseListener {
    * @return new edge identifier
    */
   private Long getNewEdgeId() {
-    return nextEdgeId++;
+    return nextEdgeId.get();
   }
 
   // --------------------------------------------------------------------------------------------
