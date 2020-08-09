@@ -8,6 +8,7 @@ import org.s1ck.gdl.model.Vertex;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collections;
+import java.util.concurrent.atomic.AtomicLong;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -120,5 +121,31 @@ public class GDLHandlerTest {
     assertEquals("Vertex has wrong number of graphs", 1, u.getGraphs().size());
     assertTrue("Vertex is in wrong graph", v.getGraphs().contains(g.getId()));
     assertTrue("Vertex is in wrong graph", u.getGraphs().contains(g.getId()));
+  }
+
+  @Test
+  public void customIdSupplierTest() {
+    AtomicLong nextGraphId = new AtomicLong(42);
+    AtomicLong nextVertexId = new AtomicLong(42);
+    AtomicLong nextEdgeId = new AtomicLong(42);
+
+    GDLHandler handler = new GDLHandler.Builder()
+            .setNextGraphId(() -> nextGraphId.getAndAdd(42))
+            .setNextVertexId(() -> nextVertexId.getAndAdd(42))
+            .setNextEdgeId(() -> nextEdgeId.getAndAdd(42))
+            .buildFromString("g1[(v1)-[e1]->(v2)], g2[(v3)-[e2]->(v4)]");
+
+    assertEquals("wrong number of graphs", 2, handler.getGraphs().size());
+    assertEquals("wrong number of vertices", 4, handler.getVertices().size());
+    assertEquals("wrong number of vertices", 2, handler.getEdges().size());
+
+    assertEquals("wrong id for g1", 42L, handler.getGraphCache().get("g1").getId());
+    assertEquals("wrong id for g2", 84L, handler.getGraphCache().get("g2").getId());
+    assertEquals("wrong id for v1", 42L, handler.getVertexCache().get("v1").getId());
+    assertEquals("wrong id for v2", 84L, handler.getVertexCache().get("v2").getId());
+    assertEquals("wrong id for v3", 126L, handler.getVertexCache().get("v3").getId());
+    assertEquals("wrong id for v4", 168L, handler.getVertexCache().get("v4").getId());
+    assertEquals("wrong id for e1", 42L, handler.getEdgeCache().get("e1").getId());
+    assertEquals("wrong id for e1", 84L, handler.getEdgeCache().get("e2").getId());
   }
 }
