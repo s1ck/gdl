@@ -4,7 +4,7 @@
 
     <groupId>com.github.s1ck</groupId>
     <artifactId>gdl</artifactId>
-    <version>0.3.5</version>
+    <version>0.3.6-SNAPSHOT</version>
 
     <name>GDL - Graph Definition Language</name>
     <description>ANTLR Grammar for the definition of extended property graphs.</description>
@@ -22,8 +22,6 @@
         <developer>
             <name>Martin Junghanns</name>
             <email>m.junghanns@mailbox.org</email>
-            <organization>Leipzig University</organization>
-            <organizationUrl>http://dbs.uni-leipzig.de/</organizationUrl>
             <id>s1ck</id>
         </developer>
     </developers>

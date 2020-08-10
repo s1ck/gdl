@@ -58,6 +58,12 @@ Numeric property values can have specific data types:
 (alice:User {name : "Alice", age : 23L, height : 1.82f, weight : 42.7d})
 ```
 
+Property values can also be ordered lists:
+
+```
+(alice:User {name : "Alice", age : 23, codes: ["Java", "Rust", "Scala"]})
+```
+
 Define an outgoing edge:
 
 ```
@@ -185,7 +191,7 @@ Add dependency to your maven project:
 <dependency>
     <groupId>com.github.s1ck</groupId>
     <artifactId>gdl</artifactId>
-    <version>0.3.4</version>
+    <version>0.3.5</version>
 </dependency>
 ```
 
