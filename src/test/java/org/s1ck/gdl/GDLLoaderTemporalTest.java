@@ -140,7 +140,7 @@ public class GDLLoaderTemporalTest {
     @Test
     public void asOfTest(){
         GDLLoader loader = getLoaderFromGDLString("MATCH (a)-[e]->(b) " +
-                "WHERE e.asOf(Timestamp(1970-01-01))");
+                "WHERE e.tx.asOf(Timestamp(1970-01-01))");
         Predicate expected = new And(
                 new Comparison(
                         new TimeSelector("e", TX_FROM),
@@ -148,10 +148,26 @@ public class GDLLoaderTemporalTest {
                         new TimeLiteral("1970-01-01")
                 ),
                 new Comparison(
-                        new TimeSelector("e", TX_TO),
-                        GTE,
-                        new TimeLiteral("1970-01-01")
+                        new TimeLiteral("1970-01-01"),
+                        LTE,
+                        new TimeSelector("e", TX_TO)
                 )
+        );
+        assertPredicateEquals(loader.getPredicates().get(), expected);
+
+        loader = getLoaderFromGDLString("MATCH (a)-[e]->(b) " +
+        "WHERE e.val.asOf(a.tx_from");
+        expected = new And(
+        new Comparison(
+        new TimeSelector("e", VAL_FROM),
+        LTE,
+        new TimeSelector("a", TX_FROM)
+        ),
+        new Comparison(
+        new TimeSelector("a", TX_FROM),
+        LTE,
+        new TimeSelector("e", VAL_TO)
+        )
         );
         assertPredicateEquals(loader.getPredicates().get(), expected);
     }

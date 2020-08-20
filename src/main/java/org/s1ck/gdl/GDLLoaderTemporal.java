@@ -203,6 +203,8 @@ public class GDLLoaderTemporal {
             return createLengthAtLeastPredicates(from, to, intervalFunc.lengthAtLeastOperator());
         } else if (intervalFunc.lengthAtMostOperator() != null) {
             return createLengthAtMostPredicates(from, to, intervalFunc.lengthAtMostOperator());
+        } else if(intervalFunc.asOfOperator() != null){
+            return createAsOfPredicates(from, to, intervalFunc.asOfOperator());
         }
         return null;
     }
@@ -477,6 +479,16 @@ public class GDLLoaderTemporal {
         return durationPredicate;
     }
 
+    private Predicate createAsOfPredicates(TimePoint from, TimePoint to,
+                                           GDLParser.AsOfOperatorContext ctx){
+        TimePoint arg = buildTimePoint(ctx.timePoint());
+        Predicate asOfPredicate = new And(
+            new Comparison(from, LTE, arg),
+            new Comparison(arg, LTE, to)
+        );
+        return asOfPredicate;
+    }
+
     /**
      * Creates a TimeConstant given a suitable context. Constants can be a constant number
      * of days ({@code Days(n)}), hours ({@code Hours(n)}), minutes ({@code Minutes(n)}),
@@ -679,9 +691,9 @@ public class GDLLoaderTemporal {
     /**
      * Create asOf predicate: a.tx_from<=point AND a.tx_to>= point
      * @param ctx asOf context
-     * @return asOf predicate
+     * @return  predicate
      */
-    Predicate createAsOf(GDLParser.AsOfContext ctx) {
+   /* Predicate createAsOf(GDLParser.AsOfContext ctx) {
         TimePoint tp = buildTimePoint(ctx.timePoint());
         String identifier = loader.resolveIdentifier(ctx.Identifier().getText());
         return new And(
@@ -695,7 +707,7 @@ public class GDLLoaderTemporal {
                                 tp)
 
         );
-    }
+    }*/
 
     /**
      * Returns the literal for all "Now" literals in the query

@@ -442,10 +442,10 @@ class GDLLoader extends GDLBaseListener {
      *
      * @param ctx asOf context
      */
-    @Override
+    /*@Override
     public void enterAsOf(GDLParser.AsOfContext ctx) {
         currentPredicates.add(temporalLoader.createAsOf(ctx));
-    }
+    }*/
 
     /**
      * Returns the literal for all "Now" literals in the query

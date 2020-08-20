@@ -148,7 +148,7 @@ temporalComparison
 timeFunc
     : interval '.' intervalFunc             #intvF
     | timePoint '.' stampFunc                 #stmpF
-    | Identifier '.asOf(' timePoint ')'   #asOf
+    //| Identifier '.asOf(' timePoint ')'   #asOf
     ;
 
 // intervals
@@ -227,6 +227,7 @@ intervalFunc
             | shorterThanOperator
             | lengthAtLeastOperator
             | lengthAtMostOperator
+            | asOfOperator
             ;
 
 overlapsIntervallOperator
@@ -280,6 +281,10 @@ lengthAtLeastOperator
 
 lengthAtMostOperator
     : 'lengthAtMost(' (interval | timeConstant) ')'
+    ;
+
+asOfOperator
+    : 'asOf(' timePoint ')'
     ;
 
 timeConstant
