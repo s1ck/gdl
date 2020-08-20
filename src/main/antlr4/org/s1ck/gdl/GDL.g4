@@ -187,6 +187,10 @@ timePoint
     ;
 
 timeLiteral
+    : 'Timestamp(' timeStamp ')'
+    ;
+
+timeStamp
     : Datetime
     | Date
     | Now;

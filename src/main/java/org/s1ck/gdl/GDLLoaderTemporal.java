@@ -82,10 +82,11 @@ public class GDLLoaderTemporal {
      * @return TimeLiteral
      */
     private TimeLiteral buildTimeLiteral(GDLParser.TimeLiteralContext ctx) {
-        if(ctx.getText().trim().toLowerCase().equals("now")){
+        GDLParser.TimeStampContext stamp = ctx.timeStamp();
+        if(stamp.getText().trim().toLowerCase().equals("now")){
             return new TimeLiteral(nowLit.getMilliseconds());
         } else{
-            return new TimeLiteral(ctx.getText().trim());
+            return new TimeLiteral(stamp.getText().trim());
         }
     }
 

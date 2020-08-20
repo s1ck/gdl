@@ -20,7 +20,7 @@ public class GDLLoaderTemporalTest {
     @Test
     public void periodLiteralTest(){
         GDLLoader loader = getLoaderFromGDLString("MATCH (a)-->(b) " +
-                "WHERE a.tx.overlaps(Interval(1970-01-01,1970-01-02))");
+                "WHERE a.tx.overlaps(Interval(Timestamp(1970-01-01), Timestamp(1970-01-02)))");
         TimeLiteral tl1 = new TimeLiteral("1970-01-01");
         TimeLiteral tl2 = new TimeLiteral("1970-01-02");
 
@@ -39,7 +39,7 @@ public class GDLLoaderTemporalTest {
     @Test
     public void afterTest(){
         GDLLoader loader = getLoaderFromGDLString("MATCH (a)-->(b) " +
-                "WHERE a.val_from.after(1970-01-01T00:00:01) AND a.tx_to.after(1970-01-01T00:00:01)");
+                "WHERE a.val_from.after(Timestamp(1970-01-01T00:00:01)) AND a.tx_to.after(Timestamp(1970-01-01T00:00:01))");
         Predicate expected =
                 new And(
                     new Comparison(
@@ -58,7 +58,7 @@ public class GDLLoaderTemporalTest {
     @Test
     public void fromToTest(){
         GDLLoader loader = getLoaderFromGDLString("MATCH (a)-->(b) " +
-                "WHERE a.tx.fromTo(1970-01-01, b.tx_to)");
+                "WHERE a.tx.fromTo(Timestamp(1970-01-01), b.tx_to)");
         Predicate expected = new And(
                 new Comparison(
                         new TimeSelector("b", "tx_to"),
@@ -77,7 +77,7 @@ public class GDLLoaderTemporalTest {
     @Test
     public void betweenTest(){
         GDLLoader loader = getLoaderFromGDLString("MATCH (a)-->(b) " +
-                "WHERE a.tx.between(b.tx_from, 2020-04-28T10:39:15)");
+                "WHERE a.tx.between(b.tx_from, Timestamp(2020-04-28T10:39:15))");
         Predicate expected = new And(
                 new Comparison(
                         new TimeSelector("a", TX_FROM),
@@ -140,7 +140,7 @@ public class GDLLoaderTemporalTest {
     @Test
     public void asOfTest(){
         GDLLoader loader = getLoaderFromGDLString("MATCH (a)-[e]->(b) " +
-                "WHERE e.asOf(1970-01-01)");
+                "WHERE e.asOf(Timestamp(1970-01-01))");
         Predicate expected = new And(
                 new Comparison(
                         new TimeSelector("e", TX_FROM),
@@ -179,7 +179,7 @@ public class GDLLoaderTemporalTest {
 
         // only lhs global
         GDLLoader loader = getLoaderFromGDLString("MATCH (a)-[e]->(b) " +
-                "WHERE tx.between(1970-01-01, 2020-05-01)");
+                "WHERE tx.between(Timestamp(1970-01-01), Timestamp(2020-05-01))");
         Predicate expected1 = new And(new And(
             new Comparison(globalTxFrom, LTE, l2),
                 new Comparison(globalTxTo, GT, l1)
@@ -188,7 +188,7 @@ public class GDLLoaderTemporalTest {
 
         //only rhs global
         loader = getLoaderFromGDLString("MATCH (a)-[e]->(b) " +
-                "WHERE 1970-01-01.precedes(tx)");
+                "WHERE Timestamp(1970-01-01).precedes(tx)");
         //Predicate expected2 = new And(new Comparison(l1, LTE, globalFrom), globalFromPredicate);
         //assertPredicateEquals(expected2, loader.getPredicates().get());
 
@@ -218,7 +218,7 @@ public class GDLLoaderTemporalTest {
     @Test
     public void intervalMergeAndJoinTest(){
         GDLLoader loader = getLoaderFromGDLString("MATCH (a)-[e]->(b) " +
-                "WHERE a.tx.merge(b.tx).succeeds(Interval(1970-01-01, 2020-05-01))");
+                "WHERE a.tx.merge(b.tx).succeeds(Interval(Timestamp(1970-01-01), Timestamp(2020-05-01) ))");
         TimeSelector aTxFrom = new TimeSelector("a", TX_FROM);
         TimeSelector aTxTo = new TimeSelector("a", TX_TO);
         TimeSelector bTxFrom = new TimeSelector("b", TX_FROM);
@@ -239,7 +239,7 @@ public class GDLLoaderTemporalTest {
          * Join
          */
         loader = getLoaderFromGDLString("MATCH (a)-[e]->(b) " +
-                "WHERE a.tx.join(b.tx).succeeds(Interval(1970-01-01, 2020-05-01))");
+                "WHERE a.tx.join(b.tx).succeeds(Interval(Timestamp(1970-01-01), Timestamp(2020-05-01))");
         expected = new And(
                 new And(
                 new Comparison(new MinTimePoint(aTxFrom, bTxFrom), GTE, tl2),
@@ -295,7 +295,7 @@ public class GDLLoaderTemporalTest {
     @Test
     public void comparisonTest(){
         GDLLoader loaderDoProcess = getLoaderFromGDLString("MATCH (a)-[e]->(b) " +
-                "WHERE a.tx_from > b.val_from AND 2013-06-01 <= a.val_to");
+                "WHERE a.tx_from > b.val_from AND Timestamp(2013-06-01) <= a.val_to");
         Predicate expected = new And(
                 new Comparison(new TimeSelector("a", TX_FROM), GT,
                         new TimeSelector("b", VAL_FROM)),
@@ -348,7 +348,7 @@ public class GDLLoaderTemporalTest {
         TimeLiteral literal1 = new TimeLiteral("2020-05-05");
 
         GDLLoader loader = getLoaderFromGDLString("MATCH (a)-[e]->(b) " +
-                "WHERE MIN(a.tx_from, b.tx_from, e.tx_from).before(2020-05-05)");
+                "WHERE MIN(a.tx_from, b.tx_from, e.tx_from).before(Timestamp(2020-05-05))");
 
         Predicate expected = new Comparison(
                 new MinTimePoint(aTxFrom, bTxFrom, eTxFrom), LT, literal1
@@ -357,7 +357,7 @@ public class GDLLoaderTemporalTest {
 
 
         loader = getLoaderFromGDLString("MATCH (a)-[e]->(b) " +
-                "WHERE MAX(a.tx_from, b.tx_from, e.tx_from).before(2020-05-05)");
+                "WHERE MAX(a.tx_from, b.tx_from, e.tx_from).before(Timestamp(2020-05-05))");
 
         expected = new Comparison(
                 new MaxTimePoint(aTxFrom, bTxFrom, eTxFrom), LT, literal1
@@ -376,7 +376,7 @@ public class GDLLoaderTemporalTest {
 
 
         loader = getLoaderFromGDLString("MATCH (a)-[e]->(b) " +
-                "WHERE MIN(a.tx_from, b.tx_from, e.tx_from).before(2020-05-05) AND" +
+                "WHERE MIN(a.tx_from, b.tx_from, e.tx_from).before(Timestamp(2020-05-05)) AND" +
                 " a.tx.succeeds(b.tx)");
         expected = new And(
                 new Comparison(
@@ -533,7 +533,7 @@ public class GDLLoaderTemporalTest {
         assertPredicateEquals(loader.getPredicates().get(), expected);
 
         loader = getLoaderFromGDLString("MATCH (a)-[e]->(b) " +
-                "WHERE val."+operator+"(Interval(2020-05-01, 2020-05-05))");
+                "WHERE val."+operator+"(Interval(Timestamp(2020-05-01), Timestamp(2020-05-05)))");
         TimeLiteral l1 = new TimeLiteral("2020-05-01");
         TimeLiteral l2 = new TimeLiteral("2020-05-05");
         Duration constantInterval = new Duration(l1, l2);
@@ -549,7 +549,7 @@ public class GDLLoaderTemporalTest {
     @Test
     public void timeLitNowTest(){
         GDLLoader loader = getLoaderFromGDLString("MATCH (a)-[e]->(b) " +
-                "WHERE Now<=Now");
+                "WHERE Timestamp(Now)<=Timestamp(Now)");
         System.out.println(loader.getPredicates());
         Comparison comp = (Comparison) loader.getPredicates().get();
         // all "Now"s should have the exact same value
