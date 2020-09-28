@@ -147,6 +147,11 @@ public class TimeLiteral extends TimeAtom {
         return getMilliseconds()==that.getMilliseconds();
     }
 
+    @Override
+    public int hashCode(){
+        return (int) getMilliseconds();
+    }
+
 
     /**
      * Utility method to handle input strings like 1970-01-01. They are not recognized by LocalDateTime.
