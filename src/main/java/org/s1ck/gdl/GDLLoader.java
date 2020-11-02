@@ -338,6 +338,9 @@ class GDLLoader extends GDLBaseListener {
     Vertex v;
     if (variable != null && userVertexCache.containsKey(variable)) {
       v = userVertexCache.get(variable);
+      if (!getProperties(vertexContext.properties()).isEmpty()) {
+        throw new IllegalArgumentException("Properties for vertex " + variable + " defined multiple times");
+      };
     } else {
       v = initNewVertex(vertexContext);
 

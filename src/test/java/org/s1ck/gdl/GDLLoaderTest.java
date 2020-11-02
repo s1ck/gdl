@@ -113,7 +113,7 @@ public class GDLLoaderTest {
       "  foobar: '\\'foobar\\''" +
       "})"
     );
-    
+
     Vertex v = loader.getVertices().iterator().next();
     Map<String, Object> properties = v.getProperties();
 
@@ -122,6 +122,16 @@ public class GDLLoaderTest {
     assertEquals("\"baz\"", properties.get("baz"));
     assertEquals("'foobar'", properties.get("foobar"));
   }
+
+  @Test
+  public void failOnDuplicatePropertyAssignment() {
+    assertThrows(
+            "Properties for vertex v1 defined multiple times",
+            IllegalArgumentException.class,
+            () -> getLoaderFromGDLString("(v1 {prop: 1}), (v1 {prop: 1})")
+    );
+  }
+
 
   // --------------------------------------------------------------------------------------------
   //  Edge only tests
