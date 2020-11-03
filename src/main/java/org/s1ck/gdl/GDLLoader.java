@@ -18,6 +18,7 @@ package org.s1ck.gdl;
 
 import org.antlr.v4.runtime.RuleContext;
 import org.antlr.v4.runtime.tree.TerminalNode;
+import org.s1ck.gdl.exceptions.DuplicateDeclarationException;
 import org.s1ck.gdl.exceptions.InvalidReferenceException;
 import org.s1ck.gdl.model.Edge;
 import org.s1ck.gdl.model.Graph;
@@ -289,6 +290,9 @@ class GDLLoader extends GDLBaseListener {
     Graph g;
     if (variable != null && userGraphCache.containsKey(variable)) {
       g = userGraphCache.get(variable);
+      if(!isEmpty(graphContext)) {
+        throw new DuplicateDeclarationException(variable, "Graph");
+      }
     } else {
       g = initNewGraph(graphContext);
 
@@ -302,6 +306,12 @@ class GDLLoader extends GDLBaseListener {
       graphs.add(g);
     }
     currentGraphId = g.getId();
+  }
+
+  private boolean isEmpty(GDLParser.GraphContext ctx) {
+    List<GDLParser.LabelContext> labels = ctx.header().label();
+    GDLParser.PropertiesContext properties = ctx.properties();
+    return (labels == null || labels.isEmpty()) && (properties == null || properties.property().isEmpty());
   }
 
   @Override
@@ -338,8 +348,8 @@ class GDLLoader extends GDLBaseListener {
     Vertex v;
     if (variable != null && userVertexCache.containsKey(variable)) {
       v = userVertexCache.get(variable);
-      if (!getProperties(vertexContext.properties()).isEmpty()) {
-        throw new IllegalArgumentException("Properties for vertex " + variable + " defined multiple times");
+      if (!isEmpty(vertexContext)) {
+        throw new DuplicateDeclarationException(variable, "Vertex");
       };
     } else {
       v = initNewVertex(vertexContext);
@@ -356,6 +366,12 @@ class GDLLoader extends GDLBaseListener {
     updateGraphElement(v);
     setLastSeenVertex(v);
     updateLastSeenEdge(v);
+  }
+
+  private boolean isEmpty(GDLParser.VertexContext ctx) {
+    List<GDLParser.LabelContext> labels = ctx.header().label();
+    GDLParser.PropertiesContext properties = ctx.properties();
+    return (labels == null || labels.isEmpty()) && (properties == null || properties.property().isEmpty());
   }
 
   /**
@@ -466,6 +482,9 @@ class GDLLoader extends GDLBaseListener {
     }
     if (variable != null && userEdgeCache.containsKey(variable)) {
       e = userEdgeCache.get(variable);
+      if (!isEmpty(edgeBodyContext)) {
+        throw new DuplicateDeclarationException(variable, "Edge");
+      };
     } else {
       e = initNewEdge(edgeBodyContext, isIncoming);
 
@@ -480,6 +499,12 @@ class GDLLoader extends GDLBaseListener {
     }
     updateGraphElement(e);
     setLastSeenEdge(e);
+  }
+
+  private boolean isEmpty(GDLParser.EdgeBodyContext ctx) {
+    List<GDLParser.LabelContext> labels = ctx.header().label();
+    GDLParser.PropertiesContext properties = ctx.properties();
+    return (labels == null || labels.isEmpty()) && (properties == null || properties.property().isEmpty());
   }
 
   /**

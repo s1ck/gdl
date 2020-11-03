@@ -4,6 +4,7 @@ import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.junit.Test;
+import org.s1ck.gdl.exceptions.DuplicateDeclarationException;
 import org.s1ck.gdl.exceptions.InvalidReferenceException;
 import org.s1ck.gdl.model.Edge;
 import org.s1ck.gdl.model.Element;
@@ -124,12 +125,13 @@ public class GDLLoaderTest {
   }
 
   @Test
-  public void failOnDuplicatePropertyAssignment() {
-    assertThrows(
-            "Properties for vertex v1 defined multiple times",
-            IllegalArgumentException.class,
+  public void failOnDuplicateVertexPropertyAssignment() {
+    DuplicateDeclarationException exc = assertThrows(
+            DuplicateDeclarationException.class,
             () -> getLoaderFromGDLString("(v1 {prop: 1}), (v1 {prop: 1})")
     );
+
+    assertEquals("Vertex `v1` is declared multiple times. Do not declare properties or labels while referencing a variable.", exc.getMessage());
   }
 
 
@@ -294,6 +296,16 @@ public class GDLLoaderTest {
     assertEquals("wrong lower bound", 0, e.getUpperBound());
   }
 
+  @Test
+  public void failOnDuplicateEdgePropertyAssignment() {
+    DuplicateDeclarationException exc = assertThrows(
+            DuplicateDeclarationException.class,
+            () -> getLoaderFromGDLString("g[(a)-[f {prop: 1}]->(b)],h[(a)-[f {prop: 1}]->(b)]")
+    );
+
+    assertEquals("Edge `f` is declared multiple times. Do not declare properties or labels while referencing a variable.", exc.getMessage());
+  }
+
   // --------------------------------------------------------------------------------------------
   //  Graph only tests
   // --------------------------------------------------------------------------------------------
@@ -398,6 +410,16 @@ public class GDLLoaderTest {
     validateCollectionSizes(loader, 1, 2, 0);
     validateCacheSizes(loader, 1, 0, 0,
       0, 2, 0);
+  }
+
+  @Test
+  public void failOnDuplicateGraphPropertyAssignment() {
+    DuplicateDeclarationException exc = assertThrows(
+            DuplicateDeclarationException.class,
+            () -> getLoaderFromGDLString("g:Community{memberCount:23}[(a)] g:{memberCount:23}[(a)]")
+    );
+
+    assertEquals("Graph `g` is declared multiple times. Do not declare properties or labels while referencing a variable.", exc.getMessage());
   }
 
   // --------------------------------------------------------------------------------------------
