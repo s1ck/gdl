@@ -27,4 +27,9 @@ public class Vertex extends GraphElement {
       ", graphs=" + getGraphs() +
       '}';
   }
+
+  @Override
+  public String referenceString() {
+    return "(" + getVariable() + ")";
+  }
 }

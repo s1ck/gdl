@@ -131,7 +131,11 @@ public class GDLLoaderTest {
             () -> getLoaderFromGDLString("(v1 {prop: 1}), (v1 {prop: 1})")
     );
 
-    assertEquals("Vertex `v1` is declared multiple times. Do not declare properties or labels while referencing a variable.", exc.getMessage());
+    assertEquals("Vertex `v1` is declared multiple times. " +
+            "Declaring properties or labels while referencing a variable is not allowed. " +
+            "Use `(v1)` to refer to the element instead.",
+            exc.getMessage()
+    );
   }
 
 
@@ -303,7 +307,11 @@ public class GDLLoaderTest {
             () -> getLoaderFromGDLString("g[(a)-[f {prop: 1}]->(b)],h[(a)-[f {prop: 1}]->(b)]")
     );
 
-    assertEquals("Edge `f` is declared multiple times. Do not declare properties or labels while referencing a variable.", exc.getMessage());
+    assertEquals("Edge `f` is declared multiple times. " +
+            "Declaring properties or labels while referencing a variable is not allowed. " +
+            "Use `[f]` to refer to the element instead.",
+            exc.getMessage()
+    );
   }
 
   // --------------------------------------------------------------------------------------------
@@ -419,7 +427,10 @@ public class GDLLoaderTest {
             () -> getLoaderFromGDLString("g:Community{memberCount:23}[(a)] g:{memberCount:23}[(a)]")
     );
 
-    assertEquals("Graph `g` is declared multiple times. Do not declare properties or labels while referencing a variable.", exc.getMessage());
+    assertEquals("Graph `g` is declared multiple times. " +
+            "Declaring properties or labels while referencing a variable is not allowed. " +
+            "Use `g` to refer to the element instead.", exc.getMessage()
+    );
   }
 
   // --------------------------------------------------------------------------------------------

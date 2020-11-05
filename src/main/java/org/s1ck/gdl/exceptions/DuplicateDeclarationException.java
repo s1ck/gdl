@@ -16,17 +16,22 @@
 
 package org.s1ck.gdl.exceptions;
 
+import org.s1ck.gdl.model.Element;
+
 /**
  * Raised when declaring properties or labels twice for a variable;
  */
 public class DuplicateDeclarationException extends RuntimeException {
 
-  /**
-   * Creates a new exception
-   *
-   * @param variable the variable which could not be resolved
-   */
-  public DuplicateDeclarationException(String variable, String entity) {
-    super(String.format("%1$s `%2$s` is declared multiple times. Do not declare properties or labels while referencing a variable.", entity, variable));
+  public DuplicateDeclarationException(Element element) {
+
+    super(String.format(
+            "%s `%s` is declared multiple times. " +
+                    "Declaring properties or labels while referencing a variable is not allowed. " +
+                    "Use `%s` to refer to the element instead.",
+            element.getClass().getSimpleName(),
+            element.getVariable(),
+            element.referenceString()
+    ));
   }
 }

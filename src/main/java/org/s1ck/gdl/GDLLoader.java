@@ -296,7 +296,7 @@ class GDLLoader extends GDLBaseListener {
     if (variable != null && userGraphCache.containsKey(variable)) {
       g = userGraphCache.get(variable);
       if(!isEmpty(graphContext.header().label(), graphContext.properties())) {
-        throw new DuplicateDeclarationException(variable, "Graph");
+        throw new DuplicateDeclarationException(g);
       }
     } else {
       g = initNewGraph(graphContext);
@@ -348,7 +348,7 @@ class GDLLoader extends GDLBaseListener {
     if (variable != null && userVertexCache.containsKey(variable)) {
       v = userVertexCache.get(variable);
       if (!isEmpty(vertexContext.header().label(), vertexContext.properties())) {
-        throw new DuplicateDeclarationException(variable, "Vertex");
+        throw new DuplicateDeclarationException(v);
       };
     } else {
       v = initNewVertex(vertexContext);
@@ -476,7 +476,7 @@ class GDLLoader extends GDLBaseListener {
     if (variable != null && userEdgeCache.containsKey(variable)) {
       e = userEdgeCache.get(variable);
       if (!isEmpty(edgeBodyContext.header().label(), edgeBodyContext.properties())) {
-        throw new DuplicateDeclarationException(variable, "Edge");
+        throw new DuplicateDeclarationException(e);
       };
     } else {
       e = initNewEdge(edgeBodyContext, isIncoming);
