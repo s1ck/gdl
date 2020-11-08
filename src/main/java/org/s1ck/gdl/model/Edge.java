@@ -88,4 +88,9 @@ public class Edge extends GraphElement {
 
     return out;
   }
+
+  @Override
+  public String referenceString() {
+    return "[" + getVariable() + "]";
+  }
 }

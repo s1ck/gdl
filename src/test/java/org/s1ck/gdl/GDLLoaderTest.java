@@ -4,6 +4,7 @@ import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.junit.Test;
+import org.s1ck.gdl.exceptions.DuplicateDeclarationException;
 import org.s1ck.gdl.exceptions.InvalidReferenceException;
 import org.s1ck.gdl.model.Edge;
 import org.s1ck.gdl.model.Element;
@@ -113,7 +114,7 @@ public class GDLLoaderTest {
       "  foobar: '\\'foobar\\''" +
       "})"
     );
-    
+
     Vertex v = loader.getVertices().iterator().next();
     Map<String, Object> properties = v.getProperties();
 
@@ -122,6 +123,21 @@ public class GDLLoaderTest {
     assertEquals("\"baz\"", properties.get("baz"));
     assertEquals("'foobar'", properties.get("foobar"));
   }
+
+  @Test
+  public void failOnDuplicateVertexPropertyAssignment() {
+    DuplicateDeclarationException exc = assertThrows(
+            DuplicateDeclarationException.class,
+            () -> getLoaderFromGDLString("(v1 {prop: 1}), (v1 {prop: 1})")
+    );
+
+    assertEquals("Vertex `v1` is declared multiple times. " +
+            "Declaring properties or labels while referencing a variable is not allowed. " +
+            "Use `(v1)` to refer to the element instead.",
+            exc.getMessage()
+    );
+  }
+
 
   // --------------------------------------------------------------------------------------------
   //  Edge only tests
@@ -284,6 +300,20 @@ public class GDLLoaderTest {
     assertEquals("wrong lower bound", 0, e.getUpperBound());
   }
 
+  @Test
+  public void failOnDuplicateEdgePropertyAssignment() {
+    DuplicateDeclarationException exc = assertThrows(
+            DuplicateDeclarationException.class,
+            () -> getLoaderFromGDLString("g[(a)-[f {prop: 1}]->(b)],h[(a)-[f {prop: 1}]->(b)]")
+    );
+
+    assertEquals("Edge `f` is declared multiple times. " +
+            "Declaring properties or labels while referencing a variable is not allowed. " +
+            "Use `[f]` to refer to the element instead.",
+            exc.getMessage()
+    );
+  }
+
   // --------------------------------------------------------------------------------------------
   //  Graph only tests
   // --------------------------------------------------------------------------------------------
@@ -388,6 +418,19 @@ public class GDLLoaderTest {
     validateCollectionSizes(loader, 1, 2, 0);
     validateCacheSizes(loader, 1, 0, 0,
       0, 2, 0);
+  }
+
+  @Test
+  public void failOnDuplicateGraphPropertyAssignment() {
+    DuplicateDeclarationException exc = assertThrows(
+            DuplicateDeclarationException.class,
+            () -> getLoaderFromGDLString("g:Community{memberCount:23}[(a)] g:{memberCount:23}[(a)]")
+    );
+
+    assertEquals("Graph `g` is declared multiple times. " +
+            "Declaring properties or labels while referencing a variable is not allowed. " +
+            "Use `g` to refer to the element instead.", exc.getMessage()
+    );
   }
 
   // --------------------------------------------------------------------------------------------

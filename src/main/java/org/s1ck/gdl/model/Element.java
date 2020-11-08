@@ -79,6 +79,10 @@ public class Element {
     properties.put(key, value);
   }
 
+  public String referenceString() {
+    return getVariable();
+  };
+
   @Override
   public boolean equals(Object o) {
     if (this == o) {
