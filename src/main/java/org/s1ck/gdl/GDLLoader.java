@@ -38,7 +38,7 @@ import org.s1ck.gdl.utils.Comparator;
 import org.s1ck.gdl.utils.ContinuousId;
 
 import java.util.*;
-import java.util.function.Supplier;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 class GDLLoader extends GDLBaseListener {
@@ -69,10 +69,10 @@ class GDLLoader extends GDLBaseListener {
   private final String defaultVertexLabel;
   private final String defaultEdgeLabel;
 
-  // used to generate sequential ids
-  private final Supplier<Long> nextGraphId;
-  private final Supplier<Long> nextVertexId;
-  private final Supplier<Long> nextEdgeId;
+  // used to generate ids
+  private final Function<Optional<String>, Long> nextGraphId;
+  private final Function<Optional<String>, Long> nextVertexId;
+  private final Function<Optional<String>, Long> nextEdgeId;
 
   // flag that tells if the parser is inside a logical graph
   private boolean inGraph = false;
@@ -118,7 +118,7 @@ class GDLLoader extends GDLBaseListener {
    */
   GDLLoader(String defaultGraphLabel, String defaultVertexLabel, String defaultEdgeLabel,
             boolean useDefaultGraphLabel, boolean useDefaultVertexLabel, boolean useDefaultEdgeLabel,
-            Supplier<Long> nextGraphId, Supplier<Long> nextVertexId, Supplier<Long> nextEdgeId) {
+            Function<Optional<String>, Long> nextGraphId, Function<Optional<String>, Long> nextVertexId, Function<Optional<String>, Long> nextEdgeId) {
 
     this.useDefaultGraphLabel = useDefaultGraphLabel;
     this.useDefaultVertexLabel = useDefaultVertexLabel;
@@ -299,7 +299,7 @@ class GDLLoader extends GDLBaseListener {
         throw new DuplicateDeclarationException(g);
       }
     } else {
-      g = initNewGraph(graphContext);
+      g = initNewGraph(graphContext, variable);
 
       if (variable != null) {
         userGraphCache.put(variable, g);
@@ -351,7 +351,7 @@ class GDLLoader extends GDLBaseListener {
         throw new DuplicateDeclarationException(v);
       };
     } else {
-      v = initNewVertex(vertexContext);
+      v = initNewVertex(vertexContext, Optional.ofNullable(variable));
 
       if (variable != null) {
         userVertexCache.put(variable, v);
@@ -479,7 +479,7 @@ class GDLLoader extends GDLBaseListener {
         throw new DuplicateDeclarationException(e);
       };
     } else {
-      e = initNewEdge(edgeBodyContext, isIncoming);
+      e = initNewEdge(edgeBodyContext, isIncoming, Optional.ofNullable(variable));
 
       if (variable != null) {
         userEdgeCache.put(variable, e);
@@ -529,11 +529,12 @@ class GDLLoader extends GDLBaseListener {
    * Initializes a new graph from a given graph context.
    *
    * @param graphContext graph context
+   * @param variable the variable to identify the graph
    * @return new graph
    */
-  private Graph initNewGraph(GDLParser.GraphContext graphContext) {
+  private Graph initNewGraph(GDLParser.GraphContext graphContext, String variable) {
     Graph g = new Graph();
-    g.setId(getNewGraphId());
+    g.setId(getNewGraphId(Optional.ofNullable(variable)));
     List<String> labels = getLabels(graphContext.header());
     g.setLabels(labels.isEmpty() ?
       useDefaultGraphLabel ? Collections.singletonList(defaultGraphLabel) : Collections.emptyList()
@@ -549,9 +550,9 @@ class GDLLoader extends GDLBaseListener {
    * @param vertexContext vertex context
    * @return new vertex
    */
-  private Vertex initNewVertex(GDLParser.VertexContext vertexContext) {
+  private Vertex initNewVertex(GDLParser.VertexContext vertexContext, Optional<String> variable) {
     Vertex v = new Vertex();
-    v.setId(getNewVertexId());
+    v.setId(getNewVertexId(variable));
     List<String> labels = getLabels(vertexContext.header());
     v.setLabels(labels.isEmpty() ?
       useDefaultVertexLabel ? Collections.singletonList(defaultVertexLabel) : Collections.emptyList()
@@ -568,10 +569,10 @@ class GDLLoader extends GDLBaseListener {
    * @param isIncoming      true, if it's an incoming edge, false for outgoing edge
    * @return new edge
    */
-  private Edge initNewEdge(GDLParser.EdgeBodyContext edgeBodyContext, boolean isIncoming) {
+  private Edge initNewEdge(GDLParser.EdgeBodyContext edgeBodyContext, boolean isIncoming, Optional<String> variable) {
     boolean hasBody = edgeBodyContext != null;
     Edge e = new Edge();
-    e.setId(getNewEdgeId());
+    e.setId(getNewEdgeId(variable));
     e.setSourceVertexId(getSourceVertexId(isIncoming));
     e.setTargetVertexId(getTargetVertexId(isIncoming));
 
@@ -805,27 +806,30 @@ class GDLLoader extends GDLBaseListener {
    * Creates and returns an new graph identifier.
    *
    * @return new graph identifier
+   * @param variable GDL graph variable or none if anonymous
    */
-  private Long getNewGraphId() {
-    return nextGraphId.get();
+  private Long getNewGraphId(Optional<String> variable) {
+    return nextGraphId.apply(variable);
   }
 
   /**
    * Creates and returns a new vertex identifier.
    *
    * @return new vertex identifier
+   * @param variable GDL vertex variable or none if anonymous
    */
-  private Long getNewVertexId() {
-    return nextVertexId.get();
+  private Long getNewVertexId(Optional<String> variable) {
+    return nextVertexId.apply(variable);
   }
 
   /**
    * Creates and returns a new edge identifier.
    *
    * @return new edge identifier
+   * @param variable GDL edge variable or none if anonymous
    */
-  private Long getNewEdgeId() {
-    return nextEdgeId.get();
+  private Long getNewEdgeId(Optional<String> variable) {
+    return nextEdgeId.apply(variable);
   }
 
   // --------------------------------------------------------------------------------------------

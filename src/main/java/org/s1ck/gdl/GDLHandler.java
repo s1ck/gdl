@@ -16,11 +16,7 @@
 
 package org.s1ck.gdl;
 
-import org.antlr.v4.runtime.ANTLRErrorStrategy;
-import org.antlr.v4.runtime.ANTLRFileStream;
-import org.antlr.v4.runtime.ANTLRInputStream;
-import org.antlr.v4.runtime.CommonTokenStream;
-import org.antlr.v4.runtime.DefaultErrorStrategy;
+import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.s1ck.gdl.model.Edge;
 import org.s1ck.gdl.model.Graph;
@@ -33,7 +29,7 @@ import java.io.InputStream;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Supplier;
+import java.util.function.Function;
 
 /**
  * Helper class that wraps ANTLR initialization logic.
@@ -202,19 +198,19 @@ public class GDLHandler {
     private boolean useDefaultEdgeLabel = true;
 
     /**
-     * Id supplier for graphs.
+     * Id function for graphs.
      */
-    private Supplier<Long> nextGraphId = new ContinuousId();
+    private Function<Optional<String>, Long> nextGraphId = new ContinuousId();
 
     /**
-     * Id supplier for vertices.
+     * Id function for vertices.
      */
-    private Supplier<Long> nextVertexId = new ContinuousId();
+    private Function<Optional<String>, Long> nextVertexId = new ContinuousId();
 
     /**
-     * Id supplier for edges.
+     * Id function for edges.
      */
-    private Supplier<Long> nextEdgeId = new ContinuousId();
+    private Function<Optional<String>, Long> nextEdgeId = new ContinuousId();
 
     /**
      * Strategy for handling parser errors.
@@ -320,7 +316,7 @@ public class GDLHandler {
      * @param nextGraphId graph id function (must not be {@code null})
      * @return builder
      */
-    public Builder setNextGraphId(Supplier<Long> nextGraphId) {
+    public Builder setNextGraphId(Function<Optional<String>, Long> nextGraphId) {
       this.nextGraphId = nextGraphId;
       return this;
     }
@@ -331,7 +327,7 @@ public class GDLHandler {
      * @param nextVertexId vertex id function (must not be {@code null})
      * @return builder
      */
-    public Builder setNextVertexId(Supplier<Long> nextVertexId) {
+    public Builder setNextVertexId(Function<Optional<String>, Long> nextVertexId) {
       this.nextVertexId = nextVertexId;
       return this;
     }
@@ -342,7 +338,7 @@ public class GDLHandler {
      * @param nextEdgeId edge id function (must not be {@code null})
      * @return builder
      */
-    public Builder setNextEdgeId(Supplier<Long> nextEdgeId) {
+    public Builder setNextEdgeId(Function<Optional<String>, Long> nextEdgeId) {
       this.nextEdgeId = nextEdgeId;
       return this;
     }

@@ -130,9 +130,9 @@ public class GDLHandlerTest {
     AtomicLong nextEdgeId = new AtomicLong(42);
 
     GDLHandler handler = new GDLHandler.Builder()
-            .setNextGraphId(() -> nextGraphId.getAndAdd(42))
-            .setNextVertexId(() -> nextVertexId.getAndAdd(42))
-            .setNextEdgeId(() -> nextEdgeId.getAndAdd(42))
+            .setNextGraphId((ignored) -> nextGraphId.getAndAdd(42))
+            .setNextVertexId((ignored) -> nextVertexId.getAndAdd(42))
+            .setNextEdgeId((ignored) -> nextEdgeId.getAndAdd(42))
             .buildFromString("g1[(v1)-[e1]->(v2)], g2[(v3)-[e2]->(v4)]");
 
     assertEquals("wrong number of graphs", 2, handler.getGraphs().size());
@@ -147,5 +147,47 @@ public class GDLHandlerTest {
     assertEquals("wrong id for v4", 168L, handler.getVertexCache().get("v4").getId());
     assertEquals("wrong id for e1", 42L, handler.getEdgeCache().get("e1").getId());
     assertEquals("wrong id for e1", 84L, handler.getEdgeCache().get("e2").getId());
+  }
+
+  @Test
+  public void customVariableBasedIdSupplierTest() {
+    AtomicLong nextGraphId = new AtomicLong(42);
+    AtomicLong nextVertexId = new AtomicLong(42);
+    AtomicLong nextEdgeId = new AtomicLong(42);
+
+    GDLHandler handler = new GDLHandler.Builder()
+            .setNextGraphId((ignore) -> nextGraphId.getAndAdd(42))
+            .setNextVertexId((variable) -> variable.map(v -> {
+              long vertexId = 0;
+              switch (v) {
+                case "v1":
+                  vertexId = 1337L;
+                  break;
+                case "v2":
+                  vertexId = 1338L;
+                  break;
+                case "v3":
+                  vertexId = 1339L;
+                  break;
+              }
+              return vertexId;
+            }).orElseGet(() -> nextVertexId.getAndAdd(1)))
+            .setNextEdgeId((ignore) -> nextEdgeId.getAndAdd(42))
+            .buildFromString("g1[(v1)-[e1]->(v2)], g2[(v3)-[e2]->(v4), ()]");
+
+    assertEquals("wrong number of graphs", 2, handler.getGraphs().size());
+    assertEquals("wrong number of vertices", 5, handler.getVertices().size());
+    assertEquals("wrong number of vertices", 2, handler.getEdges().size());
+
+    assertEquals("wrong id for g1", 42L, handler.getGraphCache().get("g1").getId());
+    assertEquals("wrong id for g2", 84L, handler.getGraphCache().get("g2").getId());
+    assertEquals("wrong id for v1", 1337L, handler.getVertexCache().get("v1").getId());
+    assertEquals("wrong id for v2", 1338L, handler.getVertexCache().get("v2").getId());
+    assertEquals("wrong id for v3", 1339L, handler.getVertexCache().get("v3").getId());
+    assertEquals("wrong id for v4", 0L, handler.getVertexCache().get("v4").getId());
+    assertEquals("wrong id for e1", 42L, handler.getEdgeCache().get("e1").getId());
+    assertEquals("wrong id for e1", 84L, handler.getEdgeCache().get("e2").getId());
+    // the remaining anonymous node must have id 42
+    assertEquals("wrong id for anonymous node", 1, handler.getVertices().stream().filter(v -> v.getId() == 42L).count());
   }
 }
