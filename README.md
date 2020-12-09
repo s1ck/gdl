@@ -191,7 +191,7 @@ Add dependency to your maven project:
 <dependency>
     <groupId>com.github.s1ck</groupId>
     <artifactId>gdl</artifactId>
-    <version>0.3.5</version>
+    <version>0.3.6</version>
 </dependency>
 ```
 

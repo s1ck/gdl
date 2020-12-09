@@ -4,7 +4,7 @@
 
     <groupId>com.github.s1ck</groupId>
     <artifactId>gdl</artifactId>
-    <version>0.3.6</version>
+    <version>0.3.7-SNAPSHOT</version>
 
     <name>GDL - Graph Definition Language</name>
     <description>ANTLR Grammar for the definition of extended property graphs.</description>
