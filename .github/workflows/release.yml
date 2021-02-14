@@ -24,7 +24,7 @@ jobs:
         uses: actions/setup-java@v1
         with: # running setup-java again overwrites the settings.xml
           java-version: 11
-          server-id: ossrh
+          server-id: release_artifacts
           server-username: OSSRH_USERNAME
           server-password: OSSRH_PASSWORD
           gpg-private-key: ${{ secrets.MAVEN_GPG_PRIVATE_KEY }}
