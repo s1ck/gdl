@@ -14,6 +14,8 @@ distributed graph analytics.
 The project contains the grammar and a listener implementation which transforms GDL scripts into
 property graph model elements (i.e. graphs, vertices and edges).
 
+There is also a [Rust version](https://github.com/s1ck/nom-gdl) of GDL available on GitHub.
+
 ## Data model
 
 The data model contains three elements: graphs, vertices and edges. Any element has an optional
