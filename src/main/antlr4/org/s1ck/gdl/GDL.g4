@@ -20,6 +20,7 @@ grammar GDL;
 // starting point for parsing a GDL script
 database
     : elementList EOF
+    | EOF
     ;
 
 elementList
