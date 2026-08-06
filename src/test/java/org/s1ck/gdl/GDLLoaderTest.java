@@ -11,6 +11,8 @@ import org.s1ck.gdl.model.Element;
 import org.s1ck.gdl.model.Graph;
 import org.s1ck.gdl.model.GraphElement;
 import org.s1ck.gdl.model.Vertex;
+import org.s1ck.gdl.model.values.DoubleVectorLiteral;
+import org.s1ck.gdl.model.values.FloatVectorLiteral;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -138,6 +140,53 @@ public class GDLLoaderTest {
     );
   }
 
+  @Test
+  public void failOnStringVectorPropertyAssignment() {
+    IllegalArgumentException exc = assertThrows(
+            IllegalArgumentException.class,
+            () -> getLoaderFromGDLString("(v1 {prop: vector(['foo'])})")
+    );
+
+    assertEquals("Vector for property 'prop' must contain only numbers but found 'foo'",
+            exc.getMessage()
+    );
+  }
+
+  @Test
+  public void readVectorAsVariableAndLabelTest() {
+    GDLLoader loader = getLoaderFromGDLString("(vector:vector)-[vector2:VECTOR]->(v)");
+
+    Vertex vertex = loader.getVertexCache().get("vector");
+    assertEquals("vertex has wrong variable", "vector", vertex.getVariable());
+    assertEquals("vertex has wrong label", "vector", vertex.getLabel());
+
+    Edge edge = loader.getEdgeCache().get("vector2");
+    assertEquals("edge has wrong label", "VECTOR", edge.getLabel());
+  }
+
+  @Test
+  public void failOnIntegerVectorPropertyAssignment() {
+    IllegalArgumentException exc = assertThrows(
+            IllegalArgumentException.class,
+            () -> getLoaderFromGDLString("(v1 {prop: vector([1, 2, 3])})")
+    );
+
+    assertEquals("Vector for property 'prop' must contain only floats or doubles but found 'Integer'",
+            exc.getMessage()
+    );
+  }
+
+  @Test
+  public void failOnMixedVectorPropertyAssignment() {
+    IllegalArgumentException exc = assertThrows(
+            IllegalArgumentException.class,
+            () -> getLoaderFromGDLString("(v1 {prop: vector([1.0f, 2.0d])})")
+    );
+
+    assertEquals("Vector for property 'prop' must not contain mixed element types but found 'Float' and 'Double'",
+            exc.getMessage()
+    );
+  }
 
   // --------------------------------------------------------------------------------------------
   //  Edge only tests
@@ -826,6 +875,18 @@ public class GDLLoaderTest {
     PROPERTIES_LIST.add(new PropertyTriple<>("k46", "[]", new ArrayList<>()));
     PROPERTIES_LIST.add(new PropertyTriple<>("k47", "[ ]", new ArrayList<>()));
     PROPERTIES_LIST.add(new PropertyTriple<>("k48", "[NaN, NULL]", new ArrayList<>(Arrays.asList(Double.NaN, null))));
+    PROPERTIES_LIST.add(new PropertyTriple<>("k49", "vector([1.0F, 3.0f, 3.0F, 7.0f])", new FloatVectorLiteral(List.of(1f, 3f, 3f, 7f))));
+    PROPERTIES_LIST.add(new PropertyTriple<>("k50", "vector([1.0D, 3.0d, 3.0D, 7.0d])", new DoubleVectorLiteral(List.of(1d, 3d, 3d, 7d))));
+    PROPERTIES_LIST.add(new PropertyTriple<>("k51", "vector([1.0f, NaN])", new FloatVectorLiteral(List.of(1f, Float.NaN))));
+    PROPERTIES_LIST.add(new PropertyTriple<>("k52", "vector([1.0d, NaN])", new DoubleVectorLiteral(List.of(1d, Double.NaN))));
+    PROPERTIES_LIST.add(new PropertyTriple<>("k53", "vector([NaN])", new DoubleVectorLiteral(List.of(Double.NaN))));
+    PROPERTIES_LIST.add(new PropertyTriple<>("k54", "vector([])", new DoubleVectorLiteral(List.of())));
+    PROPERTIES_LIST.add(new PropertyTriple<>("k55", "VECTOR([1.0F, 3.0f])", new FloatVectorLiteral(List.of(1f, 3f))));
+    PROPERTIES_LIST.add(new PropertyTriple<>("k56", "Vector([1.0D, 3.0d])", new DoubleVectorLiteral(List.of(1d, 3d))));
+    PROPERTIES_LIST.add(new PropertyTriple<>("k57", "vEcToR([1.0f])", new FloatVectorLiteral(List.of(1f))));
+    PROPERTIES_LIST.add(new PropertyTriple<>("vector", "42", 42));
+    PROPERTIES_LIST.add(new PropertyTriple<>("k58", "\"vector\"", "vector"));
+    PROPERTIES_LIST.add(new PropertyTriple<>("k59", "['vector', \"VECTOR\"]", new ArrayList<>(Arrays.asList("vector", "VECTOR"))));
 
     Iterator<PropertyTriple<?>> iterator = PROPERTIES_LIST.iterator();
     StringBuilder sb = new StringBuilder();
