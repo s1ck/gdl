@@ -15,5 +15,6 @@ jobs:
       uses: actions/setup-java@v5
       with:
         java-version: 11
+        distribution: 'temurin'
     - name: Build with Maven
       run: mvn clean install
