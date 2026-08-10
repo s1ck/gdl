@@ -34,6 +34,9 @@ import org.s1ck.gdl.model.predicates.booleans.Not;
 import org.s1ck.gdl.model.predicates.booleans.Or;
 import org.s1ck.gdl.model.predicates.booleans.Xor;
 import org.s1ck.gdl.model.predicates.expressions.Comparison;
+import org.s1ck.gdl.model.values.DoubleVectorLiteral;
+import org.s1ck.gdl.model.values.FloatVectorLiteral;
+import org.s1ck.gdl.model.values.VectorLiteral;
 import org.s1ck.gdl.utils.Comparator;
 import org.s1ck.gdl.utils.ContinuousId;
 
@@ -662,6 +665,9 @@ class GDLLoader extends GDLBaseListener {
                   .map(this::getPropertyValue)
                   .collect(Collectors.toList());
           properties.put(property.Identifier().getText(), list);
+        } else if (property.vectorLiteral() != null) {
+          properties.put(property.Identifier().getText(),
+                  getVectorLiteral(property.Identifier().getText(), property.vectorLiteral()));
         } else {
           properties.put(property.Identifier().getText(), getPropertyValue(property.literal()));
         }
@@ -669,6 +675,61 @@ class GDLLoader extends GDLBaseListener {
       return properties;
     }
     return Collections.emptyMap();
+  }
+
+  /**
+   * Returns the corresponding vector for a given vector literal.
+   *
+   * <p>All elements must have the same type and that type must be either float or double.
+   * {@code NaN} adopts the element type of the vector; a vector that contains nothing but
+   * {@code NaN}, or no elements at all, is read as a double vector.
+   *
+   * @param property property name, used for error messages
+   * @param vectorContext vector literal context
+   * @return parsed vector
+   */
+  private VectorLiteral getVectorLiteral(String property, GDLParser.VectorLiteralContext vectorContext) {
+    List<Number> values = new ArrayList<>();
+    Class<? extends Number> elementType = null;
+
+    for (GDLParser.LiteralContext literal : vectorContext.listLiteral().literalList().literal()) {
+      Number value = getNumberOrThrow(property, getPropertyValue(literal));
+      values.add(value);
+
+      if (literal.NaN() != null) {
+        // NaN is typed by the remaining elements instead of typing them
+        continue;
+      }
+      if (!(value instanceof Float) && !(value instanceof Double)) {
+        throw new IllegalArgumentException(String.format(
+                "Vector for property '%s' must contain only floats or doubles but found '%s'",
+                property, value.getClass().getSimpleName()));
+      }
+      if (elementType == null) {
+        elementType = value.getClass();
+      } else if (elementType != value.getClass()) {
+        throw new IllegalArgumentException(String.format(
+                "Vector for property '%s' must not contain mixed element types but found '%s' and '%s'",
+                property, elementType.getSimpleName(), value.getClass().getSimpleName()));
+      }
+    }
+
+    if (elementType == Float.class) {
+      return new FloatVectorLiteral(values.stream()
+              .map(Number::floatValue)
+              .collect(Collectors.toList()));
+    }
+    return new DoubleVectorLiteral(values.stream()
+            .map(Number::doubleValue)
+            .collect(Collectors.toList()));
+  }
+
+  private static Number getNumberOrThrow(String property, Object o) {
+    if (o instanceof Number) {
+      return (Number) o;
+    } else {
+      throw new IllegalArgumentException(String.format("Vector for property '%s' must contain only numbers but found '%s'", property, o));
+    }
   }
 
   /**

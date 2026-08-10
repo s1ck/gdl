@@ -66,6 +66,21 @@ Property values can also be ordered lists:
 (alice:User {name : "Alice", age : 23, codes: ["Java", "Rust", "Scala"]})
 ```
 
+Property values can also be vectors. All elements of a vector must be of the same type, which has
+to be either float or double. The `vector` keyword is case insensitive:
+
+```
+(alice:User {name : "Alice", embedding : vector([1.0f, 3.0f, 3.0f, 7.0f])})
+(alice:User {name : "Alice", embedding : vector([1.0d, 3.0d, 3.0d, 7.0d])})
+```
+
+A vector without a type suffix on its elements is read as a float vector, and a vector without any
+elements is read as a double vector:
+
+```
+(alice:User {name : "Alice", embedding : vector([1.0, 3.0]), other : vector([])})
+```
+
 Define an outgoing edge:
 
 ```

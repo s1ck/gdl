@@ -78,7 +78,7 @@ properties
     ;
 
 property
-    : Identifier Colon (literal | listLiteral)
+    : Identifier Colon (literal | listLiteral | vectorLiteral)
     ;
 
 label
@@ -127,6 +127,10 @@ listLiteral
 
 literalList
     : (literal (',' WS? literal)* )?
+    ;
+
+vectorLiteral
+    : VectorOpen WS? listLiteral WS? ')'
     ;
 
 literal
@@ -244,6 +248,12 @@ MATCH
 
 CREATE
     : 'CREATE'
+    ;
+
+// opens a vector literal, e.g. vector([1.0f, 3.0f]). Only matches when directly followed by '(',
+// so that 'vector' stays usable as an identifier, label or property key.
+VectorOpen
+    : ('v'|'V')('e'|'E')('c'|'C')('t'|'T')('o'|'O')('r'|'R') '('
     ;
 
 NaN
