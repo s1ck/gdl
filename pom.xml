@@ -8,7 +8,7 @@
 
     <name>GDL - Graph Definition Language</name>
     <description>ANTLR Grammar for the definition of extended property graphs.</description>
-    <url>http://github.com/s1ck/gdl.git</url>
+    <url>https://github.com/s1ck/gdl</url>
 
     <licenses>
         <license>
@@ -27,21 +27,10 @@
     </developers>
     
     <scm>
-        <url>http://github.com/s1ck/gdl.git</url>
+        <url>https://github.com/s1ck/gdl</url>
         <connection>scm:git:git@github.com:s1ck/gdl.git</connection>
-        <developerConnection>scm:git:s1ck@github.com/s1ck/gdl.git</developerConnection>
+        <developerConnection>scm:git:git@github.com:s1ck/gdl.git</developerConnection>
     </scm>
-
-    <distributionManagement>
-        <snapshotRepository>
-            <id>release_artifacts</id>
-            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-        </snapshotRepository>
-        <repository>
-            <id>release_artifacts</id>
-            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
-        </repository>
-    </distributionManagement>
 
     <properties>
         <project.build.targetJdk>11</project.build.targetJdk>
@@ -51,10 +40,10 @@
 
         <plugin.maven-compiler.version>3.8.0</plugin.maven-compiler.version>
         <plugin.maven-release.version>2.5.3</plugin.maven-release.version>
-        <plugin.maven-source.version>3.2.1</plugin.maven-source.version>
-        <plugin.maven-javadoc.version>3.2.0</plugin.maven-javadoc.version>
-        <plugin.maven-gpg.version>1.6</plugin.maven-gpg.version>
-        <plugin.maven-nexus-staging.version>1.6.8</plugin.maven-nexus-staging.version>
+        <plugin.maven-source.version>3.4.0</plugin.maven-source.version>
+        <plugin.maven-javadoc.version>3.12.0</plugin.maven-javadoc.version>
+        <plugin.maven-gpg.version>3.2.8</plugin.maven-gpg.version>
+        <plugin.central-publishing.version>0.11.0</plugin.central-publishing.version>
     </properties>
 
     <dependencies>
@@ -71,6 +60,48 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
+
+    <profiles>
+        <profile>
+            <id>release</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-gpg-plugin</artifactId>
+                        <version>${plugin.maven-gpg.version}</version>
+                        <configuration>
+                            <keyname>1197C803E40A1516FC8376BD64410E39E0EA134E</keyname>
+                            <gpgArguments>
+                                <arg>--pinentry-mode</arg>
+                                <arg>loopback</arg>
+                            </gpgArguments>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>sign_artifacts</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>sign</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.sonatype.central</groupId>
+                        <artifactId>central-publishing-maven-plugin</artifactId>
+                        <version>${plugin.central-publishing.version}</version>
+                        <extensions>true</extensions>
+                        <configuration>
+                            <publishingServerId>central</publishingServerId>
+                            <autoPublish>true</autoPublish>
+                            <waitUntil>published</waitUntil>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 
     <build>
         <plugins>
@@ -113,7 +144,7 @@
                 <executions>
                     <execution>
                         <id>attach-sources</id>
-                        <phase>deploy</phase>
+                        <phase>package</phase>
                         <goals>
                             <goal>jar-no-fork</goal>
                         </goals>
@@ -125,48 +156,17 @@
                 <artifactId>maven-javadoc-plugin</artifactId>
                 <version>${plugin.maven-javadoc.version}</version>
                 <configuration>
-                    <additionalparam>-Xdoclint:none</additionalparam>
+                    <doclint>none</doclint>
                 </configuration>
                 <executions>
                     <execution>
                         <id>attach-javadocs</id>
-                        <phase>deploy</phase>
+                        <phase>package</phase>
                         <goals>
                             <goal>jar</goal>
                         </goals>
                     </execution>
                 </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-gpg-plugin</artifactId>
-                <version>${plugin.maven-gpg.version}</version>
-                <configuration>
-                    <gpgArguments>
-                        <arg>--pinentry-mode</arg>
-                        <arg>loopback</arg>
-                    </gpgArguments>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>sign_artifacts</id>
-                        <phase>deploy</phase>
-                        <goals>
-                            <goal>sign</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.sonatype.plugins</groupId>
-                <artifactId>nexus-staging-maven-plugin</artifactId>
-                <version>${plugin.maven-nexus-staging.version}</version>
-                <extensions>true</extensions>
-                <configuration>
-                    <serverId>release_artifacts</serverId>
-                    <nexusUrl>https://oss.sonatype.org/</nexusUrl>
-                    <autoReleaseAfterClose>true</autoReleaseAfterClose>
-                </configuration>
             </plugin>
         </plugins>
     </build>
